@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Interna - Secretaría de Deportes BA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <!-- CONTENEDOR DE AUTENTICACIÓN (LOGIN Y REGISTRO) -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="ba-logo-badge">BA DEPORTES</div>
+                <h2>Secretaría de Deportes</h2>
+                <p>Sistema Interno de Planificación y Pedidos</p>
+            </div>
+            
+            <!-- FORMULARIO DE LOGIN -->
+            <form id="login-form" class="auth-form">
+                <h3>Iniciar Sesión</h3>
+                <div class="form-group-full">
+                    <label for="login-dni">Número de Documento (DNI)</label>
+                    <input type="number" id="login-dni" required placeholder="Ej: 23377971">
+                </div>
+                <div class="form-group-full">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary-block">Ingresar al Portal</button>
+                <p class="toggle-auth-text">¿No tenés cuenta? <a href="#" id="show-register">Registrate acá</a></p>
+            </form>
+
+            <!-- FORMULARIO DE REGISTRO (OCULTO POR DEFECTO) -->
+            <form id="register-form" class="auth-form hidden">
+                <h3>Crear Nueva Cuenta</h3>
+                <div class="form-group-full">
+                    <label for="reg-nombre">Nombre y Apellido</label>
+                    <input type="text" id="reg-nombre" required placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="form-group-full">
+                    <label for="reg-dni">Número de Documento (DNI)</label>
+                    <input type="number" id="reg-dni" required placeholder="Ej: 40123456">
+                </div>
+                <div class="form-group-full">
+                    <label for="reg-password">Contraseña</label>
+                    <input type="password" id="reg-password" required placeholder="Crea una contraseña">
+                </div>
+                <button type="submit" class="btn-success-block">Registrarse</button>
+                <p class="toggle-auth-text">¿Ya tenés cuenta? <a href="#" id="show-login">Iniciá sesión</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DEL PORTAL INTERNO -->
+    <div id="portal-container" class="portal-container hidden">
+        <header class="main-header">
+            <div class="header-left">
+                <div class="ba-logo-mini">BA</div>
+                <h1>Portal de Gestión Deportiva</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="user-badge" class="badge">Docente</span>
+                    <span id="user-name">Nombre Usuario</span>
+                </div>
+                <button id="btn-logout" class="btn-logout">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <div class="layout-body">
+            <nav class="sidebar">
+                <button class="nav-btn active" data-tab="tab-inicio">
+                    <span class="icon">🏠</span> Inicio
+                </button>
+                <button class="nav-btn" data-tab="tab-pedidos">
+                    <span class="icon">📋</span> Pedidos de Eventos
+                </button>
+                <button class="nav-btn" data-tab="tab-calendario">
+                    <span class="icon">📅</span> Calendario de Eventos
+                </button>
+                <button class="nav-btn" data-tab="tab-certificados">
+                    <span class="icon">🎓</span> Certificados
+                </button>
+            </nav>
+
+            <main class="content-wrapper">
+                
+                <!-- TAB INICIO CON ILUSTRACIÓN DE LA DGDSYDD -->
+                <section id="tab-inicio" class="tab-content active">
+                    <div class="welcome-hero-card">
+                        <div class="hero-image-wrapper">
+                            <img src="banner-deportes.jpg" alt="DGDSYDD Torneos y Eventos - Juntos Más Deporte Más Comunidad" class="hero-banner-img">
+                        </div>
+                        <div class="hero-content">
+                            <h2>¡Bienvenido/a al Portal Interno de la DGDSYDD!</h2>
+                            <p>Dirección General de Deporte Social y Desarrollo Deportivo. Desde este panel podrás gestionar solicitudes de infraestructura, consultar calendarios comunitarios y acceder a reportes oficiales de la Ciudad de Buenos Aires.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB PEDIDOS DE EVENTOS -->
+                <section id="tab-pedidos" class="tab-content">
+                    <div class="section-title-container">
+                        <h2>Formularios y Requerimientos de Pedidos</h2>
+                        <p>Carga y visualización de solicitudes de infraestructura, logística y personal para eventos deportivos.</p>
+                    </div>
+
+                    <div id="form-docente-container" class="panel">
+                        <h3>Nueva Solicitud de Evento</h3>
+                        <form id="form-pedido" class="grid-form">
+                            <div class="form-group col-12">
+                                <label>Título del Evento *</label>
+                                <input type="text" id="p-titulo" required placeholder="Ej: Maratón de la Ciudad Nocturna">
+                            </div>
+
+                            <div class="form-group col-6">
+                                <label>Área Responsable</label>
+                                <select id="p-area">
+                                    <option value="DGDSYDD">DGDSYDD (Dirección General de Deporte Social y Desarrollo Deportivo)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-6">
+                                <label>Programa *</label>
+                                <input type="text" id="p-programa" required placeholder="Ej: Deporte Barrial">
+                            </div>
+
+                            <div class="form-group col-4">
+                                <label>Fecha *</label>
+                                <input type="date" id="p-fecha" required>
+                            </div>
+
+                            <div class="form-group col-4">
+                                <label>Horario *</label>
+                                <input type="text" id="p-horario" required placeholder="Ej: 08:00 a 13:00">
+                            </div>
+
+                            <div class="form-group col-4">
+                                <label>Lugar *</label>
+                                <input type="text" id="p-lugar" required placeholder="Ej: Parque Manuel Belgrano">
+                            </div>
+
+                            <div class="form-group col-12">
+                                <label>Descripción del Evento (Máx 300 caracteres) *</label>
+                                <textarea id="p-descripcion" maxlength="300" required placeholder="Breve resumen del evento..."></textarea>
+                            </div>
+
+                            <div class="form-group col-4">
+                                <label>Responsable (Nombre completo) *</label>
+                                <input type="text" id="p-resp-nombre" required>
+                            </div>
+                            <div class="form-group col-4">
+                                <label>Responsable DNI *</label>
+                                <input type="number" id="p-resp-dni" required>
+                            </div>
+                            <div class="form-group col-4">
+                                <label>Responsable Teléfono *</label>
+                                <input type="text" id="p-resp-tel" required>
+                            </div>
+
+                            <div class="form-group col-6">
+                                <label>Objetivo de la Actividad *</label>
+                                <input type="text" id="p-objetivo" required>
+                            </div>
+                            <div class="form-group col-3">
+                                <label>Cant. Aprox Participantes *</label>
+                                <input type="number" id="p-cant-part" required>
+                            </div>
+                            <div class="form-group col-3">
+                                <label>Público General (Cantidad) *</label>
+                                <input type="number" id="p-publico" required>
+                            </div>
+
+                            <div class="form-group col-6">
+                                <label>Articulaciones (Organismos involucrados)</label>
+                                <input type="text" id="p-articulaciones" placeholder="Ej: Comunas, Policía de la Ciudad">
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Necesidades (Solo lo que necesitan y NO tienen) *</label>
+                                <input type="text" id="p-necesidades" required placeholder="Ej: 200 vallas, Sonido con micrófonos">
+                            </div>
+
+                            <div class="form-group col-12">
+                                <label>Transporte (Cantidad de pasajeros y Hoja de Ruta)</label>
+                                <input type="text" id="p-transporte" placeholder="Ej: 30 pasajeros. Ruta: CeNARD a Polideportivo Avellaneda">
+                            </div>
+
+                            <div class="form-group col-3">
+                                <label>Ambulancia</label>
+                                <select id="p-ambulancia">
+                                    <option value="NO">NO</option>
+                                    <option value="SI">SI</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-3">
+                                <label>Horario Ambulancia (Si aplica)</label>
+                                <input type="text" id="p-ambulancia-horario" placeholder="Ej: 08:00 a 14:00">
+                            </div>
+                            <div class="form-group col-3">
+                                <label>Seguro *</label>
+                                <select id="p-seguro">
+                                    <option value="SI">SI</option>
+                                    <option value="NO">NO</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-3">
+                                <label>Extensión ART *</label>
+                                <select id="p-art">
+                                    <option value="SI">SI</option>
+                                    <option value="NO">NO</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-4">
+                                <label>Situación de Revista *</label>
+                                <select id="p-revista">
+                                    <option value="CONTRATADO">CONTRATADO</option>
+                                    <option value="PLANTA TRANSITORIA">PLANTA TRANSITORIA</option>
+                                    <option value="PLANTA PERMANENTE">PLANTA PERMANENTE</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label>Horario Docente *</label>
+                                <input type="text" id="p-horario-docente" required placeholder="Ej: 08:00 a 12:00">
+                            </div>
+                            <div class="form-group col-2">
+                                <label>Prensa</label>
+                                <select id="p-prensa">
+                                    <option value="NO">NO</option>
+                                    <option value="SI">SI</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-2">
+                                <label>Tipo Difusión</label>
+                                <select id="p-difusion">
+                                    <option value="FLYER">FLYER</option>
+                                    <option value="REDES">REDES</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-5">
+                                <label>Timing del Evento *</label>
+                                <input type="text" id="p-timing" required placeholder="Ej: Cronograma de actividades...">
+                            </div>
+                            <div class="form-group col-5">
+                                <label>Desarme del Evento *</label>
+                                <input type="text" id="p-desarme" required placeholder="Ej: Limpieza y guardado desde 14:00">
+                            </div>
+                            <div class="form-group col-2">
+                                <label>¿Se suspende por lluvia?</label>
+                                <select id="p-lluvia">
+                                    <option value="SI">SI</option>
+                                    <option value="NO">NO</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-12 text-right" style="margin-top: 15px;">
+                                <button type="submit" class="btn-success">Enviar Solicitud de Pedido</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="director-view-container" class="panel hidden">
+                        <div class="panel-header-actions">
+                            <h3>Listado General de Requerimientos Recibidos</h3>
+                            <button id="btn-descargar-pdf" class="btn-primary">📥 Descargar Reporte PDF</button>
+                        </div>
+                        <div id="pdf-export-area" class="table-container">
+                            <div class="pdf-only-header">
+                                <h2>GOBIERNO DE LA CIUDAD DE BUENOS AIRES</h2>
+                                <h3>Secretaría de Deportes - Dirección General (DGDSYDD)</h3>
+                                <p>Informe de Requerimientos de Eventos Consolidados</p>
+                                <hr>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Evento / Programa</th>
+                                        <th>Fecha y Lugar</th>
+                                        <th>Responsable</th>
+                                        <th>Necesidades No Cubiertas</th>
+                                        <th>Logística</th>
+                                        <th>Sus. Lluvia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-pedidos-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB CALENDARIO -->
+                <section id="tab-calendario" class="tab-content">
+                    <div class="panel">
+                        <h3>Calendario de Actividades Deportivas 2026</h3>
+                        <p style="color:#666; margin-bottom: 20px;">Cronograma general aprobado de actividades de la Secretaría de Deportes.</p>
+                        <div class="calendar-list" id="calendar-list-container">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB CERTIFICADOS -->
+                <section id="tab-certificados" class="tab-content">
+                    <div class="panel">
+                        <h3>Emisión de Certificados Analíticos y Diplomas</h3>
+                        <p style="color:#666; margin-bottom: 20px;">Generación y firma digital de avales de asistencia para cursos de formación deportiva del GCBA.</p>
+                        <div class="placeholder-box">
+                            <span style="font-size: 3.5rem;">🏅</span>
+                            <h4>Módulo de Certificación en Línea</h4>
+                            <p>Los diplomas se habilitarán automáticamente una vez que la Dirección General (DGDSYDD) confirme el acta del evento.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
