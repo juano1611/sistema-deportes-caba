@@ -273,4 +273,5 @@ async function loadPedidosData() {
     } catch (err) {
         console.error('Error al obtener datos:', err);
     }
+    
 }
