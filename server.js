@@ -1,6 +1,5 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+const Database = require('better-sqlite3'); // Importamos better-sqlite3
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -14,27 +13,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-let db;
+// Abrir/crear la base de datos de forma directa
+const db = new Database('./database.sqlite');
 
 // Configuración del servicio de correo electrónico (Nodemailer)
-// Ajusta con tus credenciales SMTP (ejemplo con Gmail u otro proveedor)
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // O configura tu host y puerto SMTP
+    service: 'gmail',
     auth: {
-        user: 'tu-email@gmail.com', // Reemplaza con tu correo
-        pass: 'tu-contraseña-o-app-password' // Reemplaza con tu contraseña de aplicación
+        user: 'tu-email@gmail.com',
+        pass: 'tu-contraseña-o-app-password'
     }
 });
 
-// Inicialización de la base de datos
-async function initDB() {
-    db = await open({
-        filename: './database.sqlite',
-        driver: sqlite3.Database
-    });
-
-    // Tabla de usuarios con columna email y campos para recuperación
-    await db.exec(`
+// Inicialización de las tablas
+function initDB() {
+    db.exec(`
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             dni TEXT UNIQUE NOT NULL,
@@ -47,8 +40,7 @@ async function initDB() {
         )
     `);
 
-    // Tabla de pedidos
-    await db.exec(`
+    db.exec(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT NOT NULL,
@@ -85,21 +77,17 @@ async function initDB() {
     console.log('Base de datos SQLite inicializada correctamente.');
 }
 
+initDB();
+
 // ==========================================
 // RUTAS DE AUTENTICACIÓN Y RECUPERACIÓN
 // ==========================================
 
-// Registro / Login
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', (req, res) => {
     const { dni, password } = req.body;
     try {
-        const user = await db.get('SELECT * FROM usuarios WHERE dni = ?', [dni]);
-        if (!user) {
-            return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
-        }
-
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) {
+        const user = db.prepare('SELECT * FROM usuarios WHERE dni = ?').get(dni);
+        if (!user || !bcrypt.compareSync(password, user.password)) {
             return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
         }
 
@@ -115,26 +103,21 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// 1. Solicitar restablecimiento de contraseña (Envío de email)
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
 
     try {
-        const user = await db.get('SELECT * FROM usuarios WHERE email = ?', [email]);
+        const user = db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email);
         if (!user) {
             return res.status(404).json({ error: 'No existe una cuenta registrada con ese correo electrónico.' });
         }
 
-        // Generar token único con expiración (1 hora)
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 3600000).toISOString();
 
-        await db.run(
-            'UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?',
-            [token, expires, user.id]
-        );
+        db.prepare('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?')
+          .run(token, expires, user.id);
 
-        // Enlace enviado al email
         const resetLink = `http://${req.headers.host}/reset-password.html?token=${token}`;
 
         const mailOptions = {
@@ -159,26 +142,21 @@ app.post('/api/forgot-password', async (req, res) => {
     }
 });
 
-// 2. Definir la nueva contraseña usando el token
-app.post('/api/reset-password', async (req, res) => {
+app.post('/api/reset-password', (req, res) => {
     const { token, newPassword } = req.body;
 
     try {
-        const user = await db.get(
-            'SELECT * FROM usuarios WHERE resetToken = ? AND resetTokenExpires > ?',
-            [token, new Date().toISOString()]
-        );
+        const user = db.prepare('SELECT * FROM usuarios WHERE resetToken = ? AND resetTokenExpires > ?')
+                      .get(token, new Date().toISOString());
 
         if (!user) {
             return res.status(400).json({ error: 'El token es inválido o ha expirado.' });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = bcrypt.hashSync(newPassword, 10);
 
-        await db.run(
-            'UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?',
-            [hashedPassword, user.id]
-        );
+        db.prepare('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?')
+          .run(hashedPassword, user.id);
 
         res.json({ message: 'Tu contraseña ha sido restablecida exitosamente.' });
 
@@ -192,19 +170,19 @@ app.post('/api/reset-password', async (req, res) => {
 // RUTAS DE PEDIDOS
 // ==========================================
 
-app.get('/api/pedidos', async (req, res) => {
+app.get('/api/pedidos', (req, res) => {
     try {
-        const pedidos = await db.all('SELECT * FROM pedidos ORDER BY fechaCreacion DESC');
+        const pedidos = db.prepare('SELECT * FROM pedidos ORDER BY fechaCreacion DESC').all();
         res.json(pedidos);
     } catch (err) {
         res.status(500).json({ error: 'Error al obtener los pedidos' });
     }
 });
 
-app.post('/api/pedidos', async (req, res) => {
+app.post('/api/pedidos', (req, res) => {
     const data = req.body;
     try {
-        const result = await db.run(`
+        const stmt = db.prepare(`
             INSERT INTO pedidos (
                 titulo, areaResponsable, programa, fecha, horario, lugar, descripcion,
                 responsableNombre, responsableDni, responsableTelefono, objetivo,
@@ -213,24 +191,23 @@ app.post('/api/pedidos', async (req, res) => {
                 situacionRevista, horarioDocente, prensa, tipoDifusion, timingEvento,
                 desarmeEvento, suspendeLluvia
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
+        `);
+
+        const info = stmt.run(
             data.titulo, data.areaResponsable, data.programa, data.fecha, data.horario, data.lugar, data.descripcion,
             data.responsableNombre, data.responsableDni, data.responsableTelefono, data.objetivo,
             data.participantesAprox, data.publicoGeneral, data.articulaciones, data.necesidades,
             data.transportePasajeros, data.ambulancia, data.ambulanciaHorario, data.seguro, data.extensionArt,
             data.situacionRevista, data.horarioDocente, data.prensa, data.tipoDifusion, data.timingEvento,
             data.desarmeEvento, data.suspendeLluvia
-        ]);
+        );
 
-        res.status(201).json({ id: result.lastID, message: 'Pedido creado exitosamente' });
+        res.status(201).json({ id: info.lastInsertRowid, message: 'Pedido creado exitosamente' });
     } catch (err) {
         res.status(500).json({ error: 'Error al guardar el pedido' });
     }
 });
 
-// Inicializar Servidor
-initDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor corriendo en el puerto ${PORT}`);
-    });
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
