@@ -1,6 +1,6 @@
 const express = require('express');
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
+const initSqlJs = require('sql.js');
+const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DB_FILE = path.join(__dirname, 'database.sqlite');
 
 app.use(cors());
 app.use(express.json());
@@ -16,14 +17,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
 
-// Conexión asíncrona a la base de datos
-async function initDB() {
-    db = await open({
-        filename: path.join(__dirname, 'database.sqlite'),
-        driver: sqlite3.Database
-    });
+function saveDatabase() {
+    if (db) {
+        const data = db.export();
+        const buffer = Buffer.from(data);
+        fs.writeFileSync(DB_FILE, buffer);
+    }
+}
 
-    await db.exec(`
+// Configuración de Nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'tu-email@gmail.com',
+        pass: 'tu-contraseña-o-app-password'
+    }
+});
+
+async function startServer() {
+    const SQL = await initSqlJs();
+
+    if (fs.existsSync(DB_FILE)) {
+        const filebuffer = fs.readFileSync(DB_FILE);
+        db = new SQL.Database(filebuffer);
+    } else {
+        db = new SQL.Database();
+    }
+
+    db.run(`
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             dni TEXT UNIQUE NOT NULL,
@@ -36,7 +57,7 @@ async function initDB() {
         );
     `);
 
-    await db.exec(`
+    db.run(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT NOT NULL,
@@ -70,37 +91,42 @@ async function initDB() {
         );
     `);
 
-    console.log('Base de datos conectada correctamente.');
-}
+    saveDatabase();
+    console.log('Base de datos WASM inicializada correctamente.');
 
-// Configuración de Nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'tu-email@gmail.com',
-        pass: 'tu-contraseña-o-app-password'
-    }
-});
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en el puerto ${PORT}`);
+    });
+}
 
 // ==========================================
 // RUTAS DE AUTENTICACIÓN
 // ==========================================
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', (req, res) => {
     const { dni, password } = req.body;
     try {
-        const user = await db.get('SELECT * FROM usuarios WHERE dni = ?', [dni]);
-        if (!user || !bcrypt.compareSync(password, user.password)) {
-            return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+        const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = :dni');
+        stmt.bind({ ':dni': dni });
+
+        if (stmt.step()) {
+            const user = stmt.getAsObject();
+            stmt.free();
+
+            if (bcrypt.compareSync(password, user.password)) {
+                return res.json({
+                    id: user.id,
+                    nombre: user.nombre,
+                    dni: user.dni,
+                    email: user.email,
+                    role: user.role
+                });
+            }
+        } else {
+            stmt.free();
         }
 
-        res.json({
-            id: user.id,
-            nombre: user.nombre,
-            dni: user.dni,
-            email: user.email,
-            role: user.role
-        });
+        res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     } catch (err) {
         res.status(500).json({ error: 'Error interno del servidor' });
     }
@@ -109,52 +135,59 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
-        const user = await db.get('SELECT * FROM usuarios WHERE email = ?', [email]);
-        if (!user) {
-            return res.status(404).json({ error: 'No existe una cuenta registrada con ese correo electrónico.' });
+        const stmt = db.prepare('SELECT * FROM usuarios WHERE email = :email');
+        stmt.bind({ ':email': email });
+
+        if (!stmt.step()) {
+            stmt.free();
+            return res.status(404).json({ error: 'No existe una cuenta registrada con ese correo.' });
         }
+
+        const user = stmt.getAsObject();
+        stmt.free();
 
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 3600000).toISOString();
 
-        await db.run('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?', [token, expires, user.id]);
+        db.run('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?', [token, expires, user.id]);
+        saveDatabase();
 
         const resetLink = `http://${req.headers.host}/reset-password.html?token=${token}`;
 
-        const mailOptions = {
+        await transporter.sendMail({
             from: '"Sistema Deportes CABA" <tu-email@gmail.com>',
             to: email,
             subject: 'Restablecimiento de Contraseña',
-            html: `
-                <h2>Solicitud de cambio de contraseña</h2>
-                <p>Hola ${user.nombre},</p>
-                <p>Haz clic en el siguiente botón para restablecer tu contraseña:</p>
-                <a href="${resetLink}" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">Restablecer Contraseña</a>
-                <p>Este enlace expirará en 1 hora.</p>
-            `
-        };
+            html: `<p>Haz clic para restablecer tu contraseña: <a href="${resetLink}">Restablecer</a></p>`
+        });
 
-        await transporter.sendMail(mailOptions);
-        res.json({ message: 'Se ha enviado un correo con instrucciones para restablecer tu contraseña.' });
+        res.json({ message: 'Correo enviado correctamente.' });
     } catch (err) {
         res.status(500).json({ error: 'Error al procesar la solicitud.' });
     }
 });
 
-app.post('/api/reset-password', async (req, res) => {
+app.post('/api/reset-password', (req, res) => {
     const { token, newPassword } = req.body;
     try {
-        const user = await db.get('SELECT * FROM usuarios WHERE resetToken = ? AND resetTokenExpires > ?', [token, new Date().toISOString()]);
-        if (!user) {
-            return res.status(400).json({ error: 'El token es inválido o ha expirado.' });
+        const stmt = db.prepare('SELECT * FROM usuarios WHERE resetToken = :token AND resetTokenExpires > :now');
+        stmt.bind({ ':token': token, ':now': new Date().toISOString() });
+
+        if (!stmt.step()) {
+            stmt.free();
+            return res.status(400).json({ error: 'El token es inválido o expiró.' });
         }
 
-        const hashedPassword = bcrypt.hashSync(newPassword, 10);
-        await db.run('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?', [hashedPassword, user.id]);
+        const user = stmt.getAsObject();
+        stmt.free();
 
-        res.json({ message: 'Tu contraseña ha sido restablecida exitosamente.' });
+        const hashedPassword = bcrypt.hashSync(newPassword, 10);
+        db.run('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?', [hashedPassword, user.id]);
+        saveDatabase();
+
+        res.json({ message: 'Contraseña restablecida exitosamente.' });
     } catch (err) {
-        res.status(500).json({ error: 'Error al restablecer contraseña.' });
+        res.status(500).json({ error: 'Error al restablecer la contraseña.' });
     }
 });
 
@@ -162,19 +195,24 @@ app.post('/api/reset-password', async (req, res) => {
 // RUTAS DE PEDIDOS
 // ==========================================
 
-app.get('/api/pedidos', async (req, res) => {
+app.get('/api/pedidos', (req, res) => {
     try {
-        const pedidos = await db.all('SELECT * FROM pedidos ORDER BY id DESC');
+        const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
+        const pedidos = [];
+        while (stmt.step()) {
+            pedidos.push(stmt.getAsObject());
+        }
+        stmt.free();
         res.json(pedidos);
     } catch (err) {
-        res.status(500).json({ error: 'Error al obtener los pedidos' });
+        res.status(500).json({ error: 'Error al obtener pedidos' });
     }
 });
 
-app.post('/api/pedidos', async (req, res) => {
+app.post('/api/pedidos', (req, res) => {
     const data = req.body;
     try {
-        await db.run(`
+        db.run(`
             INSERT INTO pedidos (
                 titulo, areaResponsable, programa, fecha, horario, lugar, descripcion,
                 responsableNombre, responsableDni, responsableTelefono, objetivo,
@@ -192,17 +230,11 @@ app.post('/api/pedidos', async (req, res) => {
             data.desarmeEvento, data.suspendeLluvia
         ]);
 
+        saveDatabase();
         res.status(201).json({ message: 'Pedido creado exitosamente' });
     } catch (err) {
-        res.status(500).json({ error: 'Error al guardar el pedido' });
+        res.status(500).json({ error: 'Error al guardar pedido' });
     }
 });
 
-// Inicializar DB y luego arrancar servidor
-initDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor corriendo exitosamente en el puerto ${PORT}`);
-    });
-}).catch(err => {
-    console.error('Error al iniciar la base de datos:', err);
-});
+startServer();
