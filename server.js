@@ -4,8 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,15 +23,6 @@ function saveDatabase() {
     }
 }
 
-// Configuración de Nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'tu-email@gmail.com',
-        pass: 'tu-contraseña-o-app-password'
-    }
-});
-
 async function startServer() {
     const SQL = await initSqlJs();
 
@@ -50,31 +39,12 @@ async function startServer() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             dni TEXT UNIQUE NOT NULL,
             nombre TEXT NOT NULL,
-            email TEXT UNIQUE,
             password TEXT NOT NULL,
-            role TEXT NOT NULL,
-            resetToken TEXT,
-            resetTokenExpires TEXT
+            role TEXT NOT NULL DEFAULT 'DOCENTE'
         );
     `);
 
-    // 2. Verificar y agregar columnas de manera segura sin romper la ejecución
-    const columnsResult = db.exec("PRAGMA table_info(usuarios);");
-    const existingColumns = columnsResult.length > 0 
-        ? columnsResult[0].values.map(col => col[1]) 
-        : [];
-
-    if (!existingColumns.includes('email')) {
-        try { db.run("ALTER TABLE usuarios ADD COLUMN email TEXT;"); } catch (e) {}
-    }
-    if (!existingColumns.includes('resetToken')) {
-        try { db.run("ALTER TABLE usuarios ADD COLUMN resetToken TEXT;"); } catch (e) {}
-    }
-    if (!existingColumns.includes('resetTokenExpires')) {
-        try { db.run("ALTER TABLE usuarios ADD COLUMN resetTokenExpires TEXT;"); } catch (e) {}
-    }
-
-    // 3. Crear tabla pedidos si no existe
+    // 2. Crear tabla pedidos si no existe
     db.run(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,6 +79,19 @@ async function startServer() {
         );
     `);
 
+    // 3. Insertar usuario Admin/Director por defecto si no existe ningún usuario
+    const userCheck = db.exec("SELECT COUNT(*) as count FROM usuarios;");
+    const userCount = userCheck.length > 0 ? userCheck[0].values[0][0] : 0;
+
+    if (userCount === 0) {
+        const defaultPassword = bcrypt.hashSync('123456', 10);
+        db.run(
+            "INSERT INTO usuarios (dni, nombre, password, role) VALUES (?, ?, ?, ?)",
+            ['23377971', 'Usuario Director', defaultPassword, 'DIRECTOR']
+        );
+        console.log('Usuario Director de prueba creado -> DNI: 23377971 | Clave: 123456');
+    }
+
     saveDatabase();
     console.log('Base de datos WASM inicializada correctamente.');
 
@@ -118,10 +101,10 @@ async function startServer() {
 }
 
 // ==========================================
-// RUTAS DE AUTENTICACIÓN
+// CONTROLADORES Y RUTAS DE AUTENTICACIÓN
 // ==========================================
 
-// Controlador reutilizable de Login
+// LOGIN
 function handleLogin(req, res) {
     const { dni, password } = req.body;
     try {
@@ -134,94 +117,56 @@ function handleLogin(req, res) {
 
             if (bcrypt.compareSync(password, user.password)) {
                 return res.json({
-                    id: user.id,
-                    nombre: user.nombre,
-                    dni: user.dni,
-                    email: user.email || null,
-                    role: user.role
+                    user: {
+                        id: user.id,
+                        nombre: user.nombre,
+                        dni: user.dni,
+                        role: user.role
+                    }
                 });
             }
         } else {
             stmt.free();
         }
 
-        res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+        res.status(401).json({ msg: 'Usuario o contraseña incorrectos' });
     } catch (err) {
         console.error("Error en login:", err);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ msg: 'Error interno del servidor' });
     }
 }
 
-// Se definen ambas rutas (/api/login y /api/auth/login) para evitar errores 404
-app.post('/api/login', handleLogin);
 app.post('/api/auth/login', handleLogin);
+app.post('/api/login', handleLogin);
 
-// Controlador reutilizable para Recuperar Contraseña
-async function handleForgotPassword(req, res) {
-    const { email } = req.body;
+// REGISTRO
+function handleRegister(req, res) {
+    const { nombre, dni, password } = req.body;
     try {
-        const stmt = db.prepare('SELECT * FROM usuarios WHERE email = :email');
-        stmt.bind({ ':email': email });
-
-        if (!stmt.step()) {
+        const stmt = db.prepare('SELECT id FROM usuarios WHERE dni = :dni');
+        stmt.bind({ ':dni': dni });
+        if (stmt.step()) {
             stmt.free();
-            return res.status(404).json({ error: 'No existe una cuenta registrada con ese correo.' });
+            return res.status(400).json({ msg: 'El DNI ingresado ya se encuentra registrado.' });
         }
-
-        const user = stmt.getAsObject();
         stmt.free();
 
-        const token = crypto.randomBytes(32).toString('hex');
-        const expires = new Date(Date.now() + 3600000).toISOString();
-
-        db.run('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?', [token, expires, user.id]);
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        db.run(
+            'INSERT INTO usuarios (nombre, dni, password, role) VALUES (?, ?, ?, ?)',
+            [nombre, dni, hashedPassword, 'DOCENTE']
+        );
         saveDatabase();
 
-        const resetLink = `http://${req.headers.host}/reset-password.html?token=${token}`;
-
-        await transporter.sendMail({
-            from: '"Sistema Deportes CABA" <tu-email@gmail.com>',
-            to: email,
-            subject: 'Restablecimiento de Contraseña',
-            html: `<p>Haz clic para restablecer tu contraseña: <a href="${resetLink}">Restablecer</a></p>`
-        });
-
-        res.json({ message: 'Correo enviado correctamente.' });
+        res.status(201).json({ msg: 'Usuario registrado con éxito' });
     } catch (err) {
-        res.status(500).json({ error: 'Error al procesar la solicitud.' });
+        console.error("Error en registro:", err);
+        res.status(500).json({ msg: 'Error al registrar usuario en la base de datos' });
     }
 }
 
-app.post('/api/forgot-password', handleForgotPassword);
-app.post('/api/auth/forgot-password', handleForgotPassword);
-
-// Controlador reutilizable para Restablecer Contraseña
-function handleResetPassword(req, res) {
-    const { token, newPassword } = req.body;
-    try {
-        const stmt = db.prepare('SELECT * FROM usuarios WHERE resetToken = :token AND resetTokenExpires > :now');
-        stmt.bind({ ':token': token, ':now': new Date().toISOString() });
-
-        if (!stmt.step()) {
-            stmt.free();
-            return res.status(400).json({ error: 'El token es inválido o expiró.' });
-        }
-
-        const user = stmt.getAsObject();
-        stmt.free();
-
-        const hashedPassword = bcrypt.hashSync(newPassword, 10);
-        db.run('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?', [hashedPassword, user.id]);
-        saveDatabase();
-
-        res.json({ message: 'Contraseña restablecida exitosamente.' });
-    } catch (err) {
-        res.status(500).json({ error: 'Error al restablecer la contraseña.' });
-    }
-}
-
-app.post('/api/reset-password', handleResetPassword);
-app.post('/api/auth/reset-password', handleResetPassword);
+app.post('/api/auth/register', handleRegister);
+app.post('/api/register', handleRegister);
 
 // ==========================================
 // RUTAS DE PEDIDOS
@@ -237,7 +182,7 @@ app.get('/api/pedidos', (req, res) => {
         stmt.free();
         res.json(pedidos);
     } catch (err) {
-        res.status(500).json({ error: 'Error al obtener pedidos' });
+        res.status(500).json({ msg: 'Error al obtener pedidos' });
     }
 });
 
@@ -263,9 +208,9 @@ app.post('/api/pedidos', (req, res) => {
         ]);
 
         saveDatabase();
-        res.status(201).json({ message: 'Pedido creado exitosamente' });
+        res.status(201).json({ msg: 'Pedido creado exitosamente' });
     } catch (err) {
-        res.status(500).json({ error: 'Error al guardar pedido' });
+        res.status(500).json({ msg: 'Error al guardar pedido' });
     }
 });
 
