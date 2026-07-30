@@ -57,6 +57,11 @@ async function startServer() {
         );
     `);
 
+    // Migraciones automáticas para agregar columnas a la tabla preexistente si no existen
+    try { db.run("ALTER TABLE usuarios ADD COLUMN email TEXT UNIQUE;"); } catch (e) {}
+    try { db.run("ALTER TABLE usuarios ADD COLUMN resetToken TEXT;"); } catch (e) {}
+    try { db.run("ALTER TABLE usuarios ADD COLUMN resetTokenExpires TEXT;"); } catch (e) {}
+
     db.run(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,7 +123,7 @@ app.post('/api/login', (req, res) => {
                     id: user.id,
                     nombre: user.nombre,
                     dni: user.dni,
-                    email: user.email,
+                    email: user.email || null, // Evita fallos si el campo no existía previamente
                     role: user.role
                 });
             }
@@ -128,6 +133,7 @@ app.post('/api/login', (req, res) => {
 
         res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     } catch (err) {
+        console.error("Error en login:", err);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
