@@ -13,11 +13,10 @@
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^13.0.2",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "nodemailer": "^9.0.3",
     "sequelize": "^6.37.8",
-    "sqlite": "^5.1.1"
+    "sql.js": "^1.14.1"
   }
 }

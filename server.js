@@ -1,22 +1,23 @@
 const express = require('express');
-const Database = require('better-sqlite3'); // Importamos better-sqlite3
+const initSqlJs = require('sql.js');
+const fs = require('fs');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DB_FILE = path.join(__dirname, 'database.sqlite');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Abrir/crear la base de datos de forma directa
-const db = new Database('./database.sqlite');
+let db;
 
-// Configuración del servicio de correo electrónico (Nodemailer)
+// Configuración de Nodemailer
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -25,9 +26,29 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Inicialización de las tablas
-function initDB() {
-    db.exec(`
+// Función para guardar cambios en el archivo .sqlite
+function saveDatabase() {
+    if (db) {
+        const data = db.export();
+        const buffer = Buffer.from(data);
+        fs.writeFileSync(DB_FILE, buffer);
+    }
+}
+
+// Inicialización de la base de datos con WebAssembly (sql.js)
+async function startServer() {
+    const SQL = await initSqlJs();
+
+    // Cargar la base de datos si existe, o crear una nueva
+    if (fs.existsSync(DB_FILE)) {
+        const filebuffer = fs.readFileSync(DB_FILE);
+        db = new SQL.Database(filebuffer);
+    } else {
+        db = new SQL.Database();
+    }
+
+    // Crear tablas si no existen
+    db.run(`
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             dni TEXT UNIQUE NOT NULL,
@@ -36,11 +57,11 @@ function initDB() {
             password TEXT NOT NULL,
             role TEXT NOT NULL,
             resetToken TEXT,
-            resetTokenExpires DATETIME
-        )
+            resetTokenExpires TEXT
+        );
     `);
 
-    db.exec(`
+    db.run(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT NOT NULL,
@@ -70,14 +91,17 @@ function initDB() {
             timingEvento TEXT,
             desarmeEvento TEXT,
             suspendeLluvia TEXT,
-            fechaCreacion DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
+            fechaCreacion TEXT DEFAULT CURRENT_TIMESTAMP
+        );
     `);
 
-    console.log('Base de datos SQLite inicializada correctamente.');
-}
+    saveDatabase();
+    console.log('Base de datos WASM (sql.js) inicializada correctamente.');
 
-initDB();
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en el puerto ${PORT}`);
+    });
+}
 
 // ==========================================
 // RUTAS DE AUTENTICACIÓN Y RECUPERACIÓN
@@ -86,19 +110,29 @@ initDB();
 app.post('/api/login', (req, res) => {
     const { dni, password } = req.body;
     try {
-        const user = db.prepare('SELECT * FROM usuarios WHERE dni = ?').get(dni);
-        if (!user || !bcrypt.compareSync(password, user.password)) {
-            return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+        const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = :dni');
+        stmt.bind({ ':dni': dni });
+
+        if (stmt.step()) {
+            const user = stmt.getAsObject();
+            stmt.free();
+
+            if (bcrypt.compareSync(password, user.password)) {
+                return res.json({
+                    id: user.id,
+                    nombre: user.nombre,
+                    dni: user.dni,
+                    email: user.email,
+                    role: user.role
+                });
+            }
+        } else {
+            stmt.free();
         }
 
-        res.json({
-            id: user.id,
-            nombre: user.nombre,
-            dni: user.dni,
-            email: user.email,
-            role: user.role
-        });
+        res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
@@ -107,16 +141,22 @@ app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
 
     try {
-        const user = db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email);
-        if (!user) {
+        const stmt = db.prepare('SELECT * FROM usuarios WHERE email = :email');
+        stmt.bind({ ':email': email });
+
+        if (!stmt.step()) {
+            stmt.free();
             return res.status(404).json({ error: 'No existe una cuenta registrada con ese correo electrónico.' });
         }
+
+        const user = stmt.getAsObject();
+        stmt.free();
 
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 3600000).toISOString();
 
-        db.prepare('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?')
-          .run(token, expires, user.id);
+        db.run('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?', [token, expires, user.id]);
+        saveDatabase();
 
         const resetLink = `http://${req.headers.host}/reset-password.html?token=${token}`;
 
@@ -146,17 +186,21 @@ app.post('/api/reset-password', (req, res) => {
     const { token, newPassword } = req.body;
 
     try {
-        const user = db.prepare('SELECT * FROM usuarios WHERE resetToken = ? AND resetTokenExpires > ?')
-                      .get(token, new Date().toISOString());
+        const stmt = db.prepare('SELECT * FROM usuarios WHERE resetToken = :token AND resetTokenExpires > :now');
+        stmt.bind({ ':token': token, ':now': new Date().toISOString() });
 
-        if (!user) {
+        if (!stmt.step()) {
+            stmt.free();
             return res.status(400).json({ error: 'El token es inválido o ha expirado.' });
         }
 
+        const user = stmt.getAsObject();
+        stmt.free();
+
         const hashedPassword = bcrypt.hashSync(newPassword, 10);
 
-        db.prepare('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?')
-          .run(hashedPassword, user.id);
+        db.run('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?', [hashedPassword, user.id]);
+        saveDatabase();
 
         res.json({ message: 'Tu contraseña ha sido restablecida exitosamente.' });
 
@@ -172,7 +216,12 @@ app.post('/api/reset-password', (req, res) => {
 
 app.get('/api/pedidos', (req, res) => {
     try {
-        const pedidos = db.prepare('SELECT * FROM pedidos ORDER BY fechaCreacion DESC').all();
+        const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
+        const pedidos = [];
+        while (stmt.step()) {
+            pedidos.push(stmt.getAsObject());
+        }
+        stmt.free();
         res.json(pedidos);
     } catch (err) {
         res.status(500).json({ error: 'Error al obtener los pedidos' });
@@ -182,7 +231,7 @@ app.get('/api/pedidos', (req, res) => {
 app.post('/api/pedidos', (req, res) => {
     const data = req.body;
     try {
-        const stmt = db.prepare(`
+        db.run(`
             INSERT INTO pedidos (
                 titulo, areaResponsable, programa, fecha, horario, lugar, descripcion,
                 responsableNombre, responsableDni, responsableTelefono, objetivo,
@@ -191,23 +240,21 @@ app.post('/api/pedidos', (req, res) => {
                 situacionRevista, horarioDocente, prensa, tipoDifusion, timingEvento,
                 desarmeEvento, suspendeLluvia
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        const info = stmt.run(
+        `, [
             data.titulo, data.areaResponsable, data.programa, data.fecha, data.horario, data.lugar, data.descripcion,
             data.responsableNombre, data.responsableDni, data.responsableTelefono, data.objetivo,
             data.participantesAprox, data.publicoGeneral, data.articulaciones, data.necesidades,
             data.transportePasajeros, data.ambulancia, data.ambulanciaHorario, data.seguro, data.extensionArt,
             data.situacionRevista, data.horarioDocente, data.prensa, data.tipoDifusion, data.timingEvento,
             data.desarmeEvento, data.suspendeLluvia
-        );
+        ]);
 
-        res.status(201).json({ id: info.lastInsertRowid, message: 'Pedido creado exitosamente' });
+        saveDatabase();
+        res.status(201).json({ message: 'Pedido creado exitosamente' });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Error al guardar el pedido' });
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+startServer();
