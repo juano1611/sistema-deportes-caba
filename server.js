@@ -58,7 +58,7 @@ async function startServer() {
         );
     `);
 
-    // 2. Verificar y agregar columnas de manera segura sin romper la ejecucion
+    // 2. Verificar y agregar columnas de manera segura sin romper la ejecución
     const columnsResult = db.exec("PRAGMA table_info(usuarios);");
     const existingColumns = columnsResult.length > 0 
         ? columnsResult[0].values.map(col => col[1]) 
@@ -121,7 +121,8 @@ async function startServer() {
 // RUTAS DE AUTENTICACIÓN
 // ==========================================
 
-app.post('/api/login', (req, res) => {
+// Controlador reutilizable de Login
+function handleLogin(req, res) {
     const { dni, password } = req.body;
     try {
         const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = :dni');
@@ -149,9 +150,14 @@ app.post('/api/login', (req, res) => {
         console.error("Error en login:", err);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
-});
+}
 
-app.post('/api/forgot-password', async (req, res) => {
+// Se definen ambas rutas (/api/login y /api/auth/login) para evitar errores 404
+app.post('/api/login', handleLogin);
+app.post('/api/auth/login', handleLogin);
+
+// Controlador reutilizable para Recuperar Contraseña
+async function handleForgotPassword(req, res) {
     const { email } = req.body;
     try {
         const stmt = db.prepare('SELECT * FROM usuarios WHERE email = :email');
@@ -184,9 +190,13 @@ app.post('/api/forgot-password', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Error al procesar la solicitud.' });
     }
-});
+}
 
-app.post('/api/reset-password', (req, res) => {
+app.post('/api/forgot-password', handleForgotPassword);
+app.post('/api/auth/forgot-password', handleForgotPassword);
+
+// Controlador reutilizable para Restablecer Contraseña
+function handleResetPassword(req, res) {
     const { token, newPassword } = req.body;
     try {
         const stmt = db.prepare('SELECT * FROM usuarios WHERE resetToken = :token AND resetTokenExpires > :now');
@@ -208,7 +218,10 @@ app.post('/api/reset-password', (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Error al restablecer la contraseña.' });
     }
-});
+}
+
+app.post('/api/reset-password', handleResetPassword);
+app.post('/api/auth/reset-password', handleResetPassword);
 
 // ==========================================
 // RUTAS DE PEDIDOS
