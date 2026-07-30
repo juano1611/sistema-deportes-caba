@@ -39,7 +39,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 15px;
     background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
 }
 
@@ -49,7 +49,7 @@ body {
     max-width: 440px;
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-    padding: 35px;
+    padding: 25px;
     border-top: 6px solid var(--ba-yellow);
 }
 
@@ -66,7 +66,7 @@ body {
 }
 
 .auth-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     color: var(--ba-dark);
     font-weight: 700;
 }
@@ -161,36 +161,50 @@ body {
 .main-header {
     background-color: var(--ba-dark);
     color: white;
-    padding: 15px 30px;
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 4px solid var(--ba-yellow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .ba-logo-mini {
     background: var(--ba-yellow);
     color: var(--ba-dark);
-    padding: 4px 10px;
+    padding: 4px 8px;
     font-weight: 900;
     border-radius: 4px;
+    font-size: 0.9rem;
 }
 
 .main-header h1 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px 8px;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .badge {
@@ -211,7 +225,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: var(--radius-md);
     cursor: pointer;
     font-size: 0.85rem;
@@ -225,13 +239,15 @@ body {
 .layout-body {
     display: flex;
     min-height: calc(100vh - 65px);
+    position: relative;
 }
 
 .sidebar {
     width: 240px;
     background: var(--ba-dark-surface);
-    padding-top: 20px;
+    padding-top: 15px;
     flex-shrink: 0;
+    transition: transform 0.3s ease;
 }
 
 .nav-btn {
@@ -242,7 +258,7 @@ body {
     background: transparent;
     border: none;
     color: #94A3B8;
-    padding: 14px 24px;
+    padding: 14px 20px;
     text-align: left;
     font-size: 0.9rem;
     font-weight: 500;
@@ -259,8 +275,9 @@ body {
 
 .content-wrapper {
     flex-grow: 1;
-    padding: 35px;
+    padding: 20px;
     max-width: 1400px;
+    width: 100%;
 }
 
 .tab-content {
@@ -276,15 +293,33 @@ body {
     background: var(--ba-card-bg);
     border-radius: var(--radius-lg);
     box-shadow: var(--ba-shadow);
-    padding: 30px;
-    margin-bottom: 25px;
+    padding: 20px;
+    margin-bottom: 20px;
     border: 1px solid var(--ba-border);
 }
 
 .panel h3 {
-    margin-bottom: 20px;
-    font-size: 1.25rem;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
     color: var(--ba-dark);
+}
+
+.section-title-container {
+    margin-bottom: 20px;
+}
+
+.section-title-container h2 {
+    font-size: 1.35rem;
+    color: var(--ba-dark);
+}
+
+.panel-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 /* HERO INICIO CON BANNER ILUSTRATIVO */
@@ -298,7 +333,7 @@ body {
 
 .hero-image-wrapper {
     width: 100%;
-    max-height: 400px;
+    max-height: 350px;
     overflow: hidden;
     background-color: #f1f5f9;
 }
@@ -311,29 +346,30 @@ body {
 }
 
 .hero-content {
-    padding: 30px;
+    padding: 20px;
 }
 
 .hero-content h2 {
     color: var(--ba-dark);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     margin-bottom: 10px;
 }
 
 .hero-content p {
     color: var(--ba-text-muted);
     line-height: 1.6;
+    font-size: 0.95rem;
 }
 
-/* FORMULARIO GRID */
+/* FORMULARIO GRID RESPONSIVO */
 .grid-form {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 -10px;
+    margin: 0 -8px;
 }
 
 .form-group {
-    padding: 0 10px;
+    padding: 0 8px;
     margin-bottom: 15px;
 }
 
@@ -344,21 +380,26 @@ body {
 .col-3 { width: 25%; }
 .col-2 { width: 16.66%; }
 
+.form-actions {
+    margin-top: 15px;
+}
+
 .btn-success {
     background-color: var(--ba-success);
     color: white;
     border: none;
-    padding: 12px 28px;
+    padding: 12px 24px;
     font-weight: 600;
     border-radius: var(--radius-md);
     cursor: pointer;
+    width: auto;
 }
 
 .btn-primary {
     background-color: var(--ba-dark);
     color: var(--ba-yellow);
     border: none;
-    padding: 10px 20px;
+    padding: 10px 18px;
     font-weight: 600;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -366,17 +407,20 @@ body {
 
 /* TABLA Y CALENDARIO */
 .table-container {
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
+    min-width: 600px;
 }
 
 .data-table th, .data-table td {
-    padding: 12px 16px;
+    padding: 10px 12px;
     border: 1px solid var(--ba-border);
     text-align: left;
 }
@@ -390,15 +434,83 @@ body {
 .calendar-card {
     background: var(--ba-bg);
     border-left: 5px solid var(--ba-yellow);
-    padding: 18px;
+    padding: 15px;
     border-radius: var(--radius-md);
     margin-bottom: 12px;
 }
 
 .placeholder-box {
     text-align: center;
-    padding: 50px;
+    padding: 35px 15px;
     color: var(--ba-text-muted);
 }
 
 .pdf-only-header { display: none; }
+
+/* ==========================================
+   ADAPTACIÓN RESPONSIVA (MÓVILES Y TABLETS)
+   ========================================== */
+
+@media (max-width: 992px) {
+    .col-5, .col-4, .col-3, .col-2 {
+        width: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    .main-header {
+        padding: 10px 15px;
+    }
+
+    .main-header h1 {
+        font-size: 0.95rem;
+    }
+
+    #user-name {
+        display: none; /* Ocultar el texto largo del nombre en pantallas chicas */
+    }
+
+    .layout-body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 999;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        display: none;
+    }
+
+    .sidebar.open {
+        display: block;
+    }
+
+    .content-wrapper {
+        padding: 12px;
+    }
+
+    .panel {
+        padding: 15px;
+    }
+
+    .col-6, .col-5, .col-4, .col-3, .col-2 {
+        width: 100%;
+    }
+
+    .btn-success, .btn-primary, .form-actions {
+        width: 100%;
+        text-align: center;
+    }
+
+    .panel-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

@@ -59,20 +59,21 @@
     <div id="portal-container" class="portal-container hidden">
         <header class="main-header">
             <div class="header-left">
+                <button id="mobile-menu-btn" class="mobile-menu-toggle" aria-label="Abrir Menú">☰</button>
                 <div class="ba-logo-mini">BA</div>
-                <h1>Portal de Gestión Deportiva</h1>
+                <h1>Portal Deportes</h1>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <span id="user-badge" class="badge">Docente</span>
                     <span id="user-name">Nombre Usuario</span>
                 </div>
-                <button id="btn-logout" class="btn-logout">Cerrar Sesión</button>
+                <button id="btn-logout" class="btn-logout">Salir</button>
             </div>
         </header>
 
         <div class="layout-body">
-            <nav class="sidebar">
+            <nav id="main-sidebar" class="sidebar">
                 <button class="nav-btn active" data-tab="tab-inicio">
                     <span class="icon">🏠</span> Inicio
                 </button>
@@ -176,16 +177,16 @@
                             </div>
 
                             <div class="form-group col-6">
-                                <label>Articulaciones (Organismos involucrados)</label>
+                                <label>Articulaciones (Organismos)</label>
                                 <input type="text" id="p-articulaciones" placeholder="Ej: Comunas, Policía de la Ciudad">
                             </div>
                             <div class="form-group col-6">
-                                <label>Necesidades (Solo lo que necesitan y NO tienen) *</label>
+                                <label>Necesidades No Cubiertas *</label>
                                 <input type="text" id="p-necesidades" required placeholder="Ej: 200 vallas, Sonido con micrófonos">
                             </div>
 
                             <div class="form-group col-12">
-                                <label>Transporte (Cantidad de pasajeros y Hoja de Ruta)</label>
+                                <label>Transporte (Pasajeros y Ruta)</label>
                                 <input type="text" id="p-transporte" placeholder="Ej: 30 pasajeros. Ruta: CeNARD a Polideportivo Avellaneda">
                             </div>
 
@@ -197,7 +198,7 @@
                                 </select>
                             </div>
                             <div class="form-group col-3">
-                                <label>Horario Ambulancia (Si aplica)</label>
+                                <label>Horario Ambulancia</label>
                                 <input type="text" id="p-ambulancia-horario" placeholder="Ej: 08:00 a 14:00">
                             </div>
                             <div class="form-group col-3">
@@ -216,7 +217,7 @@
                             </div>
 
                             <div class="form-group col-4">
-                                <label>Situación de Revista *</label>
+                                <label>Situación Revista *</label>
                                 <select id="p-revista">
                                     <option value="CONTRATADO">CONTRATADO</option>
                                     <option value="PLANTA TRANSITORIA">PLANTA TRANSITORIA</option>
@@ -235,7 +236,7 @@
                                 </select>
                             </div>
                             <div class="form-group col-2">
-                                <label>Tipo Difusión</label>
+                                <label>Difusión</label>
                                 <select id="p-difusion">
                                     <option value="FLYER">FLYER</option>
                                     <option value="REDES">REDES</option>
@@ -243,22 +244,22 @@
                             </div>
 
                             <div class="form-group col-5">
-                                <label>Timing del Evento *</label>
-                                <input type="text" id="p-timing" required placeholder="Ej: Cronograma de actividades...">
+                                <label>Timing Evento *</label>
+                                <input type="text" id="p-timing" required placeholder="Cronograma...">
                             </div>
                             <div class="form-group col-5">
-                                <label>Desarme del Evento *</label>
-                                <input type="text" id="p-desarme" required placeholder="Ej: Limpieza y guardado desde 14:00">
+                                <label>Desarme Evento *</label>
+                                <input type="text" id="p-desarme" required placeholder="Limpieza desde...">
                             </div>
                             <div class="form-group col-2">
-                                <label>¿Se suspende por lluvia?</label>
+                                <label>¿Lluvia?</label>
                                 <select id="p-lluvia">
                                     <option value="SI">SI</option>
                                     <option value="NO">NO</option>
                                 </select>
                             </div>
 
-                            <div class="form-group col-12 text-right" style="margin-top: 15px;">
+                            <div class="form-group col-12 form-actions">
                                 <button type="submit" class="btn-success">Enviar Solicitud de Pedido</button>
                             </div>
                         </form>
@@ -266,7 +267,7 @@
 
                     <div id="director-view-container" class="panel hidden">
                         <div class="panel-header-actions">
-                            <h3>Listado General de Requerimientos Recibidos</h3>
+                            <h3>Requerimientos Recibidos</h3>
                             <button id="btn-descargar-pdf" class="btn-primary">📥 Descargar Reporte PDF</button>
                         </div>
                         <div id="pdf-export-area" class="table-container">
@@ -297,7 +298,7 @@
                 <!-- TAB CALENDARIO -->
                 <section id="tab-calendario" class="tab-content">
                     <div class="panel">
-                        <h3>Calendario de Actividades Deportivas 2026</h3>
+                        <h3>Calendario de Actividades Deportivas</h3>
                         <p style="color:#666; margin-bottom: 20px;">Cronograma general aprobado de actividades de la Secretaría de Deportes.</p>
                         <div class="calendar-list" id="calendar-list-container">
                         </div>

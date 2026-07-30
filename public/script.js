@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigationTabs();
     initAuthToggles();
     initFormEvents();
+    initMobileMenu();
     
     if (authUser) {
         renderPortalView();
@@ -13,9 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// MENÚ DESPLEGABLE EN MÓVILES
+function initMobileMenu() {
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('main-sidebar');
+
+    if (menuBtn && sidebar) {
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+    }
+}
+
 // NAVEGACIÓN ENTRE SECCIONES
 function initNavigationTabs() {
     const navButtons = document.querySelectorAll('.nav-btn');
+    const sidebar = document.getElementById('main-sidebar');
+
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             navButtons.forEach(b => b.classList.remove('active'));
@@ -24,6 +39,11 @@ function initNavigationTabs() {
             btn.classList.add('active');
             const targetTab = btn.getAttribute('data-tab');
             document.getElementById(targetTab).classList.add('active');
+
+            // Cierra el menú al hacer clic en una solapa si está en vista celular
+            if (sidebar && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
         });
     });
 }
@@ -167,7 +187,7 @@ function initFormEvents() {
                 });
 
                 if (res.ok) {
-                    alert('¡Solicitud guardada con éxito en la base de datos!');
+                    alert('¡Solicitud guardada con éxito!');
                     formPedido.reset();
                     loadPedidosData();
                 }
@@ -273,5 +293,4 @@ async function loadPedidosData() {
     } catch (err) {
         console.error('Error al obtener datos:', err);
     }
-    
 }
