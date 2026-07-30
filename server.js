@@ -44,6 +44,7 @@ async function startServer() {
         db = new SQL.Database();
     }
 
+    // 1. Crear tabla usuarios si no existe
     db.run(`
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,11 +58,23 @@ async function startServer() {
         );
     `);
 
-    // Migraciones automáticas para agregar columnas a la tabla preexistente si no existen
-    try { db.run("ALTER TABLE usuarios ADD COLUMN email TEXT UNIQUE;"); } catch (e) {}
-    try { db.run("ALTER TABLE usuarios ADD COLUMN resetToken TEXT;"); } catch (e) {}
-    try { db.run("ALTER TABLE usuarios ADD COLUMN resetTokenExpires TEXT;"); } catch (e) {}
+    // 2. Verificar y agregar columnas de manera segura sin romper la ejecucion
+    const columnsResult = db.exec("PRAGMA table_info(usuarios);");
+    const existingColumns = columnsResult.length > 0 
+        ? columnsResult[0].values.map(col => col[1]) 
+        : [];
 
+    if (!existingColumns.includes('email')) {
+        try { db.run("ALTER TABLE usuarios ADD COLUMN email TEXT;"); } catch (e) {}
+    }
+    if (!existingColumns.includes('resetToken')) {
+        try { db.run("ALTER TABLE usuarios ADD COLUMN resetToken TEXT;"); } catch (e) {}
+    }
+    if (!existingColumns.includes('resetTokenExpires')) {
+        try { db.run("ALTER TABLE usuarios ADD COLUMN resetTokenExpires TEXT;"); } catch (e) {}
+    }
+
+    // 3. Crear tabla pedidos si no existe
     db.run(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -123,7 +136,7 @@ app.post('/api/login', (req, res) => {
                     id: user.id,
                     nombre: user.nombre,
                     dni: user.dni,
-                    email: user.email || null, // Evita fallos si el campo no existía previamente
+                    email: user.email || null,
                     role: user.role
                 });
             }
