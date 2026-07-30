@@ -89,29 +89,13 @@ body {
     margin-bottom: 6px;
 }
 
-.input-icon {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-icon i {
-    position: absolute;
-    left: 12px;
-    color: var(--text-muted);
-}
-
 .input-icon input {
     width: 100%;
-    padding: 10px 10px 10px 38px;
+    padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.95rem;
     outline: none;
-}
-
-.input-icon input:focus {
-    border-color: var(--ba-dark);
 }
 
 .btn-primary {
@@ -123,21 +107,6 @@ body {
     font-weight: 600;
     cursor: pointer;
     width: 100%;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: var(--ba-dark-hover);
-}
-
-.error-banner {
-    background-color: #fce8e6;
-    color: #d93025;
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    margin-bottom: 15px;
-    text-align: center;
 }
 
 /* ==========================================
@@ -152,31 +121,35 @@ body {
 .main-header {
     background-color: var(--ba-dark);
     color: white;
-    padding: 10px 20px;
+    padding: 10px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 4px solid var(--ba-yellow);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 2000;
     height: 60px;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
+/* BOTÓN DE MENÚ HAMBURGUESA */
 .mobile-menu-toggle {
     display: none;
-    background: transparent;
-    border: none;
+    background: #26374a;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1;
     cursor: pointer;
-    padding: 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    touch-action: manipulation;
 }
 
 .ba-logo-mini {
@@ -185,54 +158,48 @@ body {
     padding: 4px 8px;
     font-weight: 900;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .main-header h1 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    white-space: nowrap;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
+    gap: 6px;
+    font-size: 0.8rem;
 }
 
 .badge {
     background: var(--ba-yellow);
     color: var(--ba-dark);
     font-weight: 700;
-    padding: 2px 6px;
+    padding: 2px 5px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
 }
 
 .btn-logout {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.4);
     color: white;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-logout:hover {
-    background: rgba(255, 255, 255, 0.1);
 }
 
 /* ==========================================
-   LAYOUT BODY Y SIDEBAR (ESCRITORIO)
+   LAYOUT BODY Y SIDEBAR
    ========================================== */
 .layout-body {
     display: flex;
@@ -255,19 +222,10 @@ body {
 }
 
 .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     padding: 14px 20px;
     color: #b0bec5;
     cursor: pointer;
-    transition: all 0.2s;
     font-size: 0.95rem;
-}
-
-.nav-item:hover {
-    background-color: var(--ba-dark-hover);
-    color: white;
 }
 
 .nav-item.active {
@@ -278,9 +236,8 @@ body {
 
 .content-wrapper {
     flex: 1;
-    padding: 25px;
-    max-width: 1200px;
-    box-sizing: border-box;
+    padding: 20px;
+    width: 100%;
 }
 
 .tab-content {
@@ -291,52 +248,33 @@ body {
     display: block;
 }
 
-/* CARDS Y CONTENIDO */
 .hero-card {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     display: flex;
     overflow: hidden;
-    margin-bottom: 20px;
 }
 
 .hero-content {
-    padding: 30px;
+    padding: 20px;
     flex: 1;
 }
 
-.hero-content h2 {
-    font-size: 1.5rem;
-    color: var(--ba-dark);
-    margin-bottom: 15px;
-}
-
-.hero-content p {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-}
-
 .hero-image {
-    width: 350px;
+    width: 300px;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fafafa;
 }
 
 .hero-image img {
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
 }
 
 .panel {
     background: white;
-    padding: 25px;
+    padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .sidebar-overlay {
@@ -348,71 +286,52 @@ body {
    ========================================== */
 @media (max-width: 768px) {
     .mobile-menu-toggle {
-        display: block; /* Muestra el botón de hamburguesa */
-    }
-
-    .main-header h1 {
-        font-size: 0.85rem;
+        display: block !important; /* Muestra el botón */
     }
 
     #user-name {
-        display: none; /* Esconde nombre largo en móvil */
+        display: none; /* Esconde nombre en pantallas chicas */
     }
 
-    /* Pasa la estructura principal a vertical */
-    .layout-body {
-        flex-direction: column;
-    }
-
-    /* Vuelve el Sidebar un menú flotante deslizante */
+    /* BARRA LATERAL FLOTANTE */
     .sidebar {
-        position: fixed;
-        top: 60px;
-        left: -260px; /* Escondido a la izquierda */
-        width: 250px;
-        height: calc(100vh - 60px);
-        z-index: 1001;
-        transition: left 0.3s ease-in-out;
-        box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        position: fixed !important;
+        top: 60px !important;
+        left: -100% !important; /* Oculto por defecto */
+        width: 260px !important;
+        height: calc(100vh - 60px) !important;
+        z-index: 3000 !important;
+        transition: left 0.25s ease-in-out !important;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
     }
 
-    /* Cuando se activa con JavaScript */
+    /* CLASE FORZADA PARA MOSTRAR */
     .sidebar.open {
-        left: 0;
+        left: 0 !important;
     }
 
-    /* Fondo oscuro transparente cuando el menú está abierto */
+    /* FONDO OSCURO */
     .sidebar-overlay.active {
-        display: block;
+        display: block !important;
         position: fixed;
         top: 60px;
         left: 0;
         width: 100vw;
         height: calc(100vh - 60px);
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2500;
     }
 
-    /* El contenido pasa a tomar el 100% del ancho móvil */
     .content-wrapper {
-        width: 100%;
-        padding: 15px;
+        padding: 10px !important;
+        width: 100% !important;
     }
 
-    /* Apila la card de bienvenido */
     .hero-card {
         flex-direction: column-reverse;
     }
 
     .hero-image {
         width: 100%;
-    }
-
-    .hero-content {
-        padding: 20px;
-    }
-
-    .hero-content h2 {
-        font-size: 1.2rem;
     }
 }
