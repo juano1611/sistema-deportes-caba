@@ -1,6 +1,6 @@
 const express = require('express');
-const initSqlJs = require('sql.js');
-const fs = require('fs');
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
@@ -9,7 +9,6 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'database.sqlite');
 
 app.use(cors());
 app.use(express.json());
@@ -17,38 +16,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
 
-// Configuración de Nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'tu-email@gmail.com',
-        pass: 'tu-contraseña-o-app-password'
-    }
-});
+// Conexión asíncrona a la base de datos
+async function initDB() {
+    db = await open({
+        filename: path.join(__dirname, 'database.sqlite'),
+        driver: sqlite3.Database
+    });
 
-// Función para guardar cambios en el archivo .sqlite
-function saveDatabase() {
-    if (db) {
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(DB_FILE, buffer);
-    }
-}
-
-// Inicialización de la base de datos con WebAssembly (sql.js)
-async function startServer() {
-    const SQL = await initSqlJs();
-
-    // Cargar la base de datos si existe, o crear una nueva
-    if (fs.existsSync(DB_FILE)) {
-        const filebuffer = fs.readFileSync(DB_FILE);
-        db = new SQL.Database(filebuffer);
-    } else {
-        db = new SQL.Database();
-    }
-
-    // Crear tablas si no existen
-    db.run(`
+    await db.exec(`
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             dni TEXT UNIQUE NOT NULL,
@@ -61,7 +36,7 @@ async function startServer() {
         );
     `);
 
-    db.run(`
+    await db.exec(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT NOT NULL,
@@ -95,68 +70,54 @@ async function startServer() {
         );
     `);
 
-    saveDatabase();
-    console.log('Base de datos WASM (sql.js) inicializada correctamente.');
-
-    app.listen(PORT, () => {
-        console.log(`Servidor corriendo en el puerto ${PORT}`);
-    });
+    console.log('Base de datos conectada correctamente.');
 }
 
+// Configuración de Nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'tu-email@gmail.com',
+        pass: 'tu-contraseña-o-app-password'
+    }
+});
+
 // ==========================================
-// RUTAS DE AUTENTICACIÓN Y RECUPERACIÓN
+// RUTAS DE AUTENTICACIÓN
 // ==========================================
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { dni, password } = req.body;
     try {
-        const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = :dni');
-        stmt.bind({ ':dni': dni });
-
-        if (stmt.step()) {
-            const user = stmt.getAsObject();
-            stmt.free();
-
-            if (bcrypt.compareSync(password, user.password)) {
-                return res.json({
-                    id: user.id,
-                    nombre: user.nombre,
-                    dni: user.dni,
-                    email: user.email,
-                    role: user.role
-                });
-            }
-        } else {
-            stmt.free();
+        const user = await db.get('SELECT * FROM usuarios WHERE dni = ?', [dni]);
+        if (!user || !bcrypt.compareSync(password, user.password)) {
+            return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
         }
 
-        res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+        res.json({
+            id: user.id,
+            nombre: user.nombre,
+            dni: user.dni,
+            email: user.email,
+            role: user.role
+        });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
-
     try {
-        const stmt = db.prepare('SELECT * FROM usuarios WHERE email = :email');
-        stmt.bind({ ':email': email });
-
-        if (!stmt.step()) {
-            stmt.free();
+        const user = await db.get('SELECT * FROM usuarios WHERE email = ?', [email]);
+        if (!user) {
             return res.status(404).json({ error: 'No existe una cuenta registrada con ese correo electrónico.' });
         }
-
-        const user = stmt.getAsObject();
-        stmt.free();
 
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 3600000).toISOString();
 
-        db.run('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?', [token, expires, user.id]);
-        saveDatabase();
+        await db.run('UPDATE usuarios SET resetToken = ?, resetTokenExpires = ? WHERE id = ?', [token, expires, user.id]);
 
         const resetLink = `http://${req.headers.host}/reset-password.html?token=${token}`;
 
@@ -175,38 +136,25 @@ app.post('/api/forgot-password', async (req, res) => {
 
         await transporter.sendMail(mailOptions);
         res.json({ message: 'Se ha enviado un correo con instrucciones para restablecer tu contraseña.' });
-
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error al procesar la solicitud de restablecimiento.' });
+        res.status(500).json({ error: 'Error al procesar la solicitud.' });
     }
 });
 
-app.post('/api/reset-password', (req, res) => {
+app.post('/api/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
-
     try {
-        const stmt = db.prepare('SELECT * FROM usuarios WHERE resetToken = :token AND resetTokenExpires > :now');
-        stmt.bind({ ':token': token, ':now': new Date().toISOString() });
-
-        if (!stmt.step()) {
-            stmt.free();
+        const user = await db.get('SELECT * FROM usuarios WHERE resetToken = ? AND resetTokenExpires > ?', [token, new Date().toISOString()]);
+        if (!user) {
             return res.status(400).json({ error: 'El token es inválido o ha expirado.' });
         }
 
-        const user = stmt.getAsObject();
-        stmt.free();
-
         const hashedPassword = bcrypt.hashSync(newPassword, 10);
-
-        db.run('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?', [hashedPassword, user.id]);
-        saveDatabase();
+        await db.run('UPDATE usuarios SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?', [hashedPassword, user.id]);
 
         res.json({ message: 'Tu contraseña ha sido restablecida exitosamente.' });
-
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error al restablecer la contraseña.' });
+        res.status(500).json({ error: 'Error al restablecer contraseña.' });
     }
 });
 
@@ -214,24 +162,19 @@ app.post('/api/reset-password', (req, res) => {
 // RUTAS DE PEDIDOS
 // ==========================================
 
-app.get('/api/pedidos', (req, res) => {
+app.get('/api/pedidos', async (req, res) => {
     try {
-        const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
-        const pedidos = [];
-        while (stmt.step()) {
-            pedidos.push(stmt.getAsObject());
-        }
-        stmt.free();
+        const pedidos = await db.all('SELECT * FROM pedidos ORDER BY id DESC');
         res.json(pedidos);
     } catch (err) {
         res.status(500).json({ error: 'Error al obtener los pedidos' });
     }
 });
 
-app.post('/api/pedidos', (req, res) => {
+app.post('/api/pedidos', async (req, res) => {
     const data = req.body;
     try {
-        db.run(`
+        await db.run(`
             INSERT INTO pedidos (
                 titulo, areaResponsable, programa, fecha, horario, lugar, descripcion,
                 responsableNombre, responsableDni, responsableTelefono, objetivo,
@@ -249,12 +192,17 @@ app.post('/api/pedidos', (req, res) => {
             data.desarmeEvento, data.suspendeLluvia
         ]);
 
-        saveDatabase();
         res.status(201).json({ message: 'Pedido creado exitosamente' });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Error al guardar el pedido' });
     }
 });
 
-startServer();
+// Inicializar DB y luego arrancar servidor
+initDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo exitosamente en el puerto ${PORT}`);
+    });
+}).catch(err => {
+    console.error('Error al iniciar la base de datos:', err);
+});
