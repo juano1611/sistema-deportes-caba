@@ -17,7 +17,7 @@
                 <p>Dirección General de Deporte Social y Desarrollo Deportivo</p>
             </div>
 
-            <!-- TOGGLE PESTAÑAS LOGIN / REGISTRO (VISIBLE EN PC Y MÓVIL) -->
+            <!-- TOGGLE PESTAÑAS LOGIN / REGISTRO -->
             <div class="auth-tabs">
                 <button type="button" id="tab-login-btn" class="auth-tab-btn active">Ingresar</button>
                 <button type="button" id="tab-register-btn" class="auth-tab-btn">Registrarme</button>
@@ -28,14 +28,14 @@
                 <div class="form-group">
                     <label for="username">DNI / Usuario</label>
                     <div class="input-icon">
-                        <input type="text" id="username" placeholder="Ingresá tu DNI" required>
+                        <input type="text" id="username" placeholder="Ingresá tu DNI" required autocomplete="username">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Contraseña</label>
                     <div class="input-icon">
-                        <input type="password" id="password" placeholder="••••••••" required>
+                        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@
                 <div class="form-group">
                     <label for="reg-nombre">Nombre Completo</label>
                     <div class="input-icon">
-                        <input type="text" id="reg-nombre" placeholder="Ingresá tu nombre y apellido" required>
+                        <input type="text" id="reg-nombre" placeholder="Ingresá tu nombre y apellido" required autocomplete="name">
                     </div>
                 </div>
 
@@ -62,7 +62,7 @@
                 <div class="form-group">
                     <label for="reg-password">Contraseña</label>
                     <div class="input-icon">
-                        <input type="password" id="reg-password" placeholder="••••••••" required>
+                        <input type="password" id="reg-password" placeholder="••••••••" required autocomplete="new-password">
                     </div>
                 </div>
 
@@ -130,10 +130,49 @@
                     </div>
                 </section>
 
+                <!-- SECCIÓN PEDIDOS -->
                 <section id="tab-pedidos" class="tab-content">
                     <div class="panel">
                         <h2>Gestión de Pedidos de Eventos</h2>
-                        <p>Acá podrás cargar y consultar las solicitudes pendientes para eventos deportivos.</p>
+                        <p class="section-desc">Carga de solicitudes para nuevos eventos deportivos institucionales.</p>
+                        
+                        <!-- FORMULARIO NUEVO PEDIDO -->
+                        <form id="form-nuevo-pedido" class="pedido-form">
+                            <h3>Cargar Nuevo Pedido de Evento</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="ped-titulo">Título del Evento *</label>
+                                    <input type="text" id="ped-titulo" required placeholder="Ej: Torneo Deportivo Escolar">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ped-area">Área Responsable</label>
+                                    <input type="text" id="ped-area" placeholder="Ej: Deporte Barrial">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ped-fecha">Fecha del Evento *</label>
+                                    <input type="date" id="ped-fecha" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ped-lugar">Lugar / Sede *</label>
+                                    <input type="text" id="ped-lugar" required placeholder="Ej: Parque Sarmiento">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ped-descripcion">Descripción del Evento</label>
+                                <textarea id="ped-descripcion" rows="3" placeholder="Detalles de las actividades..."></textarea>
+                            </div>
+                            <div id="pedido-msg" class="auth-success hidden"></div>
+                            <button type="submit" class="btn-primary btn-submit-pedido">Enviar Pedido</button>
+                        </form>
+
+                        <!-- LISTA DE PEDIDOS RESTRINGIDA SOLO PARA DIRECTOR -->
+                        <div id="director-pedidos-container" class="hidden director-only-section">
+                            <hr class="divider">
+                            <h3>Historial Completo de Pedidos Cargados</h3>
+                            <div id="lista-pedidos" class="pedidos-list">
+                                <p class="loading-text">Cargando eventos registrados...</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

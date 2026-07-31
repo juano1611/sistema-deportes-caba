@@ -2,18 +2,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigationTabs();
     initMobileMenu();
     initAuthEvents();
+    initPedidoForm();
     checkSession();
 });
 
 /* ==========================================
-   1. CHECK DE SESIÓN AL CARGAR
+   1. CHECK DE SESIÓN Y CONTROL DE PERMISOS
    ========================================== */
 function checkSession() {
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
         try {
             const user = JSON.parse(storedUser);
+            // Re-verificación estricta de rol basada en DNI en cliente
+            user.role = (user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
+            
             renderUserProfile(user);
+            applyRolePermissions(user);
             showPortal();
         } catch (e) {
             sessionStorage.removeItem('currentUser');
@@ -39,7 +44,7 @@ function renderUserProfile(user) {
     const nameSpan = document.getElementById('user-name');
 
     if (badge) {
-        badge.textContent = user.role || 'DOCENTE';
+        badge.textContent = user.role;
         if (user.role === 'DIRECTOR') {
             badge.classList.add('badge-director');
         } else {
@@ -51,11 +56,27 @@ function renderUserProfile(user) {
     }
 }
 
+function applyRolePermissions(user) {
+    const directorSection = document.getElementById('director-pedidos-container');
+    
+    if (user.role === 'DIRECTOR') {
+        if (directorSection) {
+            directorSection.classList.remove('hidden');
+            cargarPedidosDirector();
+        }
+    } else {
+        // SI ES DOCENTE: Se oculta la lista de pedidos cargados
+        if (directorSection) {
+            directorSection.classList.add('hidden');
+        }
+    }
+}
+
 /* ==========================================
-   2. NAVEGACIÓN POR PESTAÑAS
+   2. NAVEGACIÓN Y MENÚ
    ========================================== */
 function initNavigationTabs() {
-    const navItems = document.querySelectorAll('.nav-item');
+    const navItems = document.querySelectorAll('.nav-list .nav-item');
     const tabContents = document.querySelectorAll('.tab-content');
 
     navItems.forEach(item => {
@@ -76,9 +97,6 @@ function initNavigationTabs() {
     });
 }
 
-/* ==========================================
-   3. CONTROL DEL MENÚ MÓVIL
-   ========================================== */
 function initMobileMenu() {
     const menuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.getElementById('main-sidebar');
@@ -105,7 +123,7 @@ function closeMobileMenu() {
 }
 
 /* ==========================================
-   4. EVENTOS DE LOGIN / REGISTRO / LOGOUT REALES
+   3. EVENTOS DE AUTENTICACIÓN
    ========================================== */
 function initAuthEvents() {
     const loginForm = document.getElementById('login-form');
@@ -119,7 +137,6 @@ function initAuthEvents() {
     const registerError = document.getElementById('register-error');
     const registerSuccess = document.getElementById('register-success');
 
-    // Cambiar entre pestañas Login / Registro
     if (tabLoginBtn && tabRegisterBtn) {
         tabLoginBtn.addEventListener('click', () => {
             tabLoginBtn.classList.add('active');
@@ -139,7 +156,6 @@ function initAuthEvents() {
         });
     }
 
-    // FORMULARIO DE LOGIN REAL AL BACKEND
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -159,15 +175,18 @@ function initAuthEvents() {
 
                 if (!res.ok) {
                     if (loginError) {
-                        loginError.textContent = data.msg || 'Error al iniciar sesión';
+                        loginError.textContent = data.msg || 'Usuario o contraseña incorrectos';
                         loginError.classList.remove('hidden');
                     }
                     return;
                 }
 
-                // Guardar usuario en sesión con el rol real que trae la BD
+                // Asegurar rol estricto
+                data.user.role = (data.user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
+
                 sessionStorage.setItem('currentUser', JSON.stringify(data.user));
                 renderUserProfile(data.user);
+                applyRolePermissions(data.user);
                 showPortal();
 
             } catch (err) {
@@ -179,7 +198,6 @@ function initAuthEvents() {
         });
     }
 
-    // FORMULARIO DE REGISTRO REAL AL BACKEND
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -208,7 +226,7 @@ function initAuthEvents() {
                 }
 
                 if (registerSuccess) {
-                    registerSuccess.textContent = '¡Registro exitoso! Ya podés iniciar sesión.';
+                    registerSuccess.textContent = '¡Cuenta creada con éxito en la base de datos!';
                     registerSuccess.classList.remove('hidden');
                 }
 
@@ -228,12 +246,89 @@ function initAuthEvents() {
         });
     }
 
-    // BOTÓN CERRAR SESIÓN
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
             sessionStorage.removeItem('currentUser');
             showLogin();
             closeMobileMenu();
         });
+    }
+}
+
+/* ==========================================
+   4. GESTIÓN DE PEDIDOS Y ROL DIRECTOR
+   ========================================== */
+function initPedidoForm() {
+    const pedidoForm = document.getElementById('form-nuevo-pedido');
+    const msg = document.getElementById('pedido-msg');
+
+    if (pedidoForm) {
+        pedidoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+
+            const nuevoPedido = {
+                titulo: document.getElementById('ped-titulo').value,
+                areaResponsable: document.getElementById('ped-area').value,
+                fecha: document.getElementById('ped-fecha').value,
+                lugar: document.getElementById('ped-lugar').value,
+                descripcion: document.getElementById('ped-descripcion').value,
+                responsableNombre: currentUser.nombre || 'Docente',
+                responsableDni: currentUser.dni || ''
+            };
+
+            try {
+                const res = await fetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoPedido)
+                });
+
+                if (res.ok) {
+                    msg.textContent = '¡Pedido registrado correctamente!';
+                    msg.classList.remove('hidden');
+                    pedidoForm.reset();
+
+                    if (currentUser.role === 'DIRECTOR') {
+                        cargarPedidosDirector();
+                    }
+
+                    setTimeout(() => msg.classList.add('hidden'), 3000);
+                }
+            } catch (err) {
+                console.error("Error enviando pedido:", err);
+            }
+        });
+    }
+}
+
+async function cargarPedidosDirector() {
+    const lista = document.getElementById('lista-pedidos');
+    if (!lista) return;
+
+    try {
+        const res = await fetch('/api/pedidos');
+        const pedidos = await res.json();
+
+        if (pedidos.length === 0) {
+            lista.innerHTML = '<p class="empty-msg">No hay pedidos registrados en el sistema.</p>';
+            return;
+        }
+
+        lista.innerHTML = pedidos.map(p => `
+            <div class="pedido-card">
+                <div class="pedido-card-header">
+                    <h4>${p.titulo}</h4>
+                    <span class="pedido-date">${p.fecha || 'Sin fecha'}</span>
+                </div>
+                <p><strong>Lugar:</strong> ${p.lugar || 'No especificado'}</p>
+                <p><strong>Área:</strong> ${p.areaResponsable || '-'}</p>
+                <p><strong>Solicitante:</strong> ${p.responsableNombre || 'Docente'} (DNI: ${p.responsableDni || '-'})</p>
+                ${p.descripcion ? `<p class="pedido-desc">${p.descripcion}</p>` : ''}
+            </div>
+        `).join('');
+    } catch (e) {
+        lista.innerHTML = '<p class="error-msg">Error al cargar la lista de pedidos.</p>';
     }
 }

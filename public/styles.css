@@ -9,9 +9,10 @@
     --bg-light: #f4f6f9;
     --text-dark: #222222;
     --text-muted: #666666;
-    --border-color: #e0e0e0;
+    --border-color: #e2e8f0;
     --danger-color: #d9534f;
-    --success-color: #5cb85c;
+    --success-color: #28a745;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -41,22 +42,23 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    background-color: var(--ba-dark);
+    background: linear-gradient(135deg, #0d1520 0%, #1a2737 100%);
 }
 
 .auth-card {
     background: #ffffff;
     width: 100%;
     max-width: 420px;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border-top: 5px solid var(--ba-yellow);
+    padding: 35px 30px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    border-top: 6px solid var(--ba-yellow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .ba-logo {
@@ -64,48 +66,57 @@ body {
     background: var(--ba-yellow);
     color: var(--ba-dark);
     font-weight: 900;
-    font-size: 1.5rem;
-    padding: 6px 12px;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    font-size: 1.6rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
 }
 
 .auth-header h2 {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     color: var(--ba-dark);
+    font-weight: 700;
 }
 
 .auth-header p {
     font-size: 0.85rem;
     color: var(--text-muted);
+    margin-top: 4px;
 }
 
 /* PESTAÑAS LOGIN / REGISTRO */
 .auth-tabs {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     border-bottom: 2px solid var(--border-color);
+    gap: 10px;
 }
 
 .auth-tab-btn {
     flex: 1;
-    padding: 10px;
+    padding: 12px 0;
     background: transparent;
     border: none;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.auth-tab-btn:hover {
+    color: var(--ba-dark);
 }
 
 .auth-tab-btn.active {
     color: var(--ba-dark);
-    border-bottom: 3px solid var(--ba-yellow);
+    border-bottom-color: var(--ba-yellow);
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
 }
 
 .form-group label {
@@ -113,49 +124,71 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 6px;
+    color: #334155;
 }
 
-.input-icon input {
+.input-icon input,
+.pedido-form input,
+.pedido-form textarea {
     width: 100%;
-    padding: 10px 12px;
+    padding: 11px 14px;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.95rem;
     outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #f8fafc;
 }
 
-.input-icon input:focus {
+.input-icon input:focus,
+.pedido-form input:focus,
+.pedido-form textarea:focus {
     border-color: var(--ba-dark);
+    box-shadow: 0 0 0 3px rgba(18, 30, 45, 0.1);
+    background-color: #ffffff;
 }
 
 .btn-primary {
     background: var(--ba-dark);
     color: white;
     border: none;
-    padding: 12px;
-    border-radius: 6px;
-    font-weight: 600;
+    padding: 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
     cursor: pointer;
     width: 100%;
     margin-top: 10px;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
 }
 
 .btn-primary:hover {
     background: var(--ba-dark-hover);
 }
 
+.btn-primary:active {
+    transform: scale(0.99);
+}
+
 .auth-error {
+    background-color: #fef2f2;
     color: var(--danger-color);
+    border: 1px solid #fecaca;
+    padding: 10px;
+    border-radius: 6px;
     font-size: 0.85rem;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     text-align: center;
 }
 
 .auth-success {
+    background-color: #f0fdf4;
     color: var(--success-color);
+    border: 1px solid #bbf7d0;
+    padding: 10px;
+    border-radius: 6px;
     font-size: 0.85rem;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     text-align: center;
 }
 
@@ -171,7 +204,7 @@ body {
 .main-header {
     background-color: var(--ba-dark);
     color: white;
-    padding: 10px 15px;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -179,13 +212,13 @@ body {
     position: sticky;
     top: 0;
     z-index: 2000;
-    height: 60px;
+    height: 65px;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .mobile-menu-toggle {
@@ -198,7 +231,6 @@ body {
     cursor: pointer;
     padding: 6px 12px;
     border-radius: 6px;
-    touch-action: manipulation;
 }
 
 .ba-logo-mini {
@@ -207,35 +239,35 @@ body {
     padding: 4px 8px;
     font-weight: 900;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .main-header h1 {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 600;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
+    gap: 10px;
+    font-size: 0.9rem;
 }
 
 .badge {
-    background: #17a2b8;
+    background: #0284c7;
     color: white;
     font-weight: 700;
-    padding: 3px 7px;
+    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
 }
 
 .badge-director {
@@ -247,18 +279,19 @@ body {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.4);
     color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
 .btn-logout:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* ==========================================
-   LAYOUT BODY Y SIDEBAR
+   LAYOUT BODY Y NAVEGACIÓN
    ========================================== */
 .layout-body {
     display: flex;
@@ -272,20 +305,21 @@ body {
     background-color: var(--ba-dark-surface);
     color: white;
     flex-shrink: 0;
-    min-height: calc(100vh - 60px);
+    min-height: calc(100vh - 65px);
 }
 
 .nav-list {
     list-style: none;
-    padding: 15px 0;
+    padding: 20px 0;
 }
 
 .nav-item {
-    padding: 14px 20px;
-    color: #b0bec5;
+    padding: 14px 24px;
+    color: #94a3b8;
     cursor: pointer;
     font-size: 0.95rem;
-    transition: background 0.2s, color 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .nav-item:hover {
@@ -301,7 +335,9 @@ body {
 
 .content-wrapper {
     flex: 1;
-    padding: 20px;
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
     width: 100%;
 }
 
@@ -313,35 +349,123 @@ body {
     display: block;
 }
 
+/* HERO / BANNER PRINCIPAL PC & MOBILE */
 .hero-card {
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
+    align-items: center;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
 }
 
 .hero-content {
-    padding: 25px;
+    padding: 35px;
     flex: 1;
 }
 
+.hero-content h2 {
+    font-size: 1.5rem;
+    color: var(--ba-dark);
+    margin-bottom: 12px;
+}
+
+.hero-content p {
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
 .hero-image {
-    width: 300px;
-    flex-shrink: 0;
+    width: 45%;
+    max-width: 500px;
+    min-height: 280px;
+    align-self: stretch;
+    background-color: #f1f5f9;
 }
 
 .hero-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 .panel {
     background: white;
-    padding: 20px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.section-desc {
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+/* FORMULARIO DE PEDIDOS Y DIRECTOR VISTA */
+.pedido-form h3, .director-only-section h3 {
+    font-size: 1.15rem;
+    color: var(--ba-dark);
+    margin-bottom: 15px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.btn-submit-pedido {
+    width: auto;
+    padding: 12px 30px;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+    margin: 35px 0;
+}
+
+.pedidos-list {
+    display: grid;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.pedido-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--ba-yellow);
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 18px;
+}
+
+.pedido-card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.pedido-card-header h4 {
+    color: var(--ba-dark);
+    font-size: 1.05rem;
+}
+
+.pedido-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.pedido-desc {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+    font-style: italic;
+    color: #475569;
 }
 
 .sidebar-overlay {
@@ -362,10 +486,10 @@ body {
 
     .sidebar {
         position: fixed !important;
-        top: 60px !important;
+        top: 65px !important;
         left: -100% !important;
         width: 260px !important;
-        height: calc(100vh - 60px) !important;
+        height: calc(100vh - 65px) !important;
         z-index: 3000 !important;
         transition: left 0.25s ease-in-out !important;
         box-shadow: 5px 0 15px rgba(0,0,0,0.5);
@@ -378,17 +502,16 @@ body {
     .sidebar-overlay.active {
         display: block !important;
         position: fixed;
-        top: 60px;
+        top: 65px;
         left: 0;
         width: 100vw;
-        height: calc(100vh - 60px);
+        height: calc(100vh - 65px);
         background: rgba(0, 0, 0, 0.6);
         z-index: 2500;
     }
 
     .content-wrapper {
-        padding: 12px !important;
-        width: 100% !important;
+        padding: 15px !important;
     }
 
     .hero-card {
@@ -397,6 +520,11 @@ body {
 
     .hero-image {
         width: 100%;
-        height: 180px;
+        max-width: 100%;
+        min-height: 200px;
+    }
+
+    .hero-content {
+        padding: 20px;
     }
 }

@@ -87,7 +87,7 @@ async function startServer() {
         const defaultPassword = bcrypt.hashSync('123456', 10);
         db.run(
             "INSERT INTO usuarios (dni, nombre, password, role) VALUES (?, ?, ?, ?)",
-            ['23377971', 'Usuario Director', defaultPassword, 'DIRECTOR']
+            ['23377971', 'Director DGDSYDD', defaultPassword, 'DIRECTOR']
         );
         console.log('Usuario Director de prueba creado -> DNI: 23377971 | Clave: 123456');
     }
@@ -109,19 +109,22 @@ function handleLogin(req, res) {
     const { dni, password } = req.body;
     try {
         const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = :dni');
-        stmt.bind({ ':dni': dni });
+        stmt.bind({ ':dni': String(dni).trim() });
 
         if (stmt.step()) {
             const user = stmt.getAsObject();
             stmt.free();
 
             if (bcrypt.compareSync(password, user.password)) {
+                // Asignar rol de forma estricta según el DNI
+                const assignedRole = (user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
+
                 return res.json({
                     user: {
                         id: user.id,
                         nombre: user.nombre,
                         dni: user.dni,
-                        role: user.role
+                        role: assignedRole
                     }
                 });
             }
@@ -142,19 +145,24 @@ app.post('/api/login', handleLogin);
 // REGISTRO
 function handleRegister(req, res) {
     const { nombre, dni, password } = req.body;
+    const cleanDni = String(dni).trim();
+
     try {
         const stmt = db.prepare('SELECT id FROM usuarios WHERE dni = :dni');
-        stmt.bind({ ':dni': dni });
+        stmt.bind({ ':dni': cleanDni });
         if (stmt.step()) {
             stmt.free();
             return res.status(400).json({ msg: 'El DNI ingresado ya se encuentra registrado.' });
         }
         stmt.free();
 
+        // Validar asignación de rol estricto por DNI
+        const role = (cleanDni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
         const hashedPassword = bcrypt.hashSync(password, 10);
+
         db.run(
             'INSERT INTO usuarios (nombre, dni, password, role) VALUES (?, ?, ?, ?)',
-            [nombre, dni, hashedPassword, 'DOCENTE']
+            [nombre, cleanDni, hashedPassword, role]
         );
         saveDatabase();
 
