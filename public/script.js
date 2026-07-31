@@ -56,17 +56,14 @@ function applyRolePermissions(user) {
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
 
     if (user.role === 'DIRECTOR') {
-        // Mostrar panel de visualización
         if (directorSection) {
             directorSection.classList.remove('hidden');
             cargarPedidosDirector();
         }
-        // Ocultar la opción de cargar nuevos pedidos
         if (formPedidoSection) {
             formPedidoSection.classList.add('hidden');
         }
     } else {
-        // Rol DOCENTE
         if (directorSection) {
             directorSection.classList.add('hidden');
         }
@@ -261,7 +258,6 @@ function initPedidoForm() {
 
             const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
             
-            // Protección frontend extra
             if (currentUser.role === 'DIRECTOR') {
                 alert('La cuenta de Director no tiene permisos para crear solicitudes.');
                 return;
@@ -351,4 +347,19 @@ async function cargarPedidosDirector() {
     } catch (e) {
         lista.innerHTML = '<p class="error-msg">Error al cargar la lista de solicitudes.</p>';
     }
+}
+
+function descargarReportePDF() {
+    const elemento = document.getElementById('director-pedidos-container');
+    if (!elemento) return;
+    
+    const opciones = {
+        margin:       10,
+        filename:     'Reporte_Eventos_DGDSYDD.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opciones).from(elemento).save();
 }
