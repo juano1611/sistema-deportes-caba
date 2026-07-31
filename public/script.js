@@ -164,7 +164,7 @@ function initAuthEvents() {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    loginError.textContent = data.msg || 'Error al iniciar sesión';
+                    loginError.textContent = data.msg || 'Error de autenticación';
                     loginError.classList.remove('hidden');
                     return;
                 }
@@ -173,9 +173,8 @@ function initAuthEvents() {
                 renderUserProfile(data.user);
                 applyRolePermissions(data.user);
                 showPortal();
-                loginForm.reset();
             } catch (err) {
-                loginError.textContent = 'Error de conexión con el servidor';
+                loginError.textContent = 'Error al conectar con el servidor';
                 loginError.classList.remove('hidden');
             }
         });
@@ -201,16 +200,16 @@ function initAuthEvents() {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    registerError.textContent = data.msg || 'Error en el registro';
+                    registerError.textContent = data.msg || 'Error al registrar';
                     registerError.classList.remove('hidden');
                     return;
                 }
 
-                registerSuccess.textContent = '¡Cuenta creada! Ya podés iniciar sesión.';
+                registerSuccess.textContent = 'Registro exitoso. Ahora podés iniciar sesión.';
                 registerSuccess.classList.remove('hidden');
                 registerForm.reset();
             } catch (err) {
-                registerError.textContent = 'Error de conexión con el servidor';
+                registerError.textContent = 'Error al conectar con el servidor';
                 registerError.classList.remove('hidden');
             }
         });
@@ -225,359 +224,113 @@ function initAuthEvents() {
 }
 
 function initPedidoForm() {
-    const form = document.getElementById('form-nuevo-pedido');
-    const msg = document.getElementById('pedido-msg');
+    const formPedido = document.getElementById('form-nuevo-pedido');
+    const msgBox = document.getElementById('pedido-msg');
 
-    if (!form) return;
+    if (formPedido) {
+        formPedido.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (msgBox) msgBox.classList.add('hidden');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (msg) msg.classList.add('hidden');
+            const nuevoPedido = {
+                titulo: document.getElementById('ped-titulo').value.trim(),
+                areaResponsable: document.getElementById('ped-area').value.trim(),
+                programa: document.getElementById('ped-programa').value.trim(),
+                fecha: document.getElementById('ped-fecha').value,
+                horario: document.getElementById('ped-horario').value.trim(),
+                lugar: document.getElementById('ped-lugar').value.trim(),
+                descripcion: document.getElementById('ped-descripcion').value.trim(),
+                objetivo: document.getElementById('ped-objetivo').value.trim(),
+                responsableNombre: document.getElementById('ped-resp-nombre').value.trim(),
+                responsableDni: document.getElementById('ped-resp-dni').value.trim(),
+                responsableTelefono: document.getElementById('ped-resp-tel').value.trim(),
+                participantesAprox: Number(document.getElementById('ped-part-aprox').value),
+                publicoGeneral: Number(document.getElementById('ped-pub-gral').value),
+                ambulancia: document.getElementById('ped-ambulancia').value,
+                ambulanciaHorario: document.getElementById('ped-amb-horario').value.trim(),
+                seguro: document.getElementById('ped-seguro').value.trim(),
+                extensionArt: document.getElementById('ped-ext-art').value,
+                transportePasajeros: document.getElementById('ped-transporte').value.trim(),
+                articulaciones: document.getElementById('ped-articulaciones').value.trim(),
+                necesidades: document.getElementById('ped-necesidades').value.trim(),
+                situacionRevista: document.getElementById('ped-sit-revista').value.trim(),
+                horarioDocente: document.getElementById('ped-horario-doc').value.trim(),
+                prensa: document.getElementById('ped-prensa').value,
+                tipoDifusion: document.getElementById('ped-difusion').value.trim(),
+                timingEvento: document.getElementById('ped-timing').value.trim(),
+                desarmeEvento: document.getElementById('ped-desarme').value.trim(),
+                suspendeLluvia: document.getElementById('ped-lluvia').value
+            };
 
-        const pedidoData = {
-            titulo: document.getElementById('ped-titulo').value.trim(),
-            areaResponsable: document.getElementById('ped-area').value.trim(),
-            programa: document.getElementById('ped-programa').value.trim(),
-            fecha: document.getElementById('ped-fecha').value,
-            horario: document.getElementById('ped-horario').value.trim(),
-            lugar: document.getElementById('ped-lugar').value.trim(),
-            descripcion: document.getElementById('ped-descripcion').value.trim(),
-            objetivo: document.getElementById('ped-objetivo').value.trim(),
-            responsableNombre: document.getElementById('ped-resp-nombre').value.trim(),
-            responsableDni: document.getElementById('ped-resp-dni').value.trim(),
-            responsableTelefono: document.getElementById('ped-resp-tel').value.trim(),
-            participantesAprox: parseInt(document.getElementById('ped-part-aprox').value) || 0,
-            publicoGeneral: parseInt(document.getElementById('ped-pub-gral').value) || 0,
-            ambulancia: document.getElementById('ped-ambulancia').value,
-            ambulanciaHorario: document.getElementById('ped-amb-horario').value.trim(),
-            seguro: document.getElementById('ped-seguro').value.trim(),
-            extensionArt: document.getElementById('ped-ext-art').value,
-            transportePasajeros: document.getElementById('ped-transporte').value.trim(),
-            articulaciones: document.getElementById('ped-articulaciones').value.trim(),
-            necesidades: document.getElementById('ped-necesidades').value.trim(),
-            situacionRevista: document.getElementById('ped-sit-revista').value.trim(),
-            horarioDocente: document.getElementById('ped-horario-doc').value.trim(),
-            prensa: document.getElementById('ped-prensa').value,
-            tipoDifusion: document.getElementById('ped-difusion').value.trim(),
-            timingEvento: document.getElementById('ped-timing').value.trim(),
-            desarmeEvento: document.getElementById('ped-desarme').value.trim(),
-            suspendeLluvia: document.getElementById('ped-lluvia').value
-        };
+            try {
+                const res = await fetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoPedido)
+                });
 
-        try {
-            const res = await fetch('/api/pedidos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pedidoData)
-            });
+                const data = await res.json();
 
-            const data = await res.json();
-
-            if (res.ok) {
-                if (msg) {
-                    msg.textContent = '¡Pedido de evento enviado con éxito!';
-                    msg.classList.remove('hidden');
+                if (!res.ok) {
+                    alert(data.msg || 'Error al guardar el pedido');
+                    return;
                 }
-                form.reset();
-                cargarCalendarioEventos();
-            } else {
-                alert(data.msg || 'Error al enviar el pedido');
+
+                if (msgBox) {
+                    msgBox.textContent = '✅ Solicitud enviada correctamente';
+                    msgBox.classList.remove('hidden');
+                }
+                formPedido.reset();
+            } catch (err) {
+                alert('Error al conectar con el servidor');
             }
-        } catch (err) {
-            console.error(err);
-            alert('Error de conexión con el servidor');
-        }
-    });
+        });
+    }
 }
 
-let listaPedidosCache = [];
-
-// -------------------------------------------------------------------
-// VISTA DIRECTOR: TARJETAS SÚPER COMPACTAS CON INFO CLAVE (PC Y CELULAR)
-// -------------------------------------------------------------------
 async function cargarPedidosDirector() {
     const listaContainer = document.getElementById('lista-pedidos');
     if (!listaContainer) return;
 
-    listaContainer.innerHTML = '<p>Cargando solicitudes...</p>';
-
     try {
         const res = await fetch('/api/pedidos');
         const pedidos = await res.json();
 
-        if (!Array.isArray(pedidos) || pedidos.length === 0) {
-            listaContainer.innerHTML = '<p>No hay solicitudes de eventos registradas aún.</p>';
-            listaPedidosCache = [];
+        if (pedidos.length === 0) {
+            listaContainer.innerHTML = '<p>No hay solicitudes registradas.</p>';
             return;
         }
 
-        listaPedidosCache = pedidos;
-
-        listaContainer.innerHTML = pedidos.map(p => {
-            let fechaFormateada = p.fecha || 'Sin Fecha';
-            if (p.fecha && p.fecha.includes('-')) {
-                const parts = p.fecha.split('-');
-                fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
-            }
-
-            return `
-                <div class="pedido-card">
-                    <div class="pedido-card-header">
-                        <h4>${escapeHtml(p.titulo)}</h4>
-                        <span class="badge-fecha">📅 ${escapeHtml(fechaFormateada)}</span>
-                    </div>
-                    <div class="pedido-card-body-grid">
-                        <div><strong>🏢 Área:</strong> ${escapeHtml(p.areaResponsable || '-')}</div>
-                        <div><strong>📍 Lugar:</strong> ${escapeHtml(p.lugar || '-')}</div>
-                        <div><strong>⏰ Horario:</strong> ${escapeHtml(p.horario || '-')}</div>
-                        <div><strong>👤 Responsable:</strong> ${escapeHtml(p.responsableNombre || '-')}</div>
-                        <div><strong>📞 Teléfono:</strong> ${escapeHtml(p.responsableTelefono || '-')}</div>
-                        <div><strong>👥 Participantes Est.:</strong> ${p.participantesAprox ?? 0} pers.</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    } catch (err) {
-        console.error(err);
-        listaContainer.innerHTML = '<p class="auth-error">Error al cargar las solicitudes.</p>';
-    }
-}
-
-// -------------------------------------------------------------------
-// CALENDARIO DE EVENTOS
-// -------------------------------------------------------------------
-async function cargarCalendarioEventos() {
-    const tabCalendario = document.getElementById('tab-calendario');
-    if (!tabCalendario) return;
-
-    let calContainer = document.getElementById('calendario-lista');
-    if (!calContainer) {
-        const panel = tabCalendario.querySelector('.panel');
-        if (panel) {
-            panel.innerHTML = `
-                <h2>Calendario General de Eventos</h2>
-                <p class="section-desc">Cronograma oficial ordenado cronológicamente por fecha.</p>
-                <div id="calendario-lista" class="calendario-grid"></div>
-            `;
-            calContainer = document.getElementById('calendario-lista');
-        }
-    }
-
-    if (!calContainer) return;
-    calContainer.innerHTML = '<p>Cargando eventos del calendario...</p>';
-
-    try {
-        const res = await fetch('/api/pedidos');
-        const pedidos = await res.json();
-
-        if (!Array.isArray(pedidos) || pedidos.length === 0) {
-            calContainer.innerHTML = '<p>No hay eventos agendados en el calendario.</p>';
-            return;
-        }
-
-        pedidos.sort((a, b) => {
-            if (!a.fecha) return 1;
-            if (!b.fecha) return -1;
-            return new Date(a.fecha) - new Date(b.fecha);
-        });
-
-        calContainer.innerHTML = pedidos.map(p => {
-            let fechaFormateada = p.fecha || 'Sin Fecha';
-            if (p.fecha && p.fecha.includes('-')) {
-                const parts = p.fecha.split('-');
-                fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
-            }
-
-            return `
-                <div class="event-cal-card">
-                    <div class="event-cal-date">
-                        <span class="cal-icon">📅</span>
-                        <strong>${escapeHtml(fechaFormateada)}</strong>
-                        <span class="cal-time">${escapeHtml(p.horario || '')}</span>
-                    </div>
-                    <div class="event-cal-info">
-                        <h3>${escapeHtml(p.titulo)}</h3>
-                        <p><strong>📍 Lugar:</strong> ${escapeHtml(p.lugar || 'A confirmar')}</p>
-                        <p><strong>🏢 Área:</strong> ${escapeHtml(p.areaResponsable || '-')}</p>
-                        <p><strong>👤 Responsable:</strong> ${escapeHtml(p.responsableNombre || '-')} (${escapeHtml(p.responsableTelefono || '-')})</p>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    } catch (err) {
-        console.error("Error al cargar calendario:", err);
-        calContainer.innerHTML = '<p class="auth-error">Error al cargar el calendario.</p>';
-    }
-}
-
-// -------------------------------------------------------------------
-// GENERACIÓN DE PDF PROFESIONAL CON TABLAS Y FIX DE CRASH EN CELULAR
-// -------------------------------------------------------------------
-function descargarReportePDF() {
-    if (!listaPedidosCache || listaPedidosCache.length === 0) {
-        alert('No hay eventos registrados para exportar.');
-        return;
-    }
-
-    // Un contenedor flotante independiente para renderizar el PDF perfectamente en PC y Móvil
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '750px'; // Ancho estándar fijo A4 sin romper pantallas chicas
-    container.style.padding = '20px';
-    container.style.backgroundColor = '#ffffff';
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.color = '#1a202c';
-
-    let htmlContent = `
-        <div style="border-bottom: 3px solid #fcd116; padding-bottom: 12px; margin-bottom: 20px;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style="vertical-align: middle;">
-                        <span style="background: #fcd116; color: #000; font-weight: bold; padding: 4px 10px; border-radius: 4px; font-size: 16px;">BA</span>
-                        <span style="font-size: 16px; font-weight: bold; margin-left: 8px; color: #1d2b36;">Gobierno de la Ciudad de Buenos Aires</span>
-                        <div style="font-size: 12px; color: #4a5568; margin-top: 4px;">Subsecretaría de Deportes | DGDSyDD</div>
-                    </td>
-                    <td style="text-align: right; vertical-align: middle; font-size: 11px; color: #718096;">
-                        <div style="font-weight: bold; color: #1d2b36;">REPORTE OFICIAL DE SOLICITUDES</div>
-                        <div>Generado: ${new Date().toLocaleDateString('es-AR')}</div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    `;
-
-    listaPedidosCache.forEach((p, idx) => {
-        let fechaFormateada = p.fecha || 'Sin Fecha';
-        if (p.fecha && p.fecha.includes('-')) {
-            const parts = p.fecha.split('-');
-            fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-
-        htmlContent += `
-            <div style="page-break-inside: avoid; border: 1px solid #cbd5e0; border-radius: 6px; margin-bottom: 25px; background: #ffffff;">
-                <table style="width: 100%; border-collapse: collapse; background: #1d2b36; color: #ffffff;">
-                    <tr>
-                        <td style="padding: 10px 14px; font-size: 14px; font-weight: bold;">
-                            #${idx + 1} - ${escapeHtml(p.titulo)}
-                        </td>
-                        <td style="padding: 10px 14px; text-align: right;">
-                            <span style="background: #fcd116; color: #000; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px;">FECHA: ${escapeHtml(fechaFormateada)}</span>
-                        </td>
-                    </tr>
-                </table>
-
-                <div style="padding: 14px;">
-                    <!-- Bloque 1 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">1. Información General del Evento</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
-                        <tr>
-                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Área Responsable:</strong> ${escapeHtml(p.areaResponsable || '-')}</td>
-                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Programa:</strong> ${escapeHtml(p.programa || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Horario:</strong> ${escapeHtml(p.horario || '-')}</td>
-                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Lugar / Sede:</strong> ${escapeHtml(p.lugar || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Descripción:</strong> ${escapeHtml(p.descripcion || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="padding: 4px; border: 1px solid #edf2f7;"><strong>Objetivo:</strong> ${escapeHtml(p.objetivo || '-')}</td>
-                        </tr>
-                    </table>
-
-                    <!-- Bloque 2 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">2. Datos del Responsable Directo</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
-                        <tr>
-                            <td style="width: 33%; padding: 4px; border: 1px solid #edf2f7;"><strong>Nombre:</strong> ${escapeHtml(p.responsableNombre || '-')}</td>
-                            <td style="width: 33%; padding: 4px; border: 1px solid #edf2f7;"><strong>DNI:</strong> ${escapeHtml(p.responsableDni || '-')}</td>
-                            <td style="width: 34%; padding: 4px; border: 1px solid #edf2f7;"><strong>Teléfono:</strong> ${escapeHtml(p.responsableTelefono || '-')}</td>
-                        </tr>
-                    </table>
-
-                    <!-- Bloque 3 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">3. Estimación de Concurrencia</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
-                        <tr>
-                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Participantes Estimados:</strong> ${p.participantesAprox ?? 0} personas</td>
-                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 0} personas</td>
-                        </tr>
-                    </table>
-
-                    <!-- Bloque 4 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">4. Salud, Seguro y Logística</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
-                        <tr>
-                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Requiere Ambulancia:</strong> ${escapeHtml(p.ambulancia || 'No')}</td>
-                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Horario Ambulancia:</strong> ${escapeHtml(p.ambulanciaHorario || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Seguro / Cobertura:</strong> ${escapeHtml(p.seguro || '-')}</td>
-                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Extensión ART:</strong> ${escapeHtml(p.extensionArt || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Transporte de Pasajeros:</strong> ${escapeHtml(p.transportePasajeros || '-')}</td>
-                        </tr>
-                    </table>
-
-                    <!-- Bloque 5 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">5. Articulaciones e Infraestructura</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
-                        <tr>
-                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Articulaciones:</strong> ${escapeHtml(p.articulaciones || '-')}</td>
-                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Necesidades Técnicas / Sonido:</strong> ${escapeHtml(p.necesidades || '-')}</td>
-                        </tr>
-                    </table>
-
-                    <!-- Bloque 6 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">6. Docentes, Prensa y Contingencia</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                        <tr>
-                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Situación Revista Docente:</strong> ${escapeHtml(p.situacionRevista || '-')}</td>
-                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Horario Docente:</strong> ${escapeHtml(p.horarioDocente || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Cobertura Prensa:</strong> ${escapeHtml(p.prensa || 'No')}</td>
-                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Tipo de Difusión:</strong> ${escapeHtml(p.tipoDifusion || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Montaje / Desarme:</strong> ${escapeHtml(p.timingEvento || '-')} / ${escapeHtml(p.desarmeEvento || '-')}</td>
-                            <td style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>¿Se suspende por lluvia?:</strong> ${escapeHtml(p.suspendeLluvia || '-')}</td>
-                        </tr>
-                    </table>
-                </div>
+        listaContainer.innerHTML = pedidos.map(p => `
+            <div class="pedido-card">
+                <h3>${p.titulo}</h3>
+                <p><strong>Fecha:</strong> ${p.fecha} - <strong>Horario:</strong> ${p.horario}</p>
+                <p><strong>Lugar:</strong> ${p.lugar}</p>
+                <p><strong>Área:</strong> ${p.areaResponsable || 'N/A'}</p>
+                <p><strong>Responsable:</strong> ${p.responsableNombre || 'N/A'} (DNI: ${p.responsableDni || 'N/A'}) - Tel: ${p.responsableTelefono || 'N/A'}</p>
+                <p><strong>Descripción:</strong> ${p.descripcion || 'Sin descripción'}</p>
             </div>
-        `;
-    });
+        `).join('');
+    } catch (err) {
+        listaContainer.innerHTML = '<p>Error al obtener el historial de solicitudes.</p>';
+    }
+}
 
-    container.innerHTML = htmlContent;
-    document.body.appendChild(container);
+async function cargarCalendarioEventos() {
+    // Espacio para renderizar vista de calendario si es requerido
+}
 
+function descargarReportePDF() {
+    const element = document.getElementById('lista-pedidos');
+    if (!element) return;
+    
     const opt = {
-        margin:       10,
-        filename:     'reporte_oficial_eventos_dgdsydd.pdf',
+        margin:       0.5,
+        filename:     'reporte-eventos.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(container).save().then(() => {
-        document.body.removeChild(container);
-    }).catch(err => {
-        console.error("Error al generar PDF:", err);
-        document.body.removeChild(container);
-    });
-}
-
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    html2pdf().set(opt).from(element).save();
 }
