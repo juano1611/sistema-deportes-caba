@@ -288,6 +288,9 @@ function initPedidoForm() {
     }
 }
 
+// Variable global para almacenar pedidos y renderizar el PDF
+let pedidosCargadosCache = [];
+
 async function cargarPedidosDirector() {
     const listaContainer = document.getElementById('lista-pedidos');
     if (!listaContainer) return;
@@ -295,6 +298,7 @@ async function cargarPedidosDirector() {
     try {
         const res = await fetch('/api/pedidos');
         const pedidos = await res.json();
+        pedidosCargadosCache = pedidos;
 
         if (pedidos.length === 0) {
             listaContainer.innerHTML = '<p>No hay solicitudes registradas.</p>';
@@ -303,12 +307,19 @@ async function cargarPedidosDirector() {
 
         listaContainer.innerHTML = pedidos.map(p => `
             <div class="pedido-card">
-                <h3>${p.titulo}</h3>
-                <p><strong>Fecha:</strong> ${p.fecha} - <strong>Horario:</strong> ${p.horario}</p>
-                <p><strong>Lugar:</strong> ${p.lugar}</p>
-                <p><strong>Área:</strong> ${p.areaResponsable || 'N/A'}</p>
-                <p><strong>Responsable:</strong> ${p.responsableNombre || 'N/A'} (DNI: ${p.responsableDni || 'N/A'}) - Tel: ${p.responsableTelefono || 'N/A'}</p>
-                <p><strong>Descripción:</strong> ${p.descripcion || 'Sin descripción'}</p>
+                <h3 style="margin-bottom:8px; color:#1a1a1a;">${p.titulo || 'Sin título'}</h3>
+                <p><strong>Programa / Área:</strong> ${p.programa || '-'} | ${p.areaResponsable || '-'}</p>
+                <p><strong>Fecha y Horario:</strong> ${p.fecha || '-'} (${p.horario || '-'})</p>
+                <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
+                <p><strong>Solicitante:</strong> ${p.responsableNombre || '-'} (DNI: ${p.responsableDni || '-'}) - Tel: ${p.responsableTelefono || '-'}</p>
+                <p><strong>Participantes Aprox:</strong> ${p.participantesAprox || 0} | <strong>Público General:</strong> ${p.publicoGeneral || 0}</p>
+                <p><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''} | <strong>Lluvia:</strong> ${p.suspendeLluvia || 'No'}</p>
+                ${p.descripcion ? `<p><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
+                ${p.objetivo ? `<p><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
+                ${p.necesidades ? `<p><strong>Necesidades Técnicas/Logística:</strong> ${p.necesidades}</p>` : ''}
+                ${p.articulaciones ? `<p><strong>Articulaciones:</strong> ${p.articulaciones}</p>` : ''}
+                ${p.transportePasajeros ? `<p><strong>Transporte:</strong> ${p.transportePasajeros}</p>` : ''}
+                ${p.seguro ? `<p><strong>Seguro:</strong> ${p.seguro}</p>` : ''}
             </div>
         `).join('');
     } catch (err) {
@@ -321,16 +332,94 @@ async function cargarCalendarioEventos() {
 }
 
 function descargarReportePDF() {
-    const element = document.getElementById('lista-pedidos');
-    if (!element) return;
-    
+    if (!pedidosCargadosCache || pedidosCargadosCache.length === 0) {
+        alert('No hay pedidos registrados para descargar.');
+        return;
+    }
+
+    // Contenedor temporal de renderizado PDF con tamaño fijo A4
+    const printArea = document.createElement('div');
+    printArea.style.width = '790px';
+    printArea.style.padding = '25px';
+    printArea.style.backgroundColor = '#ffffff';
+    printArea.style.fontFamily = 'Arial, sans-serif';
+    printArea.style.boxSizing = 'border-box';
+    printArea.style.color = '#333333';
+
+    let contentHTML = `
+        <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <h1 style="font-size: 20px; margin: 0; color: #111;">Reporte Oficial de Pedidos de Eventos</h1>
+            <p style="font-size: 12px; color: #666; margin: 4px 0 0 0;">Generado el: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}</p>
+        </div>
+    `;
+
+    pedidosCargadosCache.forEach((p, index) => {
+        contentHTML += `
+            <div style="border: 1px solid #ccc; border-radius: 6px; padding: 15px; margin-bottom: 18px; page-break-inside: avoid; background-color: #fafafa;">
+                <h2 style="font-size: 16px; margin: 0 0 10px 0; color: #000; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+                    ${index + 1}. ${p.titulo || 'Sin título'}
+                </h2>
+                <table style="width: 100%; font-size: 12px; border-collapse: collapse; line-height: 1.5;">
+                    <tr>
+                        <td style="padding: 3px 0; width: 50%;"><strong>Área Responsable:</strong> ${p.areaResponsable || '-'}</td>
+                        <td style="padding: 3px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;"><strong>Fecha del Evento:</strong> ${p.fecha || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;"><strong>Responsable:</strong> ${p.responsableNombre || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>DNI / Teléfono:</strong> ${p.responsableDni || '-'} / ${p.responsableTelefono || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;"><strong>Participantes Aprox:</strong> ${p.participantesAprox || 0}</td>
+                        <td style="padding: 3px 0;"><strong>Público General:</strong> ${p.publicoGeneral || 0}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
+                        <td style="padding: 3px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
+                        <td style="padding: 3px 0;"><strong>Prensa / Difusión:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
+                    </tr>
+                </table>
+
+                <div style="font-size: 12px; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 8px;">
+                    <p style="margin: 3px 0;"><strong>Descripción:</strong> ${p.descripcion || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Objetivo:</strong> ${p.objetivo || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Necesidades Técnicas / Logística:</strong> ${p.necesidades || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Articulaciones:</strong> ${p.articulaciones || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Transporte de Pasajeros:</strong> ${p.transportePasajeros || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Seguro:</strong> ${p.seguro || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Situación Revista / Horario Docente:</strong> ${p.situacionRevista || '-'} / ${p.horarioDocente || '-'}</p>
+                    <p style="margin: 3px 0;"><strong>Timing / Desarme:</strong> ${p.timingEvento || '-'} / ${p.desarmeEvento || '-'}</p>
+                </div>
+            </div>
+        `;
+    });
+
+    printArea.innerHTML = contentHTML;
+    document.body.appendChild(printArea);
+
     const opt = {
-        margin:       0.5,
-        filename:     'reporte-eventos.pdf',
+        margin:       0.4,
+        filename:     `reporte-pedidos-${new Date().toISOString().slice(0, 10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(printArea).save().then(() => {
+        document.body.removeChild(printArea);
+    }).catch(err => {
+        if (document.body.contains(printArea)) {
+            document.body.removeChild(printArea);
+        }
+        alert('Error al generar el archivo PDF.');
+    });
 }
