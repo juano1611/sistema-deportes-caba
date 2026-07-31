@@ -13,7 +13,7 @@ const DB_FILE = path.join(__dirname, 'database.sqlite');
 app.use(cors());
 app.use(express.json());
 
-// Servir la carpeta public como estática
+// Servir archivos estáticos desde la carpeta public
 app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
@@ -82,7 +82,7 @@ async function startServer() {
             );
         `);
 
-        // Usuario por defecto
+        // Comprobar y crear Director por defecto
         const userCheck = db.exec("SELECT COUNT(*) as count FROM usuarios;");
         const userCount = userCheck.length > 0 ? userCheck[0].values[0][0] : 0;
 
@@ -106,7 +106,7 @@ async function startServer() {
     }
 }
 
-// CONTROLADORES
+// CONTROLADORES DE AUTENTICACIÓN
 function handleLogin(req, res) {
     const { dni, password } = req.body;
     try {
@@ -118,6 +118,7 @@ function handleLogin(req, res) {
             stmt.free();
 
             if (bcrypt.compareSync(password, user.password)) {
+                // Solo el DNI 23377971 obtiene el rol DIRECTOR
                 const assignedRole = (user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
                 return res.json({
                     user: {
@@ -152,6 +153,7 @@ function handleRegister(req, res) {
         }
         stmt.free();
 
+        // Asignación de rol según el DNI
         const role = (cleanDni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
         const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -168,12 +170,15 @@ function handleRegister(req, res) {
     }
 }
 
-// RUTAS API
+// RUTAS API DE AUTENTICACIÓN
 app.post('/api/auth/login', handleLogin);
 app.post('/api/login', handleLogin);
 app.post('/api/auth/register', handleRegister);
 app.post('/api/register', handleRegister);
 
+// RUTAS API DE PEDIDOS CON VALIDACIÓN DE ROLES
+
+// Visualizar pedidos (Disponible para el Director)
 app.get('/api/pedidos', (req, res) => {
     try {
         const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
@@ -188,8 +193,15 @@ app.get('/api/pedidos', (req, res) => {
     }
 });
 
+// Crear pedidos (Solo permitido para rol DOCENTE / DNI distinto a Director)
 app.post('/api/pedidos', (req, res) => {
     const d = req.body;
+
+    // Validación de seguridad: El DNI del director no debe registrar pedidos
+    if (d.responsableDni === '23377971') {
+        return res.status(403).json({ msg: 'El usuario Director solo tiene permisos de visualización.' });
+    }
+
     try {
         db.run(`
             INSERT INTO pedidos (
@@ -217,7 +229,7 @@ app.post('/api/pedidos', (req, res) => {
     }
 });
 
-// Ruta Fallback para Servir la Frontend
+// Fallback para SPA
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

@@ -53,14 +53,25 @@ function renderUserProfile(user) {
 
 function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
+    const formPedidoSection = document.getElementById('form-nuevo-pedido');
+
     if (user.role === 'DIRECTOR') {
+        // Mostrar panel de visualización
         if (directorSection) {
             directorSection.classList.remove('hidden');
             cargarPedidosDirector();
         }
+        // Ocultar la opción de cargar nuevos pedidos
+        if (formPedidoSection) {
+            formPedidoSection.classList.add('hidden');
+        }
     } else {
+        // Rol DOCENTE
         if (directorSection) {
             directorSection.classList.add('hidden');
+        }
+        if (formPedidoSection) {
+            formPedidoSection.classList.remove('hidden');
         }
     }
 }
@@ -248,6 +259,14 @@ function initPedidoForm() {
         pedidoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            
+            // Protección frontend extra
+            if (currentUser.role === 'DIRECTOR') {
+                alert('La cuenta de Director no tiene permisos para crear solicitudes.');
+                return;
+            }
+
             const nuevoPedido = {
                 titulo: document.getElementById('ped-titulo').value,
                 areaResponsable: document.getElementById('ped-area').value,
@@ -258,7 +277,7 @@ function initPedidoForm() {
                 descripcion: document.getElementById('ped-descripcion').value,
                 objetivo: document.getElementById('ped-objetivo').value,
                 responsableNombre: document.getElementById('ped-resp-nombre').value,
-                responsableDni: document.getElementById('ped-resp-dni').value,
+                responsableDni: currentUser.dni || document.getElementById('ped-resp-dni').value,
                 responsableTelefono: document.getElementById('ped-resp-tel').value,
                 participantesAprox: parseInt(document.getElementById('ped-part-aprox').value) || 0,
                 publicoGeneral: parseInt(document.getElementById('ped-pub-gral').value) || 0,
@@ -285,19 +304,16 @@ function initPedidoForm() {
                     body: JSON.stringify(nuevoPedido)
                 });
 
+                const data = await res.json();
+
                 if (res.ok) {
                     msg.textContent = '¡Pedido de evento enviado con éxito!';
                     msg.classList.remove('hidden');
                     pedidoForm.reset();
 
-                    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-                    if (currentUser.role === 'DIRECTOR') {
-                        cargarPedidosDirector();
-                    }
-
                     setTimeout(() => msg.classList.add('hidden'), 4000);
                 } else {
-                    alert('Ocurrió un error al intentar enviar el pedido.');
+                    alert(data.msg || 'Ocurrió un error al intentar enviar el pedido.');
                 }
             } catch (err) {
                 console.error("Error al enviar pedido:", err);
