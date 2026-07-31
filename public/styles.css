@@ -4,11 +4,11 @@
     --ba-dark-surface: #1a2737;
     --ba-dark-hover: #26374a;
     --bg-light: #f4f6f9;
-    --text-dark: #222222;
-    --text-muted: #666666;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
     --border-color: #cbd5e1;
-    --danger-color: #d9534f;
-    --success-color: #15803d;
+    --danger-color: #ef4444;
+    --success-color: #10b981;
 }
 
 * {
@@ -28,14 +28,14 @@ body {
     display: none !important;
 }
 
-/* AUTH / LOGIN - CORREGIDO PC Y MOBILE */
+/* AUTH / LOGIN CENTRADO */
 .auth-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    background: #121e2d;
+    background: var(--ba-dark);
 }
 
 .auth-card {
@@ -90,6 +90,7 @@ body {
     color: var(--text-muted);
     cursor: pointer;
     border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .auth-tab-btn.active {
@@ -113,12 +114,13 @@ body {
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 11px 14px;
+    padding: 10px 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     outline: none;
     background-color: #ffffff;
+    transition: border 0.2s;
 }
 
 .form-group input:focus,
@@ -132,13 +134,14 @@ body {
     background: var(--ba-dark);
     color: white;
     border: none;
-    padding: 13px;
+    padding: 12px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.95rem;
     cursor: pointer;
     width: 100%;
     margin-top: 10px;
+    transition: background 0.2s;
 }
 
 .btn-primary:hover {
@@ -178,7 +181,7 @@ body {
 .main-header {
     background-color: var(--ba-dark);
     color: white;
-    padding: 0 20px;
+    padding: 0 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -275,6 +278,7 @@ body {
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 500;
+    transition: all 0.2s;
 }
 
 .nav-item:hover {
@@ -291,7 +295,7 @@ body {
 .content-wrapper {
     flex: 1;
     padding: 30px;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
 }
@@ -306,57 +310,76 @@ body {
 
 .panel {
     background: white;
-    padding: 30px;
+    padding: 35px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
     border: 1px solid var(--border-color);
 }
 
-/* FORMULARIO EXTENDIDO DE EVENTOS */
+/* FORMULARIO Y GRILLAS EN EN PC */
 .form-section-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--ba-dark);
     background-color: #f1f5f9;
-    padding: 10px 14px;
+    padding: 10px 16px;
     border-radius: 6px;
-    margin: 25px 0 15px 0;
+    margin: 30px 0 18px 0;
     border-left: 4px solid var(--ba-yellow);
 }
 
+/* Grilla responsive de 3 columnas en pantallas grandes */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
 }
 
 .grid-col-2 {
     grid-column: span 2;
 }
 
-.btn-submit-pedido {
-    width: auto;
-    padding: 14px 35px;
-    font-size: 1rem;
-    margin-top: 20px;
+.grid-col-3 {
+    grid-column: span 3;
 }
 
+.btn-submit-pedido {
+    width: auto;
+    padding: 14px 40px;
+    font-size: 1rem;
+    margin-top: 25px;
+}
+
+/* TARJETA DE INICIO */
 .hero-card {
     background: white;
     border-radius: 12px;
     display: flex;
     overflow: hidden;
     border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
 }
 
 .hero-content {
-    padding: 35px;
+    padding: 40px;
     flex: 1;
 }
 
+.hero-content h2 {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+    color: var(--ba-dark);
+}
+
+.hero-content p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
 .hero-image {
-    width: 40%;
-    max-width: 400px;
+    width: 45%;
+    max-width: 480px;
     background: #f1f5f9;
 }
 
@@ -366,34 +389,26 @@ body {
     object-fit: cover;
 }
 
-.pedido-card {
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--ba-yellow);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
+/* ADAPTACIÓN A TABLET Y CELULAR */
+@media (max-width: 992px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .grid-col-3 {
+        grid-column: span 2;
+    }
 }
 
-.pedido-card-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-}
-
-.pedido-desc {
-    margin-top: 8px;
-    font-style: italic;
-    color: #475569;
-}
-
-/* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
     .mobile-menu-toggle {
         display: block;
     }
 
-    .grid-col-2 {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-col-2, .grid-col-3 {
         grid-column: span 1;
     }
 
@@ -432,6 +447,6 @@ body {
 
     .hero-image {
         width: 100%;
-        height: 200px;
+        height: 220px;
     }
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Gestión Deportiva - BA</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
 
@@ -110,7 +110,7 @@
                 <section id="tab-pedidos" class="tab-content">
                     <div class="panel">
                         <h2>Formulario Oficial de Solicitud de Evento</h2>
-                        <p class="section-desc">Completá todos los campos requeridos para coordinar la logística institucionales.</p>
+                        <p class="section-desc">Completá todos los campos requeridos para coordinar la logística institucional.</p>
                         
                         <form id="form-nuevo-pedido" class="pedido-form">
                             <!-- SECCIÓN 1: DATOS BÁSICOS -->
@@ -136,7 +136,7 @@
                                     <label for="ped-horario">Horario (Inicio / Fin) *</label>
                                     <input type="text" id="ped-horario" required placeholder="Ej: 09:00 a 14:00 hs">
                                 </div>
-                                <div class="form-group grid-col-2">
+                                <div class="form-group grid-col-3">
                                     <label for="ped-lugar">Lugar / Sede *</label>
                                     <input type="text" id="ped-lugar" required placeholder="Ej: Parque Sarmiento - Pista Atletismo">
                                 </div>
@@ -177,7 +177,7 @@
                                     <input type="number" id="ped-part-aprox" required min="1" placeholder="Ej: 150">
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-pub-gral">¿Publico General Est.? *</label>
+                                    <label for="ped-pub-gral">¿Público General Est.? *</label>
                                     <input type="number" id="ped-pub-gral" required min="0" placeholder="Ej: 50">
                                 </div>
                             </div>
@@ -208,7 +208,7 @@
                                         <option value="En trámite">En trámite</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group grid-col-2">
                                     <label for="ped-transporte">Transporte de Pasajeros</label>
                                     <input type="text" id="ped-transporte" placeholder="Ej: 2 Micros de 45 personas">
                                 </div>
@@ -255,7 +255,7 @@
                                     <label for="ped-desarme">Timing de Desarme</label>
                                     <input type="text" id="ped-desarme" placeholder="Ej: Desarme de 14:00 a 15:00 hs">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group grid-col-3">
                                     <label for="ped-lluvia">¿Se suspende por lluvia? *</label>
                                     <select id="ped-lluvia" required>
                                         <option value="Sí">Sí</option>
@@ -294,6 +294,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2"></script>
 </body>
 </html>
