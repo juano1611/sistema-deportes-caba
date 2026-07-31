@@ -55,7 +55,7 @@ function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
 
-    // Botones del menú lateral / navegación movil
+    // Botones del menú lateral / navegación móvil
     const navItemsForm = document.querySelectorAll('[data-target="form-nuevo-pedido"]');
     const navItemsDirector = document.querySelectorAll('[data-target="director-pedidos-container"]');
 
@@ -375,12 +375,14 @@ async function cargarPedidosDirector() {
             <div class="pedido-card">
                 <div class="pedido-card-header">
                     <h4>${p.titulo}</h4>
-                    <span class="pedido-date">${p.fecha || 'Sin fecha'} (${p.horario || ''})</span>
+                    <span class="pedido-date">📅 ${p.fecha || 'Sin fecha'} ${p.horario ? `(${p.horario})` : ''}</span>
                 </div>
+                <hr class="card-divider">
                 <p><strong>Sede:</strong> ${p.lugar || '-'}</p>
-                <p><strong>Solicitante:</strong> ${p.responsableNombre} (DNI: ${p.responsableDni}) - Tel: ${p.responsableTelefono}</p>
+                <p><strong>Solicitante:</strong> ${p.responsableNombre} (DNI: ${p.responsableDni})</p>
+                <p><strong>Teléfono:</strong> ${p.responsableTelefono || '-'}</p>
                 <p><strong>Participantes:</strong> ${p.participantesAprox} | <strong>Ambulancia:</strong> ${p.ambulancia} | <strong>Lluvia:</strong> ${p.suspendeLluvia}</p>
-                ${p.descripcion ? `<p class="pedido-desc">${p.descripcion}</p>` : ''}
+                ${p.descripcion ? `<div class="pedido-desc"><strong>Descripción:</strong> ${p.descripcion}</div>` : ''}
             </div>
         `).join('');
     } catch (e) {
