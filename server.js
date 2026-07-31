@@ -85,7 +85,7 @@ async function startServer() {
         saveDatabase();
 
         // -------------------------------------------------------------
-        // RUTAS DE AUTENTICACIÓN
+        // RUTAS DE AUTENTICACIÓN Y USUARIOS
         // -------------------------------------------------------------
 
         // Registro de usuario
@@ -157,6 +157,24 @@ async function startServer() {
             } catch (err) {
                 console.error("Error en login:", err);
                 return res.status(500).json({ msg: 'Error interno del servidor' });
+            }
+        });
+
+        // OBTENER TODOS LOS USUARIOS (Para consultar desde cualquier lado)
+        app.get('/api/usuarios', (req, res) => {
+            try {
+                const stmt = db.prepare('SELECT id, dni, nombre, role FROM usuarios ORDER BY id DESC');
+                const usuarios = [];
+
+                while (stmt.step()) {
+                    usuarios.push(stmt.getAsObject());
+                }
+                stmt.free();
+
+                return res.json(usuarios);
+            } catch (err) {
+                console.error("Error al consultar usuarios:", err);
+                return res.status(500).json({ msg: 'Error al consultar usuarios' });
             }
         });
 
