@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Gestión Deportiva - BA</title>
-    <link rel="stylesheet" href="/styles.css">
-    <!-- Incluir html2pdf en el <head> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Generador PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -103,7 +103,7 @@
                             <p>Dirección General de Deporte Social y Desarrollo Deportivo. Gestión integral de solicitudes, eventos e infraestructura de la Ciudad de Buenos Aires.</p>
                         </div>
                         <div class="hero-image">
-                            <img src="banner-deportes.jpg" alt="Banner Deportes BA" id="main-banner">
+                            <img src="banner-deportes_2.jpg" alt="Banner Deportes BA" id="main-banner">
                         </div>
                     </div>
                 </section>
@@ -271,16 +271,17 @@
                         </form>
 
                         <!-- LISTA SOLO DIRECTOR -->
-<div id="director-pedidos-container" class="hidden director-only-section">
-    <hr class="divider">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3>Historial de Pedidos Registrados (Vista Director)</h3>
-        <button type="button" onclick="descargarReportePDF()" class="btn-primary" style="width: auto; padding: 8px 16px;">
-            Descargar Reporte PDF
-        </button>
-    </div>
-    <div id="lista-pedidos" class="pedidos-list"></div>
-</div>
+                        <div id="director-pedidos-container" class="hidden director-only-section">
+                            <hr class="divider">
+                            <div class="director-header">
+                                <h3>Historial de Pedidos Registrados (Vista Director)</h3>
+                                <button type="button" onclick="descargarReportePDF()" class="btn-primary btn-pdf">
+                                    Descargar Reporte PDF
+                                </button>
+                            </div>
+                            <div id="lista-pedidos" class="pedidos-list"></div>
+                        </div>
+                    </div>
                 </section>
 
                 <section id="tab-calendario" class="tab-content">
@@ -300,6 +301,6 @@
         </div>
     </div>
 
-    <script src="/script.js?v=2"></script>
+    <script src="script.js"></script>
 </body>
 </html>

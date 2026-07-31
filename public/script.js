@@ -55,50 +55,15 @@ function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
 
-    // Botones del menú lateral / navegación móvil
-    const navItemsForm = document.querySelectorAll('[data-target="form-nuevo-pedido"]');
-    const navItemsDirector = document.querySelectorAll('[data-target="director-pedidos-container"]');
-
     if (user.role === 'DIRECTOR') {
-        // Ocultar sección de formulario
-        if (formPedidoSection) {
-            formPedidoSection.classList.add('hidden');
-            formPedidoSection.classList.remove('active');
-        }
-        
-        // Mostrar sección del director
+        if (formPedidoSection) formPedidoSection.classList.add('hidden');
         if (directorSection) {
             directorSection.classList.remove('hidden');
-            directorSection.classList.add('active');
             cargarPedidosDirector();
         }
-
-        // Ocultar del menú lateral/móvil los accesos al formulario
-        navItemsForm.forEach(item => item.style.display = 'none');
-        navItemsDirector.forEach(item => {
-            item.style.display = 'block';
-            item.classList.add('active');
-        });
-
     } else {
-        // Mostrar sección de formulario para docentes
-        if (formPedidoSection) {
-            formPedidoSection.classList.remove('hidden');
-            formPedidoSection.classList.add('active');
-        }
-        
-        // Ocultar sección del director
-        if (directorSection) {
-            directorSection.classList.add('hidden');
-            directorSection.classList.remove('active');
-        }
-
-        // Ajustar visibilidad en el menú lateral/móvil
-        navItemsForm.forEach(item => {
-            item.style.display = 'block';
-            item.classList.add('active');
-        });
-        navItemsDirector.forEach(item => item.style.display = 'none');
+        if (formPedidoSection) formPedidoSection.classList.remove('hidden');
+        if (directorSection) directorSection.classList.add('hidden');
     }
 }
 
@@ -108,14 +73,7 @@ function initNavigationTabs() {
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            const storedUser = sessionStorage.getItem('currentUser');
-            const currentUser = storedUser ? JSON.parse(storedUser) : null;
             const targetId = item.getAttribute('data-target');
-
-            // Bloqueo para evitar que el Director navegue hacia el formulario
-            if (currentUser && currentUser.role === 'DIRECTOR' && targetId === 'form-nuevo-pedido') {
-                return;
-            }
 
             navItems.forEach(i => i.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
@@ -173,7 +131,6 @@ function initAuthEvents() {
             tabRegisterBtn.classList.remove('active');
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
-            if (loginError) loginError.classList.add('hidden');
         });
 
         tabRegisterBtn.addEventListener('click', () => {
@@ -181,18 +138,16 @@ function initAuthEvents() {
             tabLoginBtn.classList.remove('active');
             registerForm.classList.remove('hidden');
             loginForm.classList.add('hidden');
-            if (registerError) registerError.classList.add('hidden');
-            if (registerSuccess) registerSuccess.classList.add('hidden');
         });
     }
 
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (loginError) loginError.classList.add('hidden');
+            loginError.classList.add('hidden');
 
             const dni = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
+            const password = document.getElementById('password').value.trim();
 
             try {
                 const res = await fetch('/api/auth/login', {
@@ -204,25 +159,19 @@ function initAuthEvents() {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    if (loginError) {
-                        loginError.textContent = data.msg || 'Error al iniciar sesión';
-                        loginError.classList.remove('hidden');
-                    }
+                    loginError.textContent = data.msg || 'Error al iniciar sesión';
+                    loginError.classList.remove('hidden');
                     return;
                 }
-
-                data.user.role = (data.user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
 
                 sessionStorage.setItem('currentUser', JSON.stringify(data.user));
                 renderUserProfile(data.user);
                 applyRolePermissions(data.user);
                 showPortal();
-
+                loginForm.reset();
             } catch (err) {
-                if (loginError) {
-                    loginError.textContent = 'Error de conexión con el servidor';
-                    loginError.classList.remove('hidden');
-                }
+                loginError.textContent = 'Error de conexión con el servidor';
+                loginError.classList.remove('hidden');
             }
         });
     }
@@ -230,12 +179,12 @@ function initAuthEvents() {
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (registerError) registerError.classList.add('hidden');
-            if (registerSuccess) registerSuccess.classList.add('hidden');
+            registerError.classList.add('hidden');
+            registerSuccess.classList.add('hidden');
 
             const nombre = document.getElementById('reg-nombre').value.trim();
             const dni = document.getElementById('reg-dni').value.trim();
-            const password = document.getElementById('reg-password').value;
+            const password = document.getElementById('reg-password').value.trim();
 
             try {
                 const res = await fetch('/api/auth/register', {
@@ -247,30 +196,17 @@ function initAuthEvents() {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    if (registerError) {
-                        registerError.textContent = data.msg || 'Error en el registro';
-                        registerError.classList.remove('hidden');
-                    }
+                    registerError.textContent = data.msg || 'Error en el registro';
+                    registerError.classList.remove('hidden');
                     return;
                 }
 
-                if (registerSuccess) {
-                    registerSuccess.textContent = '¡Cuenta registrada correctamente!';
-                    registerSuccess.classList.remove('hidden');
-                }
-
+                registerSuccess.textContent = '¡Cuenta creada! Ya podés iniciar sesión.';
+                registerSuccess.classList.remove('hidden');
                 registerForm.reset();
-
-                setTimeout(() => {
-                    tabLoginBtn.click();
-                    document.getElementById('username').value = dni;
-                }, 1200);
-
             } catch (err) {
-                if (registerError) {
-                    registerError.textContent = 'Error de conexión con el servidor';
-                    registerError.classList.remove('hidden');
-                }
+                registerError.textContent = 'Error de conexión con el servidor';
+                registerError.classList.remove('hidden');
             }
         });
     }
@@ -279,132 +215,133 @@ function initAuthEvents() {
         btnLogout.addEventListener('click', () => {
             sessionStorage.removeItem('currentUser');
             showLogin();
-            closeMobileMenu();
         });
     }
 }
 
 function initPedidoForm() {
-    const pedidoForm = document.getElementById('form-nuevo-pedido');
+    const form = document.getElementById('form-nuevo-pedido');
     const msg = document.getElementById('pedido-msg');
 
-    if (pedidoForm) {
-        pedidoForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    if (!form) return;
 
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-            
-            if (currentUser.role === 'DIRECTOR') {
-                alert('La cuenta de Director no tiene permisos para crear solicitudes.');
-                return;
-            }
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (msg) msg.classList.add('hidden');
 
-            const nuevoPedido = {
-                titulo: document.getElementById('ped-titulo').value,
-                areaResponsable: document.getElementById('ped-area').value,
-                programa: document.getElementById('ped-programa').value,
-                fecha: document.getElementById('ped-fecha').value,
-                horario: document.getElementById('ped-horario').value,
-                lugar: document.getElementById('ped-lugar').value,
-                descripcion: document.getElementById('ped-descripcion').value,
-                objetivo: document.getElementById('ped-objetivo').value,
-                responsableNombre: document.getElementById('ped-resp-nombre').value,
-                responsableDni: currentUser.dni || document.getElementById('ped-resp-dni').value,
-                responsableTelefono: document.getElementById('ped-resp-tel').value,
-                participantesAprox: parseInt(document.getElementById('ped-part-aprox').value) || 0,
-                publicoGeneral: parseInt(document.getElementById('ped-pub-gral').value) || 0,
-                ambulancia: document.getElementById('ped-ambulancia').value,
-                ambulanciaHorario: document.getElementById('ped-amb-horario').value,
-                seguro: document.getElementById('ped-seguro').value,
-                extensionArt: document.getElementById('ped-ext-art').value,
-                transportePasajeros: document.getElementById('ped-transporte').value,
-                articulaciones: document.getElementById('ped-articulaciones').value,
-                necesidades: document.getElementById('ped-necesidades').value,
-                situacionRevista: document.getElementById('ped-sit-revista').value,
-                horarioDocente: document.getElementById('ped-horario-doc').value,
-                prensa: document.getElementById('ped-prensa').value,
-                tipoDifusion: document.getElementById('ped-difusion').value,
-                timingEvento: document.getElementById('ped-timing').value,
-                desarmeEvento: document.getElementById('ped-desarme').value,
-                suspendeLluvia: document.getElementById('ped-lluvia').value
-            };
+        const pedidoData = {
+            titulo: document.getElementById('ped-titulo').value.trim(),
+            areaResponsable: document.getElementById('ped-area').value.trim(),
+            programa: document.getElementById('ped-programa').value.trim(),
+            fecha: document.getElementById('ped-fecha').value,
+            horario: document.getElementById('ped-horario').value.trim(),
+            lugar: document.getElementById('ped-lugar').value.trim(),
+            descripcion: document.getElementById('ped-descripcion').value.trim(),
+            objetivo: document.getElementById('ped-objetivo').value.trim(),
+            responsableNombre: document.getElementById('ped-resp-nombre').value.trim(),
+            responsableDni: document.getElementById('ped-resp-dni').value.trim(),
+            responsableTelefono: document.getElementById('ped-resp-tel').value.trim(),
+            participantesAprox: parseInt(document.getElementById('ped-part-aprox').value) || 0,
+            publicoGeneral: parseInt(document.getElementById('ped-pub-gral').value) || 0,
+            ambulancia: document.getElementById('ped-ambulancia').value,
+            ambulanciaHorario: document.getElementById('ped-amb-horario').value.trim(),
+            seguro: document.getElementById('ped-seguro').value.trim(),
+            extensionArt: document.getElementById('ped-ext-art').value,
+            transportePasajeros: document.getElementById('ped-transporte').value.trim(),
+            articulaciones: document.getElementById('ped-articulaciones').value.trim(),
+            necesidades: document.getElementById('ped-necesidades').value.trim(),
+            situacionRevista: document.getElementById('ped-sit-revista').value.trim(),
+            horarioDocente: document.getElementById('ped-horario-doc').value.trim(),
+            prensa: document.getElementById('ped-prensa').value,
+            tipoDifusion: document.getElementById('ped-difusion').value.trim(),
+            timingEvento: document.getElementById('ped-timing').value.trim(),
+            desarmeEvento: document.getElementById('ped-desarme').value.trim(),
+            suspendeLluvia: document.getElementById('ped-lluvia').value
+        };
 
-            try {
-                const res = await fetch('/api/pedidos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...nuevoPedido })
-                });
+        try {
+            const res = await fetch('/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pedidoData)
+            });
 
-                const data = await res.json();
+            const data = await res.json();
 
-                if (res.ok) {
-                    if (msg) {
-                        msg.textContent = '¡Pedido de evento enviado con éxito!';
-                        msg.classList.remove('hidden');
-                        setTimeout(() => msg.classList.add('hidden'), 4000);
-                    } else {
-                        alert('¡Pedido de evento enviado con éxito!');
-                    }
-                    pedidoForm.reset();
-                } else {
-                    alert(data.msg || 'Ocurrió un error al intentar enviar el pedido.');
+            if (res.ok) {
+                if (msg) {
+                    msg.textContent = '¡Pedido de evento enviado con éxito!';
+                    msg.classList.remove('hidden');
                 }
-            } catch (err) {
-                console.error("Error al enviar pedido:", err);
-                alert('Error de conexión con el servidor.');
+                form.reset();
+            } else {
+                alert(data.msg || 'Error al enviar el pedido');
             }
-        });
-    }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión con el servidor');
+        }
+    });
 }
 
 async function cargarPedidosDirector() {
-    const lista = document.getElementById('lista-pedidos');
-    if (!lista) return;
+    const listaContainer = document.getElementById('lista-pedidos');
+    if (!listaContainer) return;
+
+    listaContainer.innerHTML = '<p>Cargando solicitudes...</p>';
 
     try {
         const res = await fetch('/api/pedidos');
         const pedidos = await res.json();
 
-        if (pedidos.length === 0) {
-            lista.innerHTML = '<p class="empty-msg">No hay solicitudes registradas.</p>';
+        if (!Array.isArray(pedidos) || pedidos.length === 0) {
+            listaContainer.innerHTML = '<p>No hay solicitudes de eventos registradas aún.</p>';
             return;
         }
 
-        lista.innerHTML = pedidos.map(p => `
+        listaContainer.innerHTML = pedidos.map(p => `
             <div class="pedido-card">
                 <div class="pedido-card-header">
-                    <h4>${p.titulo}</h4>
-                    <span class="pedido-date">📅 ${p.fecha || 'Sin fecha'} ${p.horario ? `(${p.horario})` : ''}</span>
+                    <h4>${escapeHtml(p.titulo)}</h4>
+                    <span class="badge-fecha">${escapeHtml(p.fecha || 'Sin Fecha')}</span>
                 </div>
-                <hr class="card-divider">
-                <p><strong>Sede:</strong> ${p.lugar || '-'}</p>
-                <p><strong>Solicitante:</strong> ${p.responsableNombre} (DNI: ${p.responsableDni})</p>
-                <p><strong>Teléfono:</strong> ${p.responsableTelefono || '-'}</p>
-                <p><strong>Participantes:</strong> ${p.participantesAprox} | <strong>Ambulancia:</strong> ${p.ambulancia} | <strong>Lluvia:</strong> ${p.suspendeLluvia}</p>
-                ${p.descripcion ? `<div class="pedido-desc"><strong>Descripción:</strong> ${p.descripcion}</div>` : ''}
+                <div class="pedido-card-body">
+                    <p><strong>Área Responsable:</strong> ${escapeHtml(p.areaResponsable || '-')}</p>
+                    <p><strong>Lugar:</strong> ${escapeHtml(p.lugar || '-')}</p>
+                    <p><strong>Horario:</strong> ${escapeHtml(p.horario || '-')}</p>
+                    <p><strong>Responsable:</strong> ${escapeHtml(p.responsableNombre || '-')} (DNI: ${escapeHtml(p.responsableDni || '-')}) - Tel: ${escapeHtml(p.responsableTelefono || '-')}</p>
+                    <p><strong>Descripción:</strong> ${escapeHtml(p.descripcion || '-')}</p>
+                    <p><strong>Requerimientos:</strong> Ambulancia: ${escapeHtml(p.ambulancia || 'No')} | Seguro: ${escapeHtml(p.seguro || '-')}</p>
+                </div>
             </div>
         `).join('');
-    } catch (e) {
-        lista.innerHTML = '<p class="error-msg">Error al cargar la lista de solicitudes.</p>';
+    } catch (err) {
+        console.error(err);
+        listaContainer.innerHTML = '<p class="auth-error">Error al cargar las solicitudes.</p>';
     }
 }
 
 function descargarReportePDF() {
-    const elemento = document.getElementById('director-pedidos-container');
-    if (!elemento) return;
-    
-    const opciones = {
+    const element = document.getElementById('lista-pedidos');
+    if (!element) return;
+
+    const opt = {
         margin:       10,
-        filename:     'Reporte_Eventos_DGDSYDD.pdf',
+        filename:     'reporte_pedidos_eventos.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    if (typeof html2pdf !== 'undefined') {
-        html2pdf().set(opciones).from(elemento).save();
-    } else {
-        alert('La librería html2pdf no está disponible.');
-    }
+    html2pdf().set(opt).from(element).save();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

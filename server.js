@@ -10,12 +10,13 @@ const PORT = process.env.PORT || 3000;
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Servir la carpeta de archivos estáticos 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
 // -------------------------------------------------------------
 // CONEXIÓN A BASE DE DATOS REMOTA (MongoDB Atlas)
 // -------------------------------------------------------------
-// Reemplazá esta cadena de conexión con la tuya de MongoDB Atlas
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://juano1611:juano1611@cluster0.lldgqos.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ Conectado con éxito a MongoDB Cloud'))
@@ -139,7 +140,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Obtener todos los usuarios registrados (Para consulta)
+// Obtener todos los usuarios registrados
 app.get('/api/usuarios', async (req, res) => {
     try {
         const usuarios = await Usuario.find({}, '-password').sort({ createdAt: -1 });
@@ -182,7 +183,12 @@ app.get('/api/pedidos', async (req, res) => {
     }
 });
 
+// Enrutamiento para SPA (Cualquier otra ruta devuelve el index.html de public)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
