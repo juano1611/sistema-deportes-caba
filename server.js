@@ -13,8 +13,8 @@ const DB_FILE = path.join(__dirname, 'database.sqlite');
 app.use(cors());
 app.use(express.json());
 
-// Servir archivos estáticos desde la carpeta public
-app.use(express.static(path.join(__dirname, 'public')));
+// Servir archivos estáticos desde la raíz o la carpeta correspondiente
+app.use(express.static(path.join(__dirname)));
 
 let db;
 
@@ -78,160 +78,153 @@ async function startServer() {
                 timingEvento TEXT,
                 desarmeEvento TEXT,
                 suspendeLluvia TEXT,
-                fechaCreacion TEXT DEFAULT CURRENT_TIMESTAMP
+                fechaCreacion DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
-        // Comprobar y crear Director por defecto
-        const userCheck = db.exec("SELECT COUNT(*) as count FROM usuarios;");
-        const userCount = userCheck.length > 0 ? userCheck[0].values[0][0] : 0;
-
-        if (userCount === 0) {
-            const defaultPassword = bcrypt.hashSync('123456', 10);
-            db.run(
-                "INSERT INTO usuarios (dni, nombre, password, role) VALUES (?, ?, ?, ?)",
-                ['23377971', 'Director DGDSYDD', defaultPassword, 'DIRECTOR']
-            );
-            console.log('Usuario Director creado -> DNI: 23377971');
-        }
-
         saveDatabase();
-        console.log('Base de datos inicializada correctamente.');
 
-        app.listen(PORT, () => {
-            console.log(`Servidor activo en el puerto ${PORT}`);
-        });
-    } catch (err) {
-        console.error("Error al iniciar el servidor:", err);
-    }
-}
+        // -------------------------------------------------------------
+        // RUTAS DE AUTENTICACIÓN
+        // -------------------------------------------------------------
 
-// CONTROLADORES DE AUTENTICACIÓN
-function handleLogin(req, res) {
-    const { dni, password } = req.body;
-    try {
-        const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = :dni');
-        stmt.bind({ ':dni': String(dni).trim() });
+        // Registro de usuario
+        app.post('/api/auth/register', async (req, res) => {
+            const { nombre, dni, password } = req.body;
 
-        if (stmt.step()) {
-            const user = stmt.getAsObject();
-            stmt.free();
-
-            if (bcrypt.compareSync(password, user.password)) {
-                // Solo el DNI 23377971 obtiene el rol DIRECTOR
-                const assignedRole = (user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
-                return res.json({
-                    user: {
-                        id: user.id,
-                        nombre: user.nombre,
-                        dni: user.dni,
-                        role: assignedRole
-                    }
-                });
+            if (!nombre || !dni || !password) {
+                return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
             }
-        } else {
-            stmt.free();
-        }
 
-        res.status(401).json({ msg: 'Usuario o contraseña incorrectos' });
+            try {
+                const stmtCheck = db.prepare('SELECT id FROM usuarios WHERE dni = ?');
+                stmtCheck.bind([dni]);
+                if (stmtCheck.step()) {
+                    stmtCheck.free();
+                    return res.status(400).json({ msg: 'El DNI ya se encuentra registrado' });
+                }
+                stmtCheck.free();
+
+                const hashedPassword = await bcrypt.hash(password, 10);
+                const role = (dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
+
+                db.run(
+                    'INSERT INTO usuarios (dni, nombre, password, role) VALUES (?, ?, ?, ?)',
+                    [dni, nombre, hashedPassword, role]
+                );
+                saveDatabase();
+
+                return res.status(201).json({ msg: 'Usuario registrado con éxito' });
+            } catch (err) {
+                console.error("Error en registro:", err);
+                return res.status(500).json({ msg: 'Error interno del servidor' });
+            }
+        });
+
+        // Inicio de sesión
+        app.post('/api/auth/login', async (req, res) => {
+            const { dni, password } = req.body;
+
+            if (!dni || !password) {
+                return res.status(400).json({ msg: 'Ingresá DNI y contraseña' });
+            }
+
+            try {
+                const stmt = db.prepare('SELECT * FROM usuarios WHERE dni = ?');
+                stmt.bind([dni]);
+
+                if (!stmt.step()) {
+                    stmt.free();
+                    return res.status(401).json({ msg: 'Usuario no encontrado' });
+                }
+
+                const row = stmt.getAsObject();
+                stmt.free();
+
+                const match = await bcrypt.compare(password, row.password);
+                if (!match) {
+                    return res.status(401).json({ msg: 'Contraseña incorrecta' });
+                }
+
+                const user = {
+                    id: row.id,
+                    dni: row.dni,
+                    nombre: row.nombre,
+                    role: row.role
+                };
+
+                return res.json({ msg: 'Login exitoso', user });
+            } catch (err) {
+                console.error("Error en login:", err);
+                return res.status(500).json({ msg: 'Error interno del servidor' });
+            }
+        });
+
+        // -------------------------------------------------------------
+        // RUTAS DE PEDIDOS DE EVENTOS
+        // -------------------------------------------------------------
+
+        // Crear un pedido
+        app.post('/api/pedidos', (req, res) => {
+            const p = req.body;
+
+            if (!p.titulo || !p.fecha || !p.lugar) {
+                return res.status(400).json({ msg: 'Campos requeridos faltantes' });
+            }
+
+            try {
+                db.run(`
+                    INSERT INTO pedidos (
+                        titulo, areaResponsable, programa, fecha, horario, lugar,
+                        descripcion, responsableNombre, responsableDni, responsableTelefono,
+                        objetivo, participantesAprox, publicoGeneral, articulaciones,
+                        necesidades, transportePasajeros, ambulancia, ambulanciaHorario,
+                        seguro, extensionArt, situacionRevista, horarioDocente,
+                        prensa, tipoDifusion, timingEvento, desarmeEvento, suspendeLluvia
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `, [
+                    p.titulo, p.areaResponsable, p.programa, p.fecha, p.horario, p.lugar,
+                    p.descripcion, p.responsableNombre, p.responsableDni, p.responsableTelefono,
+                    p.objetivo, p.participantesAprox, p.publicoGeneral, p.articulaciones,
+                    p.necesidades, p.transportePasajeros, p.ambulancia, p.ambulanciaHorario,
+                    p.seguro, p.extensionArt, p.situacionRevista, p.horarioDocente,
+                    p.prensa, p.tipoDifusion, p.timingEvento, p.desarmeEvento, p.suspendeLluvia
+                ]);
+
+                saveDatabase();
+                return res.status(201).json({ msg: 'Pedido registrado correctamente' });
+            } catch (err) {
+                console.error("Error al insertar pedido:", err);
+                return res.status(500).json({ msg: 'Error al guardar el pedido' });
+            }
+        });
+
+        // Obtener todos los pedidos (Vista Director)
+        app.get('/api/pedidos', (req, res) => {
+            try {
+                const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
+                const pedidos = [];
+
+                while (stmt.step()) {
+                    pedidos.push(stmt.getAsObject());
+                }
+                stmt.free();
+
+                return res.json(pedidos);
+            } catch (err) {
+                console.error("Error al obtener pedidos:", err);
+                return res.status(500).json({ msg: 'Error al consultar la base de datos' });
+            }
+        });
+
+        // Iniciar el servidor Express
+        app.listen(PORT, () => {
+            console.log(`Servidor corriendo en el puerto ${PORT}`);
+        });
+
     } catch (err) {
-        console.error("Error en login:", err);
-        res.status(500).json({ msg: 'Error interno del servidor' });
+        console.error("Error al iniciar el servidor SQLite/Express:", err);
     }
 }
-
-function handleRegister(req, res) {
-    const { nombre, dni, password } = req.body;
-    const cleanDni = String(dni).trim();
-
-    try {
-        const stmt = db.prepare('SELECT id FROM usuarios WHERE dni = :dni');
-        stmt.bind({ ':dni': cleanDni });
-        if (stmt.step()) {
-            stmt.free();
-            return res.status(400).json({ msg: 'El DNI ingresado ya se encuentra registrado.' });
-        }
-        stmt.free();
-
-        // Asignación de rol según el DNI
-        const role = (cleanDni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
-        const hashedPassword = bcrypt.hashSync(password, 10);
-
-        db.run(
-            'INSERT INTO usuarios (nombre, dni, password, role) VALUES (?, ?, ?, ?)',
-            [nombre, cleanDni, hashedPassword, role]
-        );
-        saveDatabase();
-
-        res.status(201).json({ msg: 'Usuario registrado con éxito' });
-    } catch (err) {
-        console.error("Error en registro:", err);
-        res.status(500).json({ msg: 'Error al registrar usuario' });
-    }
-}
-
-// RUTAS API DE AUTENTICACIÓN
-app.post('/api/auth/login', handleLogin);
-app.post('/api/login', handleLogin);
-app.post('/api/auth/register', handleRegister);
-app.post('/api/register', handleRegister);
-
-// RUTAS API DE PEDIDOS CON VALIDACIÓN DE ROLES
-
-// Visualizar pedidos (Disponible para el Director)
-app.get('/api/pedidos', (req, res) => {
-    try {
-        const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
-        const pedidos = [];
-        while (stmt.step()) {
-            pedidos.push(stmt.getAsObject());
-        }
-        stmt.free();
-        res.json(pedidos);
-    } catch (err) {
-        res.status(500).json({ msg: 'Error al obtener pedidos' });
-    }
-});
-
-// Crear pedidos (Solo permitido para rol DOCENTE / DNI distinto a Director)
-app.post('/api/pedidos', (req, res) => {
-    const d = req.body;
-
-    // Validación de seguridad: El DNI del director no debe registrar pedidos
-    if (d.responsableDni === '23377971') {
-        return res.status(403).json({ msg: 'El usuario Director solo tiene permisos de visualización.' });
-    }
-
-    try {
-        db.run(`
-            INSERT INTO pedidos (
-                titulo, areaResponsable, programa, fecha, horario, lugar, descripcion,
-                responsableNombre, responsableDni, responsableTelefono, objetivo,
-                participantesAprox, publicoGeneral, articulaciones, necesidades,
-                transportePasajeros, ambulancia, ambulanciaHorario, seguro, extensionArt,
-                situacionRevista, horarioDocente, prensa, tipoDifusion, timingEvento,
-                desarmeEvento, suspendeLluvia
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
-            d.titulo || '', d.areaResponsable || '', d.programa || '', d.fecha || '', d.horario || '', d.lugar || '', d.descripcion || '',
-            d.responsableNombre || '', d.responsableDni || '', d.responsableTelefono || '', d.objetivo || '',
-            d.participantesAprox || 0, d.publicoGeneral || 0, d.articulaciones || '', d.necesidades || '',
-            d.transportePasajeros || '', d.ambulancia || 'No', d.ambulanciaHorario || '', d.seguro || '', d.extensionArt || 'No',
-            d.situacionRevista || '', d.horarioDocente || '', d.prensa || 'No', d.tipoDifusion || '', d.timingEvento || '',
-            d.desarmeEvento || '', d.suspendeLluvia || 'No'
-        ]);
-
-        saveDatabase();
-        res.status(201).json({ msg: 'Pedido creado exitosamente' });
-    } catch (err) {
-        console.error("Error al guardar pedido:", err);
-        res.status(500).json({ msg: 'Error al guardar pedido' });
-    }
-});
-
-// Fallback para SPA
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 startServer();
