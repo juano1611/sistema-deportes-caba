@@ -9,8 +9,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'database.sqlite');
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Servir la carpeta public como estática
 app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
@@ -24,80 +27,86 @@ function saveDatabase() {
 }
 
 async function startServer() {
-    const SQL = await initSqlJs();
+    try {
+        const SQL = await initSqlJs();
 
-    if (fs.existsSync(DB_FILE)) {
-        const filebuffer = fs.readFileSync(DB_FILE);
-        db = new SQL.Database(filebuffer);
-    } else {
-        db = new SQL.Database();
+        if (fs.existsSync(DB_FILE)) {
+            const filebuffer = fs.readFileSync(DB_FILE);
+            db = new SQL.Database(filebuffer);
+        } else {
+            db = new SQL.Database();
+        }
+
+        // Crear tablas
+        db.run(`
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dni TEXT UNIQUE NOT NULL,
+                nombre TEXT NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'DOCENTE'
+            );
+        `);
+
+        db.run(`
+            CREATE TABLE IF NOT EXISTS pedidos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT NOT NULL,
+                areaResponsable TEXT,
+                programa TEXT,
+                fecha TEXT,
+                horario TEXT,
+                lugar TEXT,
+                descripcion TEXT,
+                responsableNombre TEXT,
+                responsableDni TEXT,
+                responsableTelefono TEXT,
+                objetivo TEXT,
+                participantesAprox INTEGER,
+                publicoGeneral INTEGER,
+                articulaciones TEXT,
+                necesidades TEXT,
+                transportePasajeros TEXT,
+                ambulancia TEXT,
+                ambulanciaHorario TEXT,
+                seguro TEXT,
+                extensionArt TEXT,
+                situacionRevista TEXT,
+                horarioDocente TEXT,
+                prensa TEXT,
+                tipoDifusion TEXT,
+                timingEvento TEXT,
+                desarmeEvento TEXT,
+                suspendeLluvia TEXT,
+                fechaCreacion TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Usuario por defecto
+        const userCheck = db.exec("SELECT COUNT(*) as count FROM usuarios;");
+        const userCount = userCheck.length > 0 ? userCheck[0].values[0][0] : 0;
+
+        if (userCount === 0) {
+            const defaultPassword = bcrypt.hashSync('123456', 10);
+            db.run(
+                "INSERT INTO usuarios (dni, nombre, password, role) VALUES (?, ?, ?, ?)",
+                ['23377971', 'Director DGDSYDD', defaultPassword, 'DIRECTOR']
+            );
+            console.log('Usuario Director creado -> DNI: 23377971');
+        }
+
+        saveDatabase();
+        console.log('Base de datos inicializada correctamente.');
+
+        app.listen(PORT, () => {
+            console.log(`Servidor activo en el puerto ${PORT}`);
+        });
+    } catch (err) {
+        console.error("Error al iniciar el servidor:", err);
     }
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dni TEXT UNIQUE NOT NULL,
-            nombre TEXT NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'DOCENTE'
-        );
-    `);
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS pedidos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT NOT NULL,
-            areaResponsable TEXT,
-            programa TEXT,
-            fecha TEXT,
-            horario TEXT,
-            lugar TEXT,
-            descripcion TEXT,
-            responsableNombre TEXT,
-            responsableDni TEXT,
-            responsableTelefono TEXT,
-            objetivo TEXT,
-            participantesAprox INTEGER,
-            publicoGeneral INTEGER,
-            articulaciones TEXT,
-            necesidades TEXT,
-            transportePasajeros TEXT,
-            ambulancia TEXT,
-            ambulanciaHorario TEXT,
-            seguro TEXT,
-            extensionArt TEXT,
-            situacionRevista TEXT,
-            horarioDocente TEXT,
-            prensa TEXT,
-            tipoDifusion TEXT,
-            timingEvento TEXT,
-            desarmeEvento TEXT,
-            suspendeLluvia TEXT,
-            fechaCreacion TEXT DEFAULT CURRENT_TIMESTAMP
-        );
-    `);
-
-    const userCheck = db.exec("SELECT COUNT(*) as count FROM usuarios;");
-    const userCount = userCheck.length > 0 ? userCheck[0].values[0][0] : 0;
-
-    if (userCount === 0) {
-        const defaultPassword = bcrypt.hashSync('123456', 10);
-        db.run(
-            "INSERT INTO usuarios (dni, nombre, password, role) VALUES (?, ?, ?, ?)",
-            ['23377971', 'Director DGDSYDD', defaultPassword, 'DIRECTOR']
-        );
-        console.log('Usuario Director de prueba creado -> DNI: 23377971 | Clave: 123456');
-    }
-
-    saveDatabase();
-    console.log('Base de datos WASM inicializada correctamente.');
-
-    app.listen(PORT, () => {
-        console.log(`Servidor corriendo en el puerto ${PORT}`);
-    });
 }
 
-// CONTROLADORES Y RUTAS
+// CONTROLADORES
 function handleLogin(req, res) {
     const { dni, password } = req.body;
     try {
@@ -130,9 +139,6 @@ function handleLogin(req, res) {
     }
 }
 
-app.post('/api/auth/login', handleLogin);
-app.post('/api/login', handleLogin);
-
 function handleRegister(req, res) {
     const { nombre, dni, password } = req.body;
     const cleanDni = String(dni).trim();
@@ -158,14 +164,16 @@ function handleRegister(req, res) {
         res.status(201).json({ msg: 'Usuario registrado con éxito' });
     } catch (err) {
         console.error("Error en registro:", err);
-        res.status(500).json({ msg: 'Error al registrar usuario en la base de datos' });
+        res.status(500).json({ msg: 'Error al registrar usuario' });
     }
 }
 
+// RUTAS API
+app.post('/api/auth/login', handleLogin);
+app.post('/api/login', handleLogin);
 app.post('/api/auth/register', handleRegister);
 app.post('/api/register', handleRegister);
 
-// PEDIDOS
 app.get('/api/pedidos', (req, res) => {
     try {
         const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
@@ -207,6 +215,11 @@ app.post('/api/pedidos', (req, res) => {
         console.error("Error al guardar pedido:", err);
         res.status(500).json({ msg: 'Error al guardar pedido' });
     }
+});
+
+// Ruta Fallback para Servir la Frontend
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 startServer();
