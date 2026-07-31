@@ -290,11 +290,10 @@ function initPedidoForm() {
     });
 }
 
-// Cache global de pedidos cargados
 let listaPedidosCache = [];
 
 // -------------------------------------------------------------------
-// VISTA DIRECTOR: TARJETAS ULTRA COMPACTAS Y LIMPIAS EN PANTALLA
+// VISTA DIRECTOR: TARJETAS SÚPER COMPACTAS CON INFO CLAVE (PC Y CELULAR)
 // -------------------------------------------------------------------
 async function cargarPedidosDirector() {
     const listaContainer = document.getElementById('lista-pedidos');
@@ -333,7 +332,7 @@ async function cargarPedidosDirector() {
                         <div><strong>⏰ Horario:</strong> ${escapeHtml(p.horario || '-')}</div>
                         <div><strong>👤 Responsable:</strong> ${escapeHtml(p.responsableNombre || '-')}</div>
                         <div><strong>📞 Teléfono:</strong> ${escapeHtml(p.responsableTelefono || '-')}</div>
-                        <div><strong>👥 Participantes Est.:</strong> ${p.participantesAprox ?? 0} personas</div>
+                        <div><strong>👥 Participantes Est.:</strong> ${p.participantesAprox ?? 0} pers.</div>
                     </div>
                 </div>
             `;
@@ -345,7 +344,7 @@ async function cargarPedidosDirector() {
 }
 
 // -------------------------------------------------------------------
-// MÓDULO CALENDARIO DE EVENTOS
+// CALENDARIO DE EVENTOS
 // -------------------------------------------------------------------
 async function cargarCalendarioEventos() {
     const tabCalendario = document.getElementById('tab-calendario');
@@ -412,7 +411,7 @@ async function cargarCalendarioEventos() {
 }
 
 // -------------------------------------------------------------------
-// GENERACIÓN DE PDF FORMAL, MAQUETADO CON TABLAS ESTRUCTURADAS
+// GENERACIÓN DE PDF PROFESIONAL CON TABLAS Y FIX DE CRASH EN CELULAR
 // -------------------------------------------------------------------
 function descargarReportePDF() {
     if (!listaPedidosCache || listaPedidosCache.length === 0) {
@@ -420,23 +419,32 @@ function descargarReportePDF() {
         return;
     }
 
+    // Un contenedor flotante independiente para renderizar el PDF perfectamente en PC y Móvil
     const container = document.createElement('div');
-    container.style.padding = '15px';
-    container.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '750px'; // Ancho estándar fijo A4 sin romper pantallas chicas
+    container.style.padding = '20px';
+    container.style.backgroundColor = '#ffffff';
+    container.style.fontFamily = 'Arial, sans-serif';
     container.style.color = '#1a202c';
 
-    // Encabezado institucional GCBA
     let htmlContent = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #fcd116; padding-bottom: 12px; margin-bottom: 20px;">
-            <div>
-                <span style="background: #fcd116; color: #000; font-weight: bold; padding: 4px 10px; border-radius: 4px; font-size: 14px;">BA</span>
-                <span style="font-size: 16px; font-weight: bold; margin-left: 8px; color: #1d2b36;">Gobierno de la Ciudad de Buenos Aires</span>
-                <div style="font-size: 12px; color: #4a5568; margin-top: 4px;">Subsecretaría de Deportes | DGDSyDD</div>
-            </div>
-            <div style="text-align: right; font-size: 11px; color: #718096;">
-                <div><strong>REPORTE OFICIAL DE SOLICITUDES</strong></div>
-                <div>Generado: ${new Date().toLocaleDateString('es-AR')}</div>
-            </div>
+        <div style="border-bottom: 3px solid #fcd116; padding-bottom: 12px; margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="vertical-align: middle;">
+                        <span style="background: #fcd116; color: #000; font-weight: bold; padding: 4px 10px; border-radius: 4px; font-size: 16px;">BA</span>
+                        <span style="font-size: 16px; font-weight: bold; margin-left: 8px; color: #1d2b36;">Gobierno de la Ciudad de Buenos Aires</span>
+                        <div style="font-size: 12px; color: #4a5568; margin-top: 4px;">Subsecretaría de Deportes | DGDSyDD</div>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle; font-size: 11px; color: #718096;">
+                        <div style="font-weight: bold; color: #1d2b36;">REPORTE OFICIAL DE SOLICITUDES</div>
+                        <div>Generado: ${new Date().toLocaleDateString('es-AR')}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
     `;
 
@@ -448,90 +456,96 @@ function descargarReportePDF() {
         }
 
         htmlContent += `
-            <div style="page-break-inside: avoid; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 25px; overflow: hidden; background: #ffffff;">
-                <div style="background: #1d2b36; color: #ffffff; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 15px; font-weight: bold;">#${idx + 1} - ${escapeHtml(p.titulo)}</span>
-                    <span style="background: #fcd116; color: #000000; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 4px;">FECHA: ${escapeHtml(fechaFormateada)}</span>
-                </div>
+            <div style="page-break-inside: avoid; border: 1px solid #cbd5e0; border-radius: 6px; margin-bottom: 25px; background: #ffffff;">
+                <table style="width: 100%; border-collapse: collapse; background: #1d2b36; color: #ffffff;">
+                    <tr>
+                        <td style="padding: 10px 14px; font-size: 14px; font-weight: bold;">
+                            #${idx + 1} - ${escapeHtml(p.titulo)}
+                        </td>
+                        <td style="padding: 10px 14px; text-align: right;">
+                            <span style="background: #fcd116; color: #000; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px;">FECHA: ${escapeHtml(fechaFormateada)}</span>
+                        </td>
+                    </tr>
+                </table>
 
-                <div style="padding: 15px;">
-                    <!-- Seccion 1 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase;">1. Información General del Evento</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px;">
+                <div style="padding: 14px;">
+                    <!-- Bloque 1 -->
+                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">1. Información General del Evento</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
                         <tr>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Área Responsable:</strong> ${escapeHtml(p.areaResponsable || '-')}</td>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Programa:</strong> ${escapeHtml(p.programa || '-')}</td>
+                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Área Responsable:</strong> ${escapeHtml(p.areaResponsable || '-')}</td>
+                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Programa:</strong> ${escapeHtml(p.programa || '-')}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 3px 0;"><strong>Horario:</strong> ${escapeHtml(p.horario || '-')}</td>
-                            <td style="padding: 3px 0;"><strong>Lugar / Sede:</strong> ${escapeHtml(p.lugar || '-')}</td>
+                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Horario:</strong> ${escapeHtml(p.horario || '-')}</td>
+                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Lugar / Sede:</strong> ${escapeHtml(p.lugar || '-')}</td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="padding: 3px 0;"><strong>Descripción:</strong> ${escapeHtml(p.descripcion || '-')}</td>
+                            <td colspan="2" style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Descripción:</strong> ${escapeHtml(p.descripcion || '-')}</td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="padding: 3px 0;"><strong>Objetivo:</strong> ${escapeHtml(p.objetivo || '-')}</td>
+                            <td colspan="2" style="padding: 4px; border: 1px solid #edf2f7;"><strong>Objetivo:</strong> ${escapeHtml(p.objetivo || '-')}</td>
                         </tr>
                     </table>
 
-                    <!-- Seccion 2 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase;">2. Datos del Responsable Directo</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px;">
+                    <!-- Bloque 2 -->
+                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">2. Datos del Responsable Directo</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
                         <tr>
-                            <td style="width: 33%; padding: 3px 0;"><strong>Nombre:</strong> ${escapeHtml(p.responsableNombre || '-')}</td>
-                            <td style="width: 33%; padding: 3px 0;"><strong>DNI:</strong> ${escapeHtml(p.responsableDni || '-')}</td>
-                            <td style="width: 34%; padding: 3px 0;"><strong>Teléfono:</strong> ${escapeHtml(p.responsableTelefono || '-')}</td>
+                            <td style="width: 33%; padding: 4px; border: 1px solid #edf2f7;"><strong>Nombre:</strong> ${escapeHtml(p.responsableNombre || '-')}</td>
+                            <td style="width: 33%; padding: 4px; border: 1px solid #edf2f7;"><strong>DNI:</strong> ${escapeHtml(p.responsableDni || '-')}</td>
+                            <td style="width: 34%; padding: 4px; border: 1px solid #edf2f7;"><strong>Teléfono:</strong> ${escapeHtml(p.responsableTelefono || '-')}</td>
                         </tr>
                     </table>
 
-                    <!-- Seccion 3 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase;">3. Estimación de Concurrencia</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px;">
+                    <!-- Bloque 3 -->
+                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">3. Estimación de Concurrencia</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
                         <tr>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Participantes Estimados:</strong> ${p.participantesAprox ?? 0}</td>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 0}</td>
+                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Participantes Estimados:</strong> ${p.participantesAprox ?? 0} personas</td>
+                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 0} personas</td>
                         </tr>
                     </table>
 
-                    <!-- Seccion 4 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase;">4. Salud, Seguro y Logística</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px;">
+                    <!-- Bloque 4 -->
+                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">4. Salud, Seguro y Logística</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
                         <tr>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Requiere Ambulancia:</strong> ${escapeHtml(p.ambulancia || 'No')}</td>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Horario Ambulancia:</strong> ${escapeHtml(p.ambulanciaHorario || '-')}</td>
+                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Requiere Ambulancia:</strong> ${escapeHtml(p.ambulancia || 'No')}</td>
+                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Horario Ambulancia:</strong> ${escapeHtml(p.ambulanciaHorario || '-')}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 3px 0;"><strong>Seguro / Cobertura:</strong> ${escapeHtml(p.seguro || '-')}</td>
-                            <td style="padding: 3px 0;"><strong>Extensión ART:</strong> ${escapeHtml(p.extensionArt || '-')}</td>
+                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Seguro / Cobertura:</strong> ${escapeHtml(p.seguro || '-')}</td>
+                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Extensión ART:</strong> ${escapeHtml(p.extensionArt || '-')}</td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="padding: 3px 0;"><strong>Transporte de Pasajeros:</strong> ${escapeHtml(p.transportePasajeros || '-')}</td>
-                        </tr>
-                    </table>
-
-                    <!-- Seccion 5 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase;">5. Articulaciones e Infraestructura</div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px;">
-                        <tr>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Articulaciones:</strong> ${escapeHtml(p.articulaciones || '-')}</td>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Necesidades Técnicas / Sonido:</strong> ${escapeHtml(p.necesidades || '-')}</td>
+                            <td colspan="2" style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Transporte de Pasajeros:</strong> ${escapeHtml(p.transportePasajeros || '-')}</td>
                         </tr>
                     </table>
 
-                    <!-- Seccion 6 -->
-                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase;">6. Docentes, Prensa y Contingencia</div>
+                    <!-- Bloque 5 -->
+                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">5. Articulaciones e Infraestructura</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
+                        <tr>
+                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Articulaciones:</strong> ${escapeHtml(p.articulaciones || '-')}</td>
+                            <td style="width: 50%; padding: 4px; border: 1px solid #edf2f7;"><strong>Necesidades Técnicas / Sonido:</strong> ${escapeHtml(p.necesidades || '-')}</td>
+                        </tr>
+                    </table>
+
+                    <!-- Bloque 6 -->
+                    <div style="font-size: 11px; font-weight: bold; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase;">6. Docentes, Prensa y Contingencia</div>
                     <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                         <tr>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Situación Revista Docente:</strong> ${escapeHtml(p.situacionRevista || '-')}</td>
-                            <td style="width: 50%; padding: 3px 0;"><strong>Horario Docente:</strong> ${escapeHtml(p.horarioDocente || '-')}</td>
+                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Situación Revista Docente:</strong> ${escapeHtml(p.situacionRevista || '-')}</td>
+                            <td style="width: 50%; padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Horario Docente:</strong> ${escapeHtml(p.horarioDocente || '-')}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 3px 0;"><strong>Cobertura Prensa:</strong> ${escapeHtml(p.prensa || 'No')}</td>
-                            <td style="padding: 3px 0;"><strong>Tipo de Difusión:</strong> ${escapeHtml(p.tipoDifusion || '-')}</td>
+                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Cobertura Prensa:</strong> ${escapeHtml(p.prensa || 'No')}</td>
+                            <td style="padding: 4px; border: 1px solid #edf2f7;"><strong>Tipo de Difusión:</strong> ${escapeHtml(p.tipoDifusion || '-')}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 3px 0;"><strong>Montaje / Desarme:</strong> ${escapeHtml(p.timingEvento || '-')} / ${escapeHtml(p.desarmeEvento || '-')}</td>
-                            <td style="padding: 3px 0;"><strong>¿Se suspende por lluvia?:</strong> ${escapeHtml(p.suspendeLluvia || '-')}</td>
+                            <td style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>Montaje / Desarme:</strong> ${escapeHtml(p.timingEvento || '-')} / ${escapeHtml(p.desarmeEvento || '-')}</td>
+                            <td style="padding: 4px; background: #f8fafc; border: 1px solid #edf2f7;"><strong>¿Se suspende por lluvia?:</strong> ${escapeHtml(p.suspendeLluvia || '-')}</td>
                         </tr>
                     </table>
                 </div>
@@ -540,16 +554,22 @@ function descargarReportePDF() {
     });
 
     container.innerHTML = htmlContent;
+    document.body.appendChild(container);
 
     const opt = {
-        margin:       8,
+        margin:       10,
         filename:     'reporte_oficial_eventos_dgdsydd.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(container).save();
+    html2pdf().set(opt).from(container).save().then(() => {
+        document.body.removeChild(container);
+    }).catch(err => {
+        console.error("Error al generar PDF:", err);
+        document.body.removeChild(container);
+    });
 }
 
 function escapeHtml(text) {
