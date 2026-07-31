@@ -55,21 +55,50 @@ function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
 
+    // Botones del menú lateral / navegación movil
+    const navItemsForm = document.querySelectorAll('[data-target="form-nuevo-pedido"]');
+    const navItemsDirector = document.querySelectorAll('[data-target="director-pedidos-container"]');
+
     if (user.role === 'DIRECTOR') {
-        if (directorSection) {
-            directorSection.classList.remove('hidden');
-            cargarPedidosDirector();
-        }
+        // Ocultar sección de formulario
         if (formPedidoSection) {
             formPedidoSection.classList.add('hidden');
+            formPedidoSection.classList.remove('active');
         }
-    } else {
+        
+        // Mostrar sección del director
         if (directorSection) {
-            directorSection.classList.add('hidden');
+            directorSection.classList.remove('hidden');
+            directorSection.classList.add('active');
+            cargarPedidosDirector();
         }
+
+        // Ocultar del menú lateral/móvil los accesos al formulario
+        navItemsForm.forEach(item => item.style.display = 'none');
+        navItemsDirector.forEach(item => {
+            item.style.display = 'block';
+            item.classList.add('active');
+        });
+
+    } else {
+        // Mostrar sección de formulario para docentes
         if (formPedidoSection) {
             formPedidoSection.classList.remove('hidden');
+            formPedidoSection.classList.add('active');
         }
+        
+        // Ocultar sección del director
+        if (directorSection) {
+            directorSection.classList.add('hidden');
+            directorSection.classList.remove('active');
+        }
+
+        // Ajustar visibilidad en el menú lateral/móvil
+        navItemsForm.forEach(item => {
+            item.style.display = 'block';
+            item.classList.add('active');
+        });
+        navItemsDirector.forEach(item => item.style.display = 'none');
     }
 }
 
@@ -79,7 +108,14 @@ function initNavigationTabs() {
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
+            const storedUser = sessionStorage.getItem('currentUser');
+            const currentUser = storedUser ? JSON.parse(storedUser) : null;
             const targetId = item.getAttribute('data-target');
+
+            // Bloqueo para evitar que el Director navegue hacia el formulario
+            if (currentUser && currentUser.role === 'DIRECTOR' && targetId === 'form-nuevo-pedido') {
+                return;
+            }
 
             navItems.forEach(i => i.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
@@ -102,8 +138,8 @@ function initMobileMenu() {
 
     function toggleMenu(e) {
         if (e) e.stopPropagation();
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
+        if (sidebar) sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('active');
     }
 
     if (menuBtn && sidebar && overlay) {
@@ -297,17 +333,20 @@ function initPedidoForm() {
                 const res = await fetch('/api/pedidos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(nuevoPedido)
+                    body: JSON.stringify({ ...nuevoPedido })
                 });
 
                 const data = await res.json();
 
                 if (res.ok) {
-                    msg.textContent = '¡Pedido de evento enviado con éxito!';
-                    msg.classList.remove('hidden');
+                    if (msg) {
+                        msg.textContent = '¡Pedido de evento enviado con éxito!';
+                        msg.classList.remove('hidden');
+                        setTimeout(() => msg.classList.add('hidden'), 4000);
+                    } else {
+                        alert('¡Pedido de evento enviado con éxito!');
+                    }
                     pedidoForm.reset();
-
-                    setTimeout(() => msg.classList.add('hidden'), 4000);
                 } else {
                     alert(data.msg || 'Ocurrió un error al intentar enviar el pedido.');
                 }
@@ -361,5 +400,9 @@ function descargarReportePDF() {
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opciones).from(elemento).save();
+    if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opciones).from(elemento).save();
+    } else {
+        alert('La librería html2pdf no está disponible.');
+    }
 }
