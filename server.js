@@ -33,7 +33,6 @@ async function startServer() {
         db = new SQL.Database();
     }
 
-    // 1. Crear tabla usuarios si no existe
     db.run(`
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +43,6 @@ async function startServer() {
         );
     `);
 
-    // 2. Crear tabla pedidos si no existe
     db.run(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +77,6 @@ async function startServer() {
         );
     `);
 
-    // 3. Insertar usuario Admin/Director por defecto si no existe ningún usuario
     const userCheck = db.exec("SELECT COUNT(*) as count FROM usuarios;");
     const userCount = userCheck.length > 0 ? userCheck[0].values[0][0] : 0;
 
@@ -100,11 +97,7 @@ async function startServer() {
     });
 }
 
-// ==========================================
-// CONTROLADORES Y RUTAS DE AUTENTICACIÓN
-// ==========================================
-
-// LOGIN
+// CONTROLADORES Y RUTAS
 function handleLogin(req, res) {
     const { dni, password } = req.body;
     try {
@@ -116,9 +109,7 @@ function handleLogin(req, res) {
             stmt.free();
 
             if (bcrypt.compareSync(password, user.password)) {
-                // Asignar rol de forma estricta según el DNI
                 const assignedRole = (user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
-
                 return res.json({
                     user: {
                         id: user.id,
@@ -142,7 +133,6 @@ function handleLogin(req, res) {
 app.post('/api/auth/login', handleLogin);
 app.post('/api/login', handleLogin);
 
-// REGISTRO
 function handleRegister(req, res) {
     const { nombre, dni, password } = req.body;
     const cleanDni = String(dni).trim();
@@ -156,7 +146,6 @@ function handleRegister(req, res) {
         }
         stmt.free();
 
-        // Validar asignación de rol estricto por DNI
         const role = (cleanDni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
         const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -176,10 +165,7 @@ function handleRegister(req, res) {
 app.post('/api/auth/register', handleRegister);
 app.post('/api/register', handleRegister);
 
-// ==========================================
-// RUTAS DE PEDIDOS
-// ==========================================
-
+// PEDIDOS
 app.get('/api/pedidos', (req, res) => {
     try {
         const stmt = db.prepare('SELECT * FROM pedidos ORDER BY id DESC');
@@ -195,7 +181,7 @@ app.get('/api/pedidos', (req, res) => {
 });
 
 app.post('/api/pedidos', (req, res) => {
-    const data = req.body;
+    const d = req.body;
     try {
         db.run(`
             INSERT INTO pedidos (
@@ -207,17 +193,18 @@ app.post('/api/pedidos', (req, res) => {
                 desarmeEvento, suspendeLluvia
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            data.titulo, data.areaResponsable, data.programa, data.fecha, data.horario, data.lugar, data.descripcion,
-            data.responsableNombre, data.responsableDni, data.responsableTelefono, data.objetivo,
-            data.participantesAprox, data.publicoGeneral, data.articulaciones, data.necesidades,
-            data.transportePasajeros, data.ambulancia, data.ambulanciaHorario, data.seguro, data.extensionArt,
-            data.situacionRevista, data.horarioDocente, data.prensa, data.tipoDifusion, data.timingEvento,
-            data.desarmeEvento, data.suspendeLluvia
+            d.titulo || '', d.areaResponsable || '', d.programa || '', d.fecha || '', d.horario || '', d.lugar || '', d.descripcion || '',
+            d.responsableNombre || '', d.responsableDni || '', d.responsableTelefono || '', d.objetivo || '',
+            d.participantesAprox || 0, d.publicoGeneral || 0, d.articulaciones || '', d.necesidades || '',
+            d.transportePasajeros || '', d.ambulancia || 'No', d.ambulanciaHorario || '', d.seguro || '', d.extensionArt || 'No',
+            d.situacionRevista || '', d.horarioDocente || '', d.prensa || 'No', d.tipoDifusion || '', d.timingEvento || '',
+            d.desarmeEvento || '', d.suspendeLluvia || 'No'
         ]);
 
         saveDatabase();
         res.status(201).json({ msg: 'Pedido creado exitosamente' });
     } catch (err) {
+        console.error("Error al guardar pedido:", err);
         res.status(500).json({ msg: 'Error al guardar pedido' });
     }
 });

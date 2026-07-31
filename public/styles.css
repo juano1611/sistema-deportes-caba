@@ -1,6 +1,3 @@
-/* ==========================================
-   VARIABLES Y ESTILOS GLOBALES
-   ========================================== */
 :root {
     --ba-yellow: #fecb00;
     --ba-dark: #121e2d;
@@ -9,10 +6,9 @@
     --bg-light: #f4f6f9;
     --text-dark: #222222;
     --text-muted: #666666;
-    --border-color: #e2e8f0;
+    --border-color: #cbd5e1;
     --danger-color: #d9534f;
-    --success-color: #28a745;
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --success-color: #15803d;
 }
 
 * {
@@ -26,34 +22,30 @@ body {
     background-color: var(--bg-light);
     color: var(--text-dark);
     line-height: 1.5;
-    overflow-x: hidden;
 }
 
 .hidden {
     display: none !important;
 }
 
-/* ==========================================
-   VISTA AUTH / LOGIN / REGISTRO
-   ========================================== */
+/* AUTH / LOGIN - CORREGIDO PC Y MOBILE */
 .auth-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    background: linear-gradient(135deg, #0d1520 0%, #1a2737 100%);
+    background: #121e2d;
 }
 
 .auth-card {
     background: #ffffff;
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     padding: 35px 30px;
     border-radius: 12px;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     border-top: 6px solid var(--ba-yellow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-header {
@@ -70,27 +62,22 @@ body {
     padding: 6px 14px;
     border-radius: 6px;
     margin-bottom: 12px;
-    letter-spacing: 1px;
 }
 
 .auth-header h2 {
     font-size: 1.25rem;
     color: var(--ba-dark);
-    font-weight: 700;
 }
 
 .auth-header p {
     font-size: 0.85rem;
     color: var(--text-muted);
-    margin-top: 4px;
 }
 
-/* PESTAÑAS LOGIN / REGISTRO */
 .auth-tabs {
     display: flex;
     margin-bottom: 25px;
-    border-bottom: 2px solid var(--border-color);
-    gap: 10px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 .auth-tab-btn {
@@ -102,12 +89,7 @@ body {
     font-weight: 700;
     color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.2s ease;
     border-bottom: 3px solid transparent;
-}
-
-.auth-tab-btn:hover {
-    color: var(--ba-dark);
 }
 
 .auth-tab-btn.active {
@@ -116,7 +98,7 @@ body {
 }
 
 .form-group {
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
@@ -127,25 +109,23 @@ body {
     color: #334155;
 }
 
-.input-icon input,
-.pedido-form input,
-.pedido-form textarea {
+.form-group input,
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 11px 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #f8fafc;
+    background-color: #ffffff;
 }
 
-.input-icon input:focus,
-.pedido-form input:focus,
-.pedido-form textarea:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
     border-color: var(--ba-dark);
     box-shadow: 0 0 0 3px rgba(18, 30, 45, 0.1);
-    background-color: #ffffff;
 }
 
 .btn-primary {
@@ -159,15 +139,10 @@ body {
     cursor: pointer;
     width: 100%;
     margin-top: 10px;
-    transition: background 0.2s, transform 0.1s;
 }
 
 .btn-primary:hover {
     background: var(--ba-dark-hover);
-}
-
-.btn-primary:active {
-    transform: scale(0.99);
 }
 
 .auth-error {
@@ -185,16 +160,15 @@ body {
     background-color: #f0fdf4;
     color: var(--success-color);
     border: 1px solid #bbf7d0;
-    padding: 10px;
+    padding: 12px;
     border-radius: 6px;
-    font-size: 0.85rem;
-    margin-bottom: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 15px;
     text-align: center;
 }
 
-/* ==========================================
-   ESTRUCTURA Y HEADER DEL PORTAL
-   ========================================== */
+/* PORTAL LAYOUT */
 .portal-wrapper {
     display: flex;
     flex-direction: column;
@@ -209,10 +183,10 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 4px solid var(--ba-yellow);
+    height: 65px;
     position: sticky;
     top: 0;
-    z-index: 2000;
-    height: 65px;
+    z-index: 1000;
 }
 
 .header-left {
@@ -227,10 +201,9 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
     font-size: 1.4rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
+    cursor: pointer;
 }
 
 .ba-logo-mini {
@@ -240,11 +213,6 @@ body {
     font-weight: 900;
     border-radius: 4px;
     font-size: 0.9rem;
-}
-
-.main-header h1 {
-    font-size: 1.05rem;
-    font-weight: 600;
 }
 
 .header-right {
@@ -267,7 +235,6 @@ body {
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 0.72rem;
-    letter-spacing: 0.5px;
 }
 
 .badge-director {
@@ -283,29 +250,18 @@ body {
     border-radius: 6px;
     font-size: 0.8rem;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.btn-logout:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-/* ==========================================
-   LAYOUT BODY Y NAVEGACIÓN
-   ========================================== */
 .layout-body {
     display: flex;
     flex: 1;
-    position: relative;
-    width: 100%;
 }
 
 .sidebar {
-    width: 250px;
+    width: 240px;
     background-color: var(--ba-dark-surface);
     color: white;
     flex-shrink: 0;
-    min-height: calc(100vh - 65px);
 }
 
 .nav-list {
@@ -319,12 +275,11 @@ body {
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 500;
-    transition: all 0.2s ease;
 }
 
 .nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
     color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-item.active {
@@ -336,7 +291,7 @@ body {
 .content-wrapper {
     flex: 1;
     padding: 30px;
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
     width: 100%;
 }
@@ -349,49 +304,6 @@ body {
     display: block;
 }
 
-/* HERO / BANNER PRINCIPAL PC & MOBILE */
-.hero-card {
-    background: white;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid var(--border-color);
-}
-
-.hero-content {
-    padding: 35px;
-    flex: 1;
-}
-
-.hero-content h2 {
-    font-size: 1.5rem;
-    color: var(--ba-dark);
-    margin-bottom: 12px;
-}
-
-.hero-content p {
-    color: var(--text-muted);
-    font-size: 0.98rem;
-    line-height: 1.6;
-}
-
-.hero-image {
-    width: 45%;
-    max-width: 500px;
-    min-height: 280px;
-    align-self: stretch;
-    background-color: #f1f5f9;
-}
-
-.hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
 .panel {
     background: white;
     padding: 30px;
@@ -400,16 +312,16 @@ body {
     border: 1px solid var(--border-color);
 }
 
-.section-desc {
-    color: var(--text-muted);
-    margin-bottom: 25px;
-}
-
-/* FORMULARIO DE PEDIDOS Y DIRECTOR VISTA */
-.pedido-form h3, .director-only-section h3 {
-    font-size: 1.15rem;
+/* FORMULARIO EXTENDIDO DE EVENTOS */
+.form-section-title {
+    font-size: 1rem;
+    font-weight: 700;
     color: var(--ba-dark);
-    margin-bottom: 15px;
+    background-color: #f1f5f9;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 25px 0 15px 0;
+    border-left: 4px solid var(--ba-yellow);
 }
 
 .form-grid {
@@ -418,22 +330,40 @@ body {
     gap: 15px;
 }
 
+.grid-col-2 {
+    grid-column: span 2;
+}
+
 .btn-submit-pedido {
     width: auto;
-    padding: 12px 30px;
+    padding: 14px 35px;
+    font-size: 1rem;
+    margin-top: 20px;
 }
 
-.divider {
-    border: 0;
-    height: 1px;
-    background: var(--border-color);
-    margin: 35px 0;
+.hero-card {
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
-.pedidos-list {
-    display: grid;
-    gap: 15px;
-    margin-top: 15px;
+.hero-content {
+    padding: 35px;
+    flex: 1;
+}
+
+.hero-image {
+    width: 40%;
+    max-width: 400px;
+    background: #f1f5f9;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .pedido-card {
@@ -441,77 +371,59 @@ body {
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--ba-yellow);
     border-radius: 8px;
-    padding: 18px;
+    padding: 15px;
+    margin-bottom: 15px;
 }
 
 .pedido-card-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
-}
-
-.pedido-card-header h4 {
-    color: var(--ba-dark);
-    font-size: 1.05rem;
-}
-
-.pedido-date {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+    margin-bottom: 6px;
 }
 
 .pedido-desc {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border-color);
+    margin-top: 8px;
     font-style: italic;
     color: #475569;
 }
 
-.sidebar-overlay {
-    display: none;
-}
-
-/* ==========================================
-   ADAPTACIÓN MÓVIL (HASTA 768px)
-   ========================================== */
+/* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
     .mobile-menu-toggle {
-        display: block !important;
+        display: block;
     }
 
-    #user-name {
-        display: none;
+    .grid-col-2 {
+        grid-column: span 1;
     }
 
     .sidebar {
-        position: fixed !important;
-        top: 65px !important;
-        left: -100% !important;
-        width: 260px !important;
-        height: calc(100vh - 65px) !important;
-        z-index: 3000 !important;
-        transition: left 0.25s ease-in-out !important;
-        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+        position: fixed;
+        top: 65px;
+        left: -100%;
+        width: 250px;
+        height: calc(100vh - 65px);
+        z-index: 2000;
+        transition: left 0.25s ease-in-out;
     }
 
     .sidebar.open {
-        left: 0 !important;
+        left: 0;
     }
 
     .sidebar-overlay.active {
-        display: block !important;
+        display: block;
         position: fixed;
         top: 65px;
         left: 0;
         width: 100vw;
         height: calc(100vh - 65px);
         background: rgba(0, 0, 0, 0.6);
-        z-index: 2500;
+        z-index: 1500;
     }
 
     .content-wrapper {
-        padding: 15px !important;
+        padding: 15px;
     }
 
     .hero-card {
@@ -520,11 +432,6 @@ body {
 
     .hero-image {
         width: 100%;
-        max-width: 100%;
-        min-height: 200px;
-    }
-
-    .hero-content {
-        padding: 20px;
+        height: 200px;
     }
 }
