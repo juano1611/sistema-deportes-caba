@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Servir archivos estáticos desde la raíz o la carpeta correspondiente
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 let db;
 
