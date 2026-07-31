@@ -27,6 +27,8 @@ function checkSession() {
 function showPortal() {
     document.getElementById('login-view').classList.add('hidden');
     document.getElementById('portal-view').classList.remove('hidden');
+    // Cargar siempre el calendario al iniciar
+    cargarCalendarioEventos();
 }
 
 function showLogin() {
@@ -82,6 +84,11 @@ function initNavigationTabs() {
             const targetContent = document.getElementById(targetId);
             if (targetContent) {
                 targetContent.classList.add('active');
+            }
+
+            // Si se hace clic en la solapa del calendario, recargar/actualizar
+            if (targetId === 'tab-calendario') {
+                cargarCalendarioEventos();
             }
 
             closeMobileMenu();
@@ -274,6 +281,7 @@ function initPedidoForm() {
                     msg.classList.remove('hidden');
                 }
                 form.reset();
+                cargarCalendarioEventos(); // Actualizar el calendario
             } else {
                 alert(data.msg || 'Error al enviar el pedido');
             }
@@ -284,11 +292,14 @@ function initPedidoForm() {
     });
 }
 
+// -------------------------------------------------------------------
+// VISTA DIRECTOR: REPORTE CON TODOS LOS DATOS
+// -------------------------------------------------------------------
 async function cargarPedidosDirector() {
     const listaContainer = document.getElementById('lista-pedidos');
     if (!listaContainer) return;
 
-    listaContainer.innerHTML = '<p>Cargando solicitudes...</p>';
+    listaContainer.innerHTML = '<p>Cargando solicitudes completas...</p>';
 
     try {
         const res = await fetch('/api/pedidos');
@@ -300,18 +311,48 @@ async function cargarPedidosDirector() {
         }
 
         listaContainer.innerHTML = pedidos.map(p => `
-            <div class="pedido-card">
+            <div class="pedido-card full-pdf-card">
                 <div class="pedido-card-header">
                     <h4>${escapeHtml(p.titulo)}</h4>
-                    <span class="badge-fecha">${escapeHtml(p.fecha || 'Sin Fecha')}</span>
+                    <span class="badge-fecha">Fecha: ${escapeHtml(p.fecha || 'Sin Fecha')}</span>
                 </div>
                 <div class="pedido-card-body">
+                    <p class="section-subtitle">1. Información General del Evento</p>
                     <p><strong>Área Responsable:</strong> ${escapeHtml(p.areaResponsable || '-')}</p>
-                    <p><strong>Lugar:</strong> ${escapeHtml(p.lugar || '-')}</p>
+                    <p><strong>Programa:</strong> ${escapeHtml(p.programa || '-')}</p>
                     <p><strong>Horario:</strong> ${escapeHtml(p.horario || '-')}</p>
-                    <p><strong>Responsable:</strong> ${escapeHtml(p.responsableNombre || '-')} (DNI: ${escapeHtml(p.responsableDni || '-')}) - Tel: ${escapeHtml(p.responsableTelefono || '-')}</p>
+                    <p><strong>Lugar / Sede:</strong> ${escapeHtml(p.lugar || '-')}</p>
                     <p><strong>Descripción:</strong> ${escapeHtml(p.descripcion || '-')}</p>
-                    <p><strong>Requerimientos:</strong> Ambulancia: ${escapeHtml(p.ambulancia || 'No')} | Seguro: ${escapeHtml(p.seguro || '-')}</p>
+                    <p><strong>Objetivo:</strong> ${escapeHtml(p.objetivo || '-')}</p>
+
+                    <p class="section-subtitle">2. Datos del Responsable Directo</p>
+                    <p><strong>Nombre:</strong> ${escapeHtml(p.responsableNombre || '-')}</p>
+                    <p><strong>DNI:</strong> ${escapeHtml(p.responsableDni || '-')}</p>
+                    <p><strong>Teléfono:</strong> ${escapeHtml(p.responsableTelefono || '-')}</p>
+
+                    <p class="section-subtitle">3. Estimación de Concurrencia</p>
+                    <p><strong>Participantes Aprox:</strong> ${p.participantesAprox ?? '-'}</p>
+                    <p><strong>Público General Est:</strong> ${p.publicoGeneral ?? '-'}</p>
+
+                    <p class="section-subtitle">4. Salud, Seguro y Logística</p>
+                    <p><strong>Requiere Ambulancia:</strong> ${escapeHtml(p.ambulancia || 'No')}</p>
+                    <p><strong>Horario Ambulancia:</strong> ${escapeHtml(p.ambulanciaHorario || '-')}</p>
+                    <p><strong>Seguro / Cobertura:</strong> ${escapeHtml(p.seguro || '-')}</p>
+                    <p><strong>Extensión ART:</strong> ${escapeHtml(p.extensionArt || '-')}</p>
+                    <p><strong>Transporte de Pasajeros:</strong> ${escapeHtml(p.transportePasajeros || '-')}</p>
+
+                    <p class="section-subtitle">5. Articulaciones e Infraestructura</p>
+                    <p><strong>Articulaciones Interinstitucionales:</strong> ${escapeHtml(p.articulaciones || '-')}</p>
+                    <p><strong>Necesidades Técnicas / Sonido:</strong> ${escapeHtml(p.necesidades || '-')}</p>
+
+                    <p class="section-subtitle">6. Docentes, Prensa y Contingencia</p>
+                    <p><strong>Situación Revista Docente:</strong> ${escapeHtml(p.situacionRevista || '-')}</p>
+                    <p><strong>Horario Docente:</strong> ${escapeHtml(p.horarioDocente || '-')}</p>
+                    <p><strong>Cobertura Prensa:</strong> ${escapeHtml(p.prensa || 'No')}</p>
+                    <p><strong>Tipo de Difusión:</strong> ${escapeHtml(p.tipoDifusion || '-')}</p>
+                    <p><strong>Timing de Montaje:</strong> ${escapeHtml(p.timingEvento || '-')}</p>
+                    <p><strong>Timing de Desarme:</strong> ${escapeHtml(p.desarmeEvento || '-')}</p>
+                    <p><strong>¿Se suspende por lluvia?:</strong> ${escapeHtml(p.suspendeLluvia || '-')}</p>
                 </div>
             </div>
         `).join('');
@@ -321,15 +362,83 @@ async function cargarPedidosDirector() {
     }
 }
 
+// -------------------------------------------------------------------
+// MÓDULO CALENDARIO DE EVENTOS (ORDENADOS POR FECHA)
+// -------------------------------------------------------------------
+async function cargarCalendarioEventos() {
+    const tabCalendario = document.getElementById('tab-calendario');
+    if (!tabCalendario) return;
+
+    let calContainer = document.getElementById('calendario-lista');
+    if (!calContainer) {
+        const panel = tabCalendario.querySelector('.panel');
+        if (panel) {
+            panel.innerHTML = `
+                <h2>Calendario General de Eventos</h2>
+                <p class="section-desc">Cronograma oficial ordenado cronológicamente por fecha.</p>
+                <div id="calendario-lista" class="calendario-grid"></div>
+            `;
+            calContainer = document.getElementById('calendario-lista');
+        }
+    }
+
+    if (!calContainer) return;
+    calContainer.innerHTML = '<p>Cargando eventos del calendario...</p>';
+
+    try {
+        const res = await fetch('/api/pedidos');
+        const pedidos = await res.json();
+
+        if (!Array.isArray(pedidos) || pedidos.length === 0) {
+            calContainer.innerHTML = '<p>No hay eventos agendados en el calendario.</p>';
+            return;
+        }
+
+        // Ordenar eventos de menor a mayor por fecha (cronológico)
+        pedidos.sort((a, b) => {
+            if (!a.fecha) return 1;
+            if (!b.fecha) return -1;
+            return new Date(a.fecha) - new Date(b.fecha);
+        });
+
+        calContainer.innerHTML = pedidos.map(p => {
+            let fechaFormateada = p.fecha || 'Sin Fecha';
+            if (p.fecha && p.fecha.includes('-')) {
+                const parts = p.fecha.split('-');
+                fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+
+            return `
+                <div class="event-cal-card">
+                    <div class="event-cal-date">
+                        <span class="cal-icon">📅</span>
+                        <strong>${escapeHtml(fechaFormateada)}</strong>
+                        <span class="cal-time">${escapeHtml(p.horario || '')}</span>
+                    </div>
+                    <div class="event-cal-info">
+                        <h3>${escapeHtml(p.titulo)}</h3>
+                        <p><strong>📍 Lugar:</strong> ${escapeHtml(p.lugar || 'A confirmar')}</p>
+                        <p><strong>🏢 Área:</strong> ${escapeHtml(p.areaResponsable || '-')}</p>
+                        <p><strong>👤 Responsable:</strong> ${escapeHtml(p.responsableNombre || '-')} (${escapeHtml(p.responsableTelefono || '-')})</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Error al cargar calendario:", err);
+        calContainer.innerHTML = '<p class="auth-error">Error al cargar el calendario.</p>';
+    }
+}
+
 function descargarReportePDF() {
     const element = document.getElementById('lista-pedidos');
     if (!element) return;
 
     const opt = {
-        margin:       10,
-        filename:     'reporte_pedidos_eventos.pdf',
+        margin:       8,
+        filename:     'reporte_completo_eventos_dgdsydd.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
+        html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -337,7 +446,7 @@ function descargarReportePDF() {
 }
 
 function escapeHtml(text) {
-    if (!text) return '';
+    if (text === null || text === undefined) return '';
     return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
