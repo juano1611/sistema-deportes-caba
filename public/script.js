@@ -322,12 +322,12 @@ async function cargarPedidosDirector() {
             }
 
             return `
-                <div class="pedido-card" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #edf2f7; padding-bottom:8px; margin-bottom:10px;">
-                        <h4 style="font-size:16px; color:#1a202c; margin:0; font-weight:700;">${escapeHtml(p.titulo)}</h4>
-                        <span style="background:#ebf8ff; color:#2b6cb0; font-size:12px; font-weight:bold; padding:4px 8px; border-radius:4px;">📅 ${escapeHtml(fechaFormateada)}</span>
+                <div class="pedido-card">
+                    <div class="pedido-card-header">
+                        <h4>${escapeHtml(p.titulo)}</h4>
+                        <span class="badge-fecha">📅 ${escapeHtml(fechaFormateada)}</span>
                     </div>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:8px; font-size:13px; color:#4a5568;">
+                    <div class="pedido-card-body-grid">
                         <div><strong>🏢 Área:</strong> ${escapeHtml(p.areaResponsable || '-')}</div>
                         <div><strong>📍 Lugar:</strong> ${escapeHtml(p.lugar || '-')}</div>
                         <div><strong>⏰ Horario:</strong> ${escapeHtml(p.horario || '-')}</div>
