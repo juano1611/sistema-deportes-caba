@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // CONEXIÓN A BASE DE DATOS REMOTA (MongoDB Atlas)
 // -------------------------------------------------------------
 // Reemplazá esta cadena de conexión con la tuya de MongoDB Atlas
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://juano1611:juano1611@cluster0.TU_CODIGO_REAL.mongodb.net/?retryWrites=true&w=majority';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://juano1611:juano1611@cluster0.lldgqos.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ Conectado con éxito a MongoDB Cloud'))
     .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
