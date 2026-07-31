@@ -184,7 +184,7 @@ app.get('/api/pedidos', async (req, res) => {
 });
 
 // Enrutamiento para SPA (Cualquier otra ruta devuelve el index.html de public)
-app.get('*', (req, res) => {
+app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
