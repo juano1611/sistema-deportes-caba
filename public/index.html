@@ -8,7 +8,7 @@
 </head>
 <body>
 
-    <!-- VISTA LOGIN -->
+    <!-- VISTA AUTH (LOGIN / REGISTRO) -->
     <div id="login-view" class="auth-wrapper">
         <div class="auth-card">
             <div class="auth-header">
@@ -16,12 +16,19 @@
                 <h2>Portal de Gestión Deportiva</h2>
                 <p>Dirección General de Deporte Social y Desarrollo Deportivo</p>
             </div>
+
+            <!-- TOGGLE PESTAÑAS LOGIN / REGISTRO (VISIBLE EN PC Y MÓVIL) -->
+            <div class="auth-tabs">
+                <button type="button" id="tab-login-btn" class="auth-tab-btn active">Ingresar</button>
+                <button type="button" id="tab-register-btn" class="auth-tab-btn">Registrarme</button>
+            </div>
             
+            <!-- FORMULARIO LOGIN -->
             <form id="login-form">
                 <div class="form-group">
-                    <label for="username">Usuario / CUIL</label>
+                    <label for="username">DNI / Usuario</label>
                     <div class="input-icon">
-                        <input type="text" id="username" placeholder="Ingresá tu usuario" required>
+                        <input type="text" id="username" placeholder="Ingresá tu DNI" required>
                     </div>
                 </div>
 
@@ -32,7 +39,36 @@
                     </div>
                 </div>
 
+                <div id="login-error" class="auth-error hidden"></div>
                 <button type="submit" class="btn-primary">Ingresar</button>
+            </form>
+
+            <!-- FORMULARIO REGISTRO -->
+            <form id="register-form" class="hidden">
+                <div class="form-group">
+                    <label for="reg-nombre">Nombre Completo</label>
+                    <div class="input-icon">
+                        <input type="text" id="reg-nombre" placeholder="Ingresá tu nombre y apellido" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-dni">DNI</label>
+                    <div class="input-icon">
+                        <input type="text" id="reg-dni" placeholder="Ingresá tu DNI" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password">Contraseña</label>
+                    <div class="input-icon">
+                        <input type="password" id="reg-password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div id="register-error" class="auth-error hidden"></div>
+                <div id="register-success" class="auth-success hidden"></div>
+                <button type="submit" class="btn-primary">Crear Cuenta</button>
             </form>
         </div>
     </div>
@@ -42,7 +78,6 @@
         <!-- HEADER -->
         <header class="main-header">
             <div class="header-left">
-                <!-- BOTÓN HAMBURGUESA CON TEXTO DIRECTO Y RUTA ASEGURADA -->
                 <button type="button" id="mobile-menu-btn" class="mobile-menu-toggle" aria-label="Abrir Menú">☰</button>
                 <div class="ba-logo-mini">BA</div>
                 <h1>Portal Deportes</h1>
@@ -50,8 +85,8 @@
             
             <div class="header-right">
                 <div class="user-info">
-                    <span id="user-badge" class="badge">DIRECTOR</span>
-                    <span id="user-name">Director DGDSYDD</span>
+                    <span id="user-badge" class="badge">DOCENTE</span>
+                    <span id="user-name">Usuario</span>
                 </div>
                 <button type="button" id="btn-logout" class="btn-logout">Salir</button>
             </div>
@@ -59,7 +94,7 @@
 
         <!-- ESTRUCTURA PRINCIPAL -->
         <div class="layout-body">
-            <!-- SOBRECAPA -->
+            <!-- SOBRECAPA MÓVIL -->
             <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
             <!-- NAVEGACIÓN LATERAL -->
