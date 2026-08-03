@@ -344,7 +344,6 @@ async function cargarCalendarioEventos() {
             return;
         }
 
-        // Ordenar por fecha ascendente
         pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
         calContainer.innerHTML = pedidos.map(p => {
@@ -469,6 +468,9 @@ async function eliminarPedido(id) {
     }
 }
 
+// ==========================================
+// FUNCIÓN CORREGIDA DE DESCARGA PDF
+// ==========================================
 function descargarReportePDF() {
     if (!pedidosCargadosCache || pedidosCargadosCache.length === 0) {
         alert('No hay pedidos registrados para descargar.');
@@ -476,55 +478,64 @@ function descargarReportePDF() {
     }
 
     const printArea = document.createElement('div');
-    printArea.style.width = '790px';
-    printArea.style.padding = '25px';
+    printArea.style.width = '190mm';
+    printArea.style.padding = '0';
+    printArea.style.margin = '0 auto';
     printArea.style.backgroundColor = '#ffffff';
     printArea.style.fontFamily = 'Arial, sans-serif';
     printArea.style.boxSizing = 'border-box';
-    printArea.style.color = '#333333';
+    printArea.style.color = '#1a202c';
 
     let contentHTML = `
-        <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
-            <h1 style="font-size: 20px; margin: 0; color: #111;">Reporte Oficial de Pedidos de Eventos</h1>
-            <p style="font-size: 12px; color: #666; margin: 4px 0 0 0;">Generado el: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}</p>
+        <div style="border-bottom: 3px solid #0056b3; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="font-size: 20px; margin: 0; color: #1d2b36; font-weight: bold;">Reporte Oficial de Pedidos de Eventos</h1>
+                <p style="font-size: 11px; color: #4a5568; margin: 4px 0 0 0;">Dirección General de Deporte Social y Desarrollo Deportivo - CABA</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="font-size: 10px; color: #718096; margin: 0;">Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}</p>
+            </div>
         </div>
     `;
 
     pedidosCargadosCache.forEach((p, index) => {
         contentHTML += `
-            <div style="border: 1px solid #ccc; border-radius: 6px; padding: 15px; margin-bottom: 18px; page-break-inside: avoid; background-color: #fafafa;">
-                <h2 style="font-size: 16px; margin: 0 0 10px 0; color: #000; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-                    ${index + 1}. ${p.titulo || 'Sin título'}
-                </h2>
-                <table style="width: 100%; font-size: 12px; border-collapse: collapse; line-height: 1.5;">
+            <div style="border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px; margin-bottom: 16px; page-break-inside: avoid; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px;">
+                    <h2 style="font-size: 15px; margin: 0; color: #0056b3; font-weight: bold;">
+                        ${index + 1}. ${p.titulo || 'Sin título'}
+                    </h2>
+                </div>
+                <table style="width: 100%; font-size: 11px; border-collapse: collapse; line-height: 1.6; color: #2d3748;">
                     <tr>
-                        <td style="padding: 3px 0; width: 50%;"><strong>Área Responsable:</strong> ${p.areaResponsable || '-'}</td>
-                        <td style="padding: 3px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
+                        <td style="padding: 2px 0; width: 50%;"><strong>Área:</strong> ${p.areaResponsable || '-'}</td>
+                        <td style="padding: 2px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 3px 0;"><strong>Fecha del Evento:</strong> ${p.fecha || '-'}</td>
-                        <td style="padding: 3px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
+                        <td style="padding: 2px 0;"><strong>Fecha:</strong> ${p.fecha || '-'}</td>
+                        <td style="padding: 2px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 3px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
+                        <td style="padding: 2px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 3px 0;"><strong>Responsable:</strong> ${p.responsableNombre || '-'}</td>
-                        <td style="padding: 3px 0;"><strong>DNI / Teléfono:</strong> ${p.responsableDni || '-'} / ${p.responsableTelefono || '-'}</td>
+                        <td style="padding: 2px 0;"><strong>Responsable:</strong> ${p.responsableNombre || '-'}</td>
+                        <td style="padding: 2px 0;"><strong>Contacto:</strong> DNI ${p.responsableDni || '-'} | Tel: ${p.responsableTelefono || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 3px 0;"><strong>Participantes Aprox:</strong> ${p.participantesAprox || 0}</td>
-                        <td style="padding: 3px 0;"><strong>Público General:</strong> ${p.publicoGeneral || 0}</td>
+                        <td style="padding: 2px 0;"><strong>Participantes Est.:</strong> ${p.participantesAprox || 0}</td>
+                        <td style="padding: 2px 0;"><strong>Público General Est.:</strong> ${p.publicoGeneral || 0}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 3px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
-                        <td style="padding: 3px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'}</td>
+                        <td style="padding: 2px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
+                        <td style="padding: 2px 0;"><strong>Suspende Lluvia:</strong> ${p.suspendeLluvia || 'No'}</td>
                     </tr>
                 </table>
-                <div style="font-size: 12px; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 8px;">
-                    <p style="margin: 3px 0;"><strong>Descripción:</strong> ${p.descripcion || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Objetivo:</strong> ${p.objetivo || '-'}</p>
-                </div>
+                ${(p.descripcion || p.objetivo) ? `
+                <div style="font-size: 11px; margin-top: 8px; border-top: 1px dashed #e2e8f0; padding-top: 6px; color: #4a5568;">
+                    ${p.descripcion ? `<p style="margin: 2px 0;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
+                    ${p.objetivo ? `<p style="margin: 2px 0;"><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
+                </div>` : ''}
             </div>
         `;
     });
@@ -533,11 +544,12 @@ function descargarReportePDF() {
     document.body.appendChild(printArea);
 
     const opt = {
-        margin:       0.4,
+        margin:       10, // 10mm de margen alrededor de toda la página
         filename:     `reporte-pedidos-${new Date().toISOString().slice(0, 10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
     html2pdf().set(opt).from(printArea).save().then(() => {
