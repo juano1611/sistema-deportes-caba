@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Solicitud de Eventos - Deporte Social</title>
+    <title>Portal de Eventos BA - Deporte Social</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Librería para generación de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,8 +13,18 @@
     <!-- VISTA DE LOGIN -->
     <div id="login-view" class="auth-wrapper">
         <div class="auth-card">
+            
+            <!-- TARJETA DE BIENVENIDA CON IMAGEN -->
+            <div class="welcome-card">
+                <img src="banner-bienvenida.jpg" alt="Bienvenida Portal de Eventos BA" class="welcome-img" onerror="this.style.display='none'">
+                <div class="welcome-text">
+                    <h3>¡Bienvenido/a al Portal!</h3>
+                    <p>Espacio institucional para la planificación, solicitud y coordinación de eventos deportivos y sociales.</p>
+                </div>
+            </div>
+
             <div class="auth-header">
-                <h2>Sistema de Gestión de Eventos</h2>
+                <h2>Portal de Eventos BA</h2>
                 <p>Dirección General de Deporte Social y Desarrollo Deportivo</p>
             </div>
             
@@ -65,7 +75,7 @@
         <header class="main-header">
             <div class="header-left">
                 <button id="mobile-menu-btn" class="mobile-menu-toggle">☰</button>
-                <span class="header-title">Sistema de Gestión de Eventos</span>
+                <span class="header-title">Portal de Eventos BA</span>
             </div>
             <div class="header-right">
                 <div class="user-info">
