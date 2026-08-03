@@ -306,42 +306,52 @@ body {
     display: block;
 }
 
-/* TARJETA DE INICIO (AJUSTADA Y MODERADA) */
+/* TARJETA DE INICIO (ESTRICTAMENTE CONTROLADA Y ELEGANTE) */
 .inicio-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px 10px;
+    width: 100%;
 }
 
 .welcome-card {
     background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     border: 1px solid #e2e8f0;
-    max-width: 650px;
+    max-width: 520px; /* Límite de ancho para que no se extienda en toda la pantalla */
     width: 100%;
-    padding: 30px;
+    padding: 28px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    margin: 0 auto;
 }
 
 .welcome-image-box {
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 12px;
 }
 
 .welcome-img {
-    max-width: 280px;
-    max-height: 220px;
-    width: auto;
+    width: 100%;
+    max-width: 440px; /* Tamaño máximo moderado para el banner */
     height: auto;
+    max-height: 260px;
     object-fit: contain;
-    border-radius: 12px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.welcome-img:hover {
+    transform: scale(1.02);
 }
 
 .welcome-text h2 {
@@ -354,7 +364,7 @@ body {
 .welcome-text p {
     font-size: 14px;
     color: #4a5568;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 /* PANELES DE OTRAS SECCIONES */
@@ -695,11 +705,12 @@ body {
     .welcome-card {
         padding: 20px 15px;
         border-radius: 12px;
+        max-width: 100%;
     }
 
     .welcome-img {
-        max-width: 200px;
-        max-height: 160px;
+        max-width: 280px;
+        max-height: 180px;
     }
 
     .welcome-text h2 {
