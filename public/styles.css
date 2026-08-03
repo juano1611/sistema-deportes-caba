@@ -256,56 +256,6 @@ body {
     background: rgba(255,255,255,0.15);
 }
 
-/* TARJETA DE BIENVENIDA (INICIO) */
-.welcome-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    overflow: hidden;
-    max-width: 900px;
-    margin: 0 auto;
-    border: 1px solid #e2e8f0;
-}
-
-.welcome-banner-wrapper {
-    width: 100%;
-    max-height: 380px;
-    background-color: #f7fafc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.welcome-banner-img {
-    width: 100%;
-    height: auto;
-    max-height: 380px;
-    object-fit: contain;
-    display: block;
-}
-
-.welcome-body {
-    padding: 30px;
-    text-align: center;
-}
-
-.welcome-body h2 {
-    font-size: 22px;
-    color: #1a202c;
-    margin-bottom: 12px;
-    font-weight: 700;
-}
-
-.welcome-body p {
-    font-size: 15px;
-    color: #4a5568;
-    line-height: 1.6;
-    max-width: 700px;
-    margin: 0 auto;
-}
-
 /* LAYOUT BODY */
 .layout-body {
     display: flex;
@@ -356,6 +306,58 @@ body {
     display: block;
 }
 
+/* TARJETA DE INICIO (AJUSTADA Y MODERADA) */
+.inicio-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 10px;
+}
+
+.welcome-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    max-width: 650px;
+    width: 100%;
+    padding: 30px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.welcome-image-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.welcome-img {
+    max-width: 280px;
+    max-height: 220px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.welcome-text h2 {
+    font-size: 20px;
+    color: #1d2b36;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.welcome-text p {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.5;
+}
+
+/* PANELES DE OTRAS SECCIONES */
 .panel {
     background: #ffffff;
     padding: 24px;
@@ -643,7 +645,7 @@ body {
     }
 
     .header-title {
-        display: none; /* Se oculta para dar espacio limpio al logo y datos del usuario */
+        display: none;
     }
 
     .mobile-menu-toggle {
@@ -690,15 +692,21 @@ body {
         padding: 16px;
     }
 
-    .welcome-body {
-        padding: 20px 16px;
+    .welcome-card {
+        padding: 20px 15px;
+        border-radius: 12px;
     }
 
-    .welcome-body h2 {
-        font-size: 18px;
+    .welcome-img {
+        max-width: 200px;
+        max-height: 160px;
     }
 
-    .welcome-body p {
+    .welcome-text h2 {
+        font-size: 17px;
+    }
+
+    .welcome-text p {
         font-size: 13px;
     }
 
