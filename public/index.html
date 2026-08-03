@@ -100,7 +100,7 @@
             <!-- SECCIÓN 1: SOLICITUDES Y GESTIÓN DE DIRECTOR -->
             <section id="tab-solicitudes" class="tab-content active">
                 
-                <!-- VISTA DE DIRECTOR (Panel de control + Descarga PDF) -->
+                <!-- VISTA DE DIRECTOR -->
                 <div id="director-pedidos-container" class="director-panel hidden">
                     <div class="panel-header">
                         <div>
@@ -167,7 +167,7 @@
                         </div>
                     </div>
 
-                    <!-- PUNTO 2: RESPONSABLE DE LA SOLICITUD -->
+                    <!-- PUNTO 2: RESPONSABLE -->
                     <div class="form-section">
                         <h3>2. Responsable de la Solicitud</h3>
                         <div class="form-group">
@@ -277,7 +277,6 @@
                             </select>
                         </div>
 
-                        <!-- Casilleros dinámicos de profesores -->
                         <div id="contenedor-profesores"></div>
                     </div>
 
@@ -323,7 +322,7 @@
 
             </section>
 
-            <!-- SECCIÓN 2: CALENDARIO DE EVENTOS -->
+            <!-- SECCIÓN 2: CALENDARIO -->
             <section id="tab-calendario" class="tab-content">
                 <div class="calendar-header">
                     <h2>Calendario General de Eventos</h2>
@@ -337,13 +336,14 @@
         </main>
     </div>
 
-    <!-- MODAL DE EDICIÓN PARA EL DIRECTOR -->
+    <!-- MODAL DE EDICIÓN COMPLETO CON TODOS LOS CAMPOS -->
     <div id="modal-editar" class="modal-overlay hidden">
-        <div class="modal-card">
-            <h3>Editar Solicitud de Evento</h3>
+        <div class="modal-card" style="max-height: 90vh; overflow-y: auto;">
+            <h3>Editar Solicitud de Evento (Completo)</h3>
             <form id="form-editar-pedido">
                 <input type="hidden" id="edit-id">
                 
+                <!-- 1. Datos Generales -->
                 <div class="form-group">
                     <label>Título:</label>
                     <input type="text" id="edit-titulo" required>
@@ -376,8 +376,9 @@
                     <input type="text" id="edit-lugar" required>
                 </div>
 
+                <!-- 2. Responsable -->
                 <div class="form-group">
-                    <label>Responsable:</label>
+                    <label>Responsable Nombre:</label>
                     <input type="text" id="edit-resp-nombre" required>
                 </div>
 
@@ -392,6 +393,7 @@
                     </div>
                 </div>
 
+                <!-- 3. Concurrencia -->
                 <div class="grid-2-col">
                     <div class="form-group">
                         <label>Participantes Est.:</label>
@@ -403,6 +405,7 @@
                     </div>
                 </div>
 
+                <!-- 4. Logística y Transporte -->
                 <div class="grid-2-col">
                     <div class="form-group">
                         <label>¿Ambulancia?:</label>
@@ -418,20 +421,92 @@
                 </div>
 
                 <div class="form-group">
-                    <label>¿Se suspende por lluvia?:</label>
-                    <select id="edit-lluvia">
-                        <option value="No">No</option>
-                        <option value="Sí">Sí</option>
-                    </select>
+                    <label>Transporte de Pasajeros:</label>
+                    <input type="text" id="edit-transporte">
+                </div>
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label>Salida (Hora y Lugar):</label>
+                        <input type="text" id="edit-transporte-salida">
+                    </div>
+                    <div class="form-group">
+                        <label>Regreso (Hora y Lugar):</label>
+                        <input type="text" id="edit-transporte-regreso">
+                    </div>
+                </div>
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label>Responsable Micro (Nombre):</label>
+                        <input type="text" id="edit-transporte-resp-nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Responsable Micro (Tel):</label>
+                        <input type="tel" id="edit-transporte-resp-tel">
+                    </div>
+                </div>
+
+                <!-- 5. Necesidades -->
+                <div class="form-group">
+                    <label>Necesidades Técnicas:</label>
+                    <textarea id="edit-necesidades" rows="2"></textarea>
+                </div>
+
+                <!-- 6. Personal y ART -->
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label>¿Extensión de ART?:</label>
+                        <select id="edit-ext-art">
+                            <option value="No">No</option>
+                            <option value="Sí">Sí</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Horario Docente:</label>
+                        <input type="text" id="edit-horario-doc">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Profesores Asignados (Separados por coma):</label>
+                    <input type="text" id="edit-profesores" placeholder="Ej: Juan Pérez, María Gómez">
+                </div>
+
+                <!-- 7. Prensa -->
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label>¿Prensa / Redes?:</label>
+                        <select id="edit-prensa">
+                            <option value="No">No</option>
+                            <option value="Sí">Sí</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Difusión:</label>
+                        <input type="text" id="edit-difusion">
+                    </div>
+                </div>
+
+                <!-- 8. Lluvia -->
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label>¿Se suspende por lluvia?:</label>
+                        <select id="edit-lluvia">
+                            <option value="No">No</option>
+                            <option value="Sí">Sí</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Reprogramación:</label>
+                        <input type="date" id="edit-fecha-reprogramacion">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Descripción:</label>
+                    <label>Descripción General:</label>
                     <textarea id="edit-descripcion" rows="2"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Objetivo:</label>
+                    <label>Objetivos:</label>
                     <textarea id="edit-objetivo" rows="2"></textarea>
                 </div>
 
