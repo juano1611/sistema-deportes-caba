@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMobileMenu();
     initAuthEvents();
     initPedidoForm();
+    initEditForm();
     checkSession();
 });
 
@@ -281,6 +282,7 @@ function initPedidoForm() {
                     msgBox.classList.remove('hidden');
                 }
                 formPedido.reset();
+                cargarCalendarioEventos();
             } catch (err) {
                 alert('Error al conectar con el servidor');
             }
@@ -288,7 +290,7 @@ function initPedidoForm() {
     }
 }
 
-// Variable global para almacenar pedidos y renderizar el PDF
+// Variable global para almacenar pedidos y renderizar PDF o Edición
 let pedidosCargadosCache = [];
 
 async function cargarPedidosDirector() {
@@ -307,19 +309,22 @@ async function cargarPedidosDirector() {
 
         listaContainer.innerHTML = pedidos.map(p => `
             <div class="pedido-card">
-                <h3 style="margin-bottom:8px; color:#1a1a1a;">${p.titulo || 'Sin título'}</h3>
-                <p><strong>Programa / Área:</strong> ${p.programa || '-'} | ${p.areaResponsable || '-'}</p>
-                <p><strong>Fecha y Horario:</strong> ${p.fecha || '-'} (${p.horario || '-'})</p>
-                <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
-                <p><strong>Solicitante:</strong> ${p.responsableNombre || '-'} (DNI: ${p.responsableDni || '-'}) - Tel: ${p.responsableTelefono || '-'}</p>
-                <p><strong>Participantes Aprox:</strong> ${p.participantesAprox || 0} | <strong>Público General:</strong> ${p.publicoGeneral || 0}</p>
-                <p><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''} | <strong>Lluvia:</strong> ${p.suspendeLluvia || 'No'}</p>
-                ${p.descripcion ? `<p><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
-                ${p.objetivo ? `<p><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
-                ${p.necesidades ? `<p><strong>Necesidades Técnicas/Logística:</strong> ${p.necesidades}</p>` : ''}
-                ${p.articulaciones ? `<p><strong>Articulaciones:</strong> ${p.articulaciones}</p>` : ''}
-                ${p.transportePasajeros ? `<p><strong>Transporte:</strong> ${p.transportePasajeros}</p>` : ''}
-                ${p.seguro ? `<p><strong>Seguro:</strong> ${p.seguro}</p>` : ''}
+                <div class="pedido-card-header">
+                    <h4>${p.titulo || 'Sin título'}</h4>
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" onclick="abrirModalEdicion('${p._id}')">✏️ Editar</button>
+                        <button class="btn-action btn-delete" onclick="eliminarPedido('${p._id}')">🗑️ Eliminar</button>
+                    </div>
+                </div>
+                <div class="pedido-card-body-grid">
+                    <p><strong>Programa / Área:</strong> ${p.programa || '-'} | ${p.areaResponsable || '-'}</p>
+                    <p><strong>Fecha y Horario:</strong> ${p.fecha || '-'} (${p.horario || '-'})</p>
+                    <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
+                    <p><strong>Solicitante:</strong> ${p.responsableNombre || '-'} (DNI: ${p.responsableDni || '-'}) - Tel: ${p.responsableTelefono || '-'}</p>
+                    <p><strong>Participantes Aprox:</strong> ${p.participantesAprox || 0} | <strong>Público:</strong> ${p.publicoGeneral || 0}</p>
+                    <p><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''} | <strong>Lluvia:</strong> ${p.suspendeLluvia || 'No'}</p>
+                </div>
+                ${p.descripcion ? `<p style="font-size:13px; margin-top:8px;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
             </div>
         `).join('');
     } catch (err) {
@@ -327,8 +332,150 @@ async function cargarPedidosDirector() {
     }
 }
 
+// Carga y orden cronológico de eventos en la pestaña Calendario
 async function cargarCalendarioEventos() {
-    // Espacio para renderizar vista de calendario si es requerido
+    const calContainer = document.getElementById('calendario-container');
+    if (!calContainer) return;
+
+    try {
+        const res = await fetch('/api/pedidos');
+        const pedidos = await res.json();
+
+        if (pedidos.length === 0) {
+            calContainer.innerHTML = '<p class="no-events">No hay eventos programados en el calendario.</p>';
+            return;
+        }
+
+        // Ordenar por fecha de forma ascendente
+        pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+        const hoyStr = new Date().toISOString().split('T')[0];
+
+        calContainer.innerHTML = pedidos.map(p => {
+            const esPasado = p.fecha < hoyStr;
+            const fechaFormateada = p.fecha ? p.fecha.split('-').reverse().join('/') : 'Sin fecha';
+
+            return `
+                <div class="event-cal-card ${esPasado ? 'event-pasado' : ''}">
+                    <div class="event-cal-date">
+                        <span>📅 ${fechaFormateada}</span>
+                        <span class="cal-time">⏰ ${p.horario || 'Horario no especificado'}</span>
+                    </div>
+                    <div class="event-cal-info">
+                        <h3>${p.titulo || 'Sin título'}</h3>
+                        <p>📍 <strong>Lugar:</strong> ${p.lugar || '-'}</p>
+                        <p>🏢 <strong>Área/Programa:</strong> ${p.areaResponsable || '-'} ${p.programa ? `(${p.programa})` : ''}</p>
+                        <p>👤 <strong>Responsable:</strong> ${p.responsableNombre || '-'}</p>
+                        ${p.descripcion ? `<p class="cal-desc">📝 ${p.descripcion}</p>` : ''}
+                    </div>
+                    ${esPasado ? '<span class="tag-pasado">Finalizado</span>' : '<span class="tag-proximo">Próximo</span>'}
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        calContainer.innerHTML = '<p>Error al cargar el calendario de eventos.</p>';
+    }
+}
+
+// -------------------------------------------------------------
+// FUNCIONES DE EDICIÓN Y ELIMINACIÓN PARA EL DIRECTOR
+// -------------------------------------------------------------
+
+function abrirModalEdicion(id) {
+    const pedido = pedidosCargadosCache.find(p => p._id === id);
+    if (!pedido) return;
+
+    document.getElementById('edit-id').value = pedido._id;
+    document.getElementById('edit-titulo').value = pedido.titulo || '';
+    document.getElementById('edit-area').value = pedido.areaResponsable || '';
+    document.getElementById('edit-programa').value = pedido.programa || '';
+    document.getElementById('edit-fecha').value = pedido.fecha || '';
+    document.getElementById('edit-horario').value = pedido.horario || '';
+    document.getElementById('edit-lugar').value = pedido.lugar || '';
+    document.getElementById('edit-resp-nombre').value = pedido.responsableNombre || '';
+    document.getElementById('edit-resp-dni').value = pedido.responsableDni || '';
+    document.getElementById('edit-resp-tel').value = pedido.responsableTelefono || '';
+    document.getElementById('edit-part-aprox').value = pedido.participantesAprox || 0;
+    document.getElementById('edit-pub-gral').value = pedido.publicoGeneral || 0;
+    document.getElementById('edit-ambulancia').value = pedido.ambulancia || 'No';
+    document.getElementById('edit-amb-horario').value = pedido.ambulanciaHorario || '';
+    document.getElementById('edit-lluvia').value = pedido.suspendeLluvia || 'Sí';
+    document.getElementById('edit-descripcion').value = pedido.descripcion || '';
+    document.getElementById('edit-objetivo').value = pedido.objetivo || '';
+
+    document.getElementById('modal-editar').classList.remove('hidden');
+}
+
+function cerrarModalEdicion() {
+    document.getElementById('modal-editar').classList.add('hidden');
+}
+
+function initEditForm() {
+    const editForm = document.getElementById('form-editar-pedido');
+    if (editForm) {
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+
+            const datosActualizados = {
+                titulo: document.getElementById('edit-titulo').value.trim(),
+                areaResponsable: document.getElementById('edit-area').value.trim(),
+                programa: document.getElementById('edit-programa').value.trim(),
+                fecha: document.getElementById('edit-fecha').value,
+                horario: document.getElementById('edit-horario').value.trim(),
+                lugar: document.getElementById('edit-lugar').value.trim(),
+                responsableNombre: document.getElementById('edit-resp-nombre').value.trim(),
+                responsableDni: document.getElementById('edit-resp-dni').value.trim(),
+                responsableTelefono: document.getElementById('edit-resp-tel').value.trim(),
+                participantesAprox: Number(document.getElementById('edit-part-aprox').value),
+                publicoGeneral: Number(document.getElementById('edit-pub-gral').value),
+                ambulancia: document.getElementById('edit-ambulancia').value,
+                ambulanciaHorario: document.getElementById('edit-amb-horario').value.trim(),
+                suspendeLluvia: document.getElementById('edit-lluvia').value,
+                descripcion: document.getElementById('edit-descripcion').value.trim(),
+                objetivo: document.getElementById('edit-objetivo').value.trim()
+            };
+
+            try {
+                const res = await fetch(`/api/pedidos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosActualizados)
+                });
+
+                if (res.ok) {
+                    alert('✅ Pedido modificado con éxito');
+                    cerrarModalEdicion();
+                    cargarPedidosDirector();
+                    cargarCalendarioEventos();
+                } else {
+                    alert('Error al modificar el pedido');
+                }
+            } catch (err) {
+                alert('Error al conectar con el servidor');
+            }
+        });
+    }
+}
+
+async function eliminarPedido(id) {
+    if (!confirm('¿Estás seguro/a de eliminar este evento de la base de datos?')) return;
+
+    try {
+        const res = await fetch(`/api/pedidos/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            alert('🗑️ Pedido eliminado correctamente');
+            cargarPedidosDirector();
+            cargarCalendarioEventos();
+        } else {
+            alert('Error al eliminar el pedido');
+        }
+    } catch (err) {
+        alert('Error al conectar con el servidor');
+    }
 }
 
 function descargarReportePDF() {
@@ -337,7 +484,6 @@ function descargarReportePDF() {
         return;
     }
 
-    // Contenedor temporal de renderizado PDF con tamaño fijo A4
     const printArea = document.createElement('div');
     printArea.style.width = '790px';
     printArea.style.padding = '25px';
@@ -383,21 +529,10 @@ function descargarReportePDF() {
                         <td style="padding: 3px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
                         <td style="padding: 3px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'}</td>
                     </tr>
-                    <tr>
-                        <td style="padding: 3px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
-                        <td style="padding: 3px 0;"><strong>Prensa / Difusión:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
-                    </tr>
                 </table>
-
                 <div style="font-size: 12px; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 8px;">
                     <p style="margin: 3px 0;"><strong>Descripción:</strong> ${p.descripcion || '-'}</p>
                     <p style="margin: 3px 0;"><strong>Objetivo:</strong> ${p.objetivo || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Necesidades Técnicas / Logística:</strong> ${p.necesidades || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Articulaciones:</strong> ${p.articulaciones || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Transporte de Pasajeros:</strong> ${p.transportePasajeros || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Seguro:</strong> ${p.seguro || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Situación Revista / Horario Docente:</strong> ${p.situacionRevista || '-'} / ${p.horarioDocente || '-'}</p>
-                    <p style="margin: 3px 0;"><strong>Timing / Desarme:</strong> ${p.timingEvento || '-'} / ${p.desarmeEvento || '-'}</p>
                 </div>
             </div>
         `;

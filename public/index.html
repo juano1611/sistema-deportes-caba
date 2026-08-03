@@ -103,7 +103,7 @@
                             <p>Dirección General de Deporte Social y Desarrollo Deportivo. Gestión integral de solicitudes, eventos e infraestructura de la Ciudad de Buenos Aires.</p>
                         </div>
                         <div class="hero-image">
-                            <img src="banner-deportes.jpg" alt="Banner Deportes BA" id="main-banner">
+                            <img src="banner-deportes_3.jpg" alt="Banner Deportes BA" id="main-banner">
                         </div>
                     </div>
                 </section>
@@ -284,13 +284,16 @@
                     </div>
                 </section>
 
+                <!-- CALENDARIO -->
                 <section id="tab-calendario" class="tab-content">
                     <div class="panel">
                         <h2>Calendario General de Eventos</h2>
-                        <p>Cronograma actualizado de actividades.</p>
+                        <p class="section-desc">Cronograma completo de actividades ordenado dinámicamente por fecha.</p>
+                        <div id="calendario-container" class="calendario-grid"></div>
                     </div>
                 </section>
 
+                <!-- CERTIFICADOS -->
                 <section id="tab-certificados" class="tab-content">
                     <div class="panel">
                         <h2>Emisión de Certificados</h2>
@@ -298,6 +301,98 @@
                     </div>
                 </section>
             </main>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDICIÓN PARA DIRECTOR -->
+    <div id="modal-editar" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Editar Solicitud de Evento</h3>
+                <button type="button" class="btn-close-modal" onclick="cerrarModalEdicion()">✕</button>
+            </div>
+            <form id="form-editar-pedido" class="modal-body">
+                <input type="hidden" id="edit-id">
+                
+                <div class="form-grid">
+                    <div class="form-group grid-col-2">
+                        <label>Título del Evento</label>
+                        <input type="text" id="edit-titulo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Área Responsable</label>
+                        <input type="text" id="edit-area">
+                    </div>
+                    <div class="form-group">
+                        <label>Programa</label>
+                        <input type="text" id="edit-programa">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="edit-fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horario</label>
+                        <input type="text" id="edit-horario" required>
+                    </div>
+                    <div class="form-group grid-col-2">
+                        <label>Lugar / Sede</label>
+                        <input type="text" id="edit-lugar" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsable</label>
+                        <input type="text" id="edit-resp-nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>DNI Responsable</label>
+                        <input type="text" id="edit-resp-dni">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="edit-resp-tel">
+                    </div>
+                    <div class="form-group">
+                        <label>Participantes Aprox.</label>
+                        <input type="number" id="edit-part-aprox">
+                    </div>
+                    <div class="form-group">
+                        <label>Público General Est.</label>
+                        <input type="number" id="edit-pub-gral">
+                    </div>
+                    <div class="form-group">
+                        <label>Ambulancia</label>
+                        <select id="edit-ambulancia">
+                            <option value="No">No</option>
+                            <option value="Sí">Sí</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Horario Ambulancia</label>
+                        <input type="text" id="edit-amb-horario">
+                    </div>
+                    <div class="form-group">
+                        <label>Se suspende por lluvia</label>
+                        <select id="edit-lluvia">
+                            <option value="Sí">Sí</option>
+                            <option value="No (Posee espacio cubierto)">No (Posee espacio cubierto)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="edit-descripcion" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Objetivo</label>
+                    <textarea id="edit-objetivo" rows="2"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
         </div>
     </div>
 

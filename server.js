@@ -175,11 +175,43 @@ app.post('/api/pedidos', async (req, res) => {
 // Obtener todos los pedidos
 app.get('/api/pedidos', async (req, res) => {
     try {
-        const pedidos = await Pedido.find().sort({ createdAt: -1 });
+        const pedidos = await Pedido.find().sort({ fecha: 1 });
         return res.json(pedidos);
     } catch (err) {
         console.error("Error al obtener pedidos:", err);
         return res.status(500).json({ msg: 'Error al consultar la base de datos' });
+    }
+});
+
+// Modificar un pedido por ID
+app.put('/api/pedidos/:id', async (req, res) => {
+    try {
+        const pedidoActualizado = await Pedido.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!pedidoActualizado) {
+            return res.status(404).json({ msg: 'Pedido no encontrado' });
+        }
+        return res.json({ msg: 'Pedido actualizado con éxito', pedido: pedidoActualizado });
+    } catch (err) {
+        console.error("Error al actualizar pedido:", err);
+        return res.status(500).json({ msg: 'Error al actualizar el pedido' });
+    }
+});
+
+// Eliminar un pedido por ID
+app.delete('/api/pedidos/:id', async (req, res) => {
+    try {
+        const pedidoEliminado = await Pedido.findByIdAndDelete(req.params.id);
+        if (!pedidoEliminado) {
+            return res.status(404).json({ msg: 'Pedido no encontrado' });
+        }
+        return res.json({ msg: 'Pedido eliminado correctamente' });
+    } catch (err) {
+        console.error("Error al eliminar pedido:", err);
+        return res.status(500).json({ msg: 'Error al eliminar el pedido' });
     }
 });
 
