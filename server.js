@@ -19,8 +19,37 @@ app.use(express.static(path.join(__dirname, 'public')));
 // -------------------------------------------------------------
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://juano1611:juano1611@cluster0.lldgqos.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ Conectado con éxito a MongoDB Cloud'))
+    .then(() => {
+        console.log('✅ Conectado con éxito a MongoDB Cloud');
+        // Limpiar eventos caducados al arrancar el servidor
+        eliminarEventosPasados();
+    })
     .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
+
+// -------------------------------------------------------------
+// FUNCIÓN AUTOMÁTICA DE LIMPIEZA DE EVENTOS PASADOS
+// -------------------------------------------------------------
+async function eliminarEventosPasados() {
+    try {
+        // Obtener la fecha actual en formato YYYY-MM-DD local
+        const hoy = new Date();
+        const year = hoy.getFullYear();
+        const month = String(hoy.getMonth() + 1).padStart(2, '0');
+        const day = String(hoy.getDate()).padStart(2, '0');
+        const fechaHoyStr = `${year}-${month}-${day}`;
+
+        // Eliminar pedidos donde la fecha sea estrictamente menor a hoy
+        const resultado = await Pedido.deleteMany({ fecha: { $lt: fechaHoyStr } });
+        if (resultado.deletedCount > 0) {
+            console.log(`🧹 Limpieza automática: Se eliminaron ${resultado.deletedCount} evento(s) vencido(s).`);
+        }
+    } catch (err) {
+        console.error('❌ Error al ejecutar la limpieza automática de eventos:', err);
+    }
+}
+
+// Ejecutar limpieza automática cada 12 horas (43,200,000 ms)
+setInterval(eliminarEventosPasados, 12 * 60 * 60 * 1000);
 
 // -------------------------------------------------------------
 // MODELOS DE BASE DE DATOS
@@ -172,10 +201,20 @@ app.post('/api/pedidos', async (req, res) => {
     }
 });
 
-// Obtener todos los pedidos
+// Obtener todos los pedidos (Filtra automáticamente eventos pasados)
 app.get('/api/pedidos', async (req, res) => {
     try {
-        const pedidos = await Pedido.find().sort({ fecha: 1 });
+        // Ejecutar primero la limpieza
+        await eliminarEventosPasados();
+
+        // Obtener la fecha de hoy para devolver solo vigentes
+        const hoy = new Date();
+        const year = hoy.getFullYear();
+        const month = String(hoy.getMonth() + 1).padStart(2, '0');
+        const day = String(hoy.getDate()).padStart(2, '0');
+        const fechaHoyStr = `${year}-${month}-${day}`;
+
+        const pedidos = await Pedido.find({ fecha: { $gte: fechaHoyStr } }).sort({ fecha: 1 });
         return res.json(pedidos);
     } catch (err) {
         console.error("Error al obtener pedidos:", err);
@@ -215,7 +254,7 @@ app.delete('/api/pedidos/:id', async (req, res) => {
     }
 });
 
-// Enrutamiento para SPA (Cualquier otra ruta devuelve el index.html de public)
+// Enrutamiento para SPA
 app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

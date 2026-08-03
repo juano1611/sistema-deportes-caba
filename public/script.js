@@ -290,7 +290,6 @@ function initPedidoForm() {
     }
 }
 
-// Variable global para almacenar pedidos y renderizar PDF o Edición
 let pedidosCargadosCache = [];
 
 async function cargarPedidosDirector() {
@@ -303,7 +302,7 @@ async function cargarPedidosDirector() {
         pedidosCargadosCache = pedidos;
 
         if (pedidos.length === 0) {
-            listaContainer.innerHTML = '<p>No hay solicitudes registradas.</p>';
+            listaContainer.innerHTML = '<p>No hay solicitudes vigentes o pendientes.</p>';
             return;
         }
 
@@ -332,7 +331,6 @@ async function cargarPedidosDirector() {
     }
 }
 
-// Carga y orden cronológico de eventos en la pestaña Calendario
 async function cargarCalendarioEventos() {
     const calContainer = document.getElementById('calendario-container');
     if (!calContainer) return;
@@ -342,21 +340,18 @@ async function cargarCalendarioEventos() {
         const pedidos = await res.json();
 
         if (pedidos.length === 0) {
-            calContainer.innerHTML = '<p class="no-events">No hay eventos programados en el calendario.</p>';
+            calContainer.innerHTML = '<p class="no-events">No hay eventos próximos programados en el calendario.</p>';
             return;
         }
 
-        // Ordenar por fecha de forma ascendente
+        // Ordenar por fecha ascendente
         pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-        const hoyStr = new Date().toISOString().split('T')[0];
-
         calContainer.innerHTML = pedidos.map(p => {
-            const esPasado = p.fecha < hoyStr;
             const fechaFormateada = p.fecha ? p.fecha.split('-').reverse().join('/') : 'Sin fecha';
 
             return `
-                <div class="event-cal-card ${esPasado ? 'event-pasado' : ''}">
+                <div class="event-cal-card">
                     <div class="event-cal-date">
                         <span>📅 ${fechaFormateada}</span>
                         <span class="cal-time">⏰ ${p.horario || 'Horario no especificado'}</span>
@@ -368,7 +363,7 @@ async function cargarCalendarioEventos() {
                         <p>👤 <strong>Responsable:</strong> ${p.responsableNombre || '-'}</p>
                         ${p.descripcion ? `<p class="cal-desc">📝 ${p.descripcion}</p>` : ''}
                     </div>
-                    ${esPasado ? '<span class="tag-pasado">Finalizado</span>' : '<span class="tag-proximo">Próximo</span>'}
+                    <span class="tag-proximo">Próximo</span>
                 </div>
             `;
         }).join('');
@@ -376,10 +371,6 @@ async function cargarCalendarioEventos() {
         calContainer.innerHTML = '<p>Error al cargar el calendario de eventos.</p>';
     }
 }
-
-// -------------------------------------------------------------
-// FUNCIONES DE EDICIÓN Y ELIMINACIÓN PARA EL DIRECTOR
-// -------------------------------------------------------------
 
 function abrirModalEdicion(id) {
     const pedido = pedidosCargadosCache.find(p => p._id === id);

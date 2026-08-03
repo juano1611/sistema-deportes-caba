@@ -167,20 +167,24 @@ body {
     min-height: 100vh;
 }
 
+/* HEADER Y NAVEGACIÓN RESPONSIVE MEJORADA */
 .main-header {
     background-color: #1d2b36;
     color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 24px;
+    padding: 10px 20px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    gap: 10px;
+    flex-wrap: nowrap;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    min-width: 0;
 }
 
 .ba-logo-mini {
@@ -189,33 +193,45 @@ body {
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 13px;
+    flex-shrink: 0;
 }
 
 .header-left h1 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 6px;
+    font-size: 13px;
+}
+
+#user-name {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .badge {
     background-color: #4a5568;
     color: #fff;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 12px;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
     font-weight: 700;
 }
 
@@ -227,10 +243,11 @@ body {
     background: transparent;
     border: 1px solid #cbd5e0;
     color: #fff;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
+    white-space: nowrap;
 }
 
 .btn-logout:hover {
@@ -447,12 +464,6 @@ body {
     flex-direction: column;
 }
 
-.event-cal-card.event-pasado {
-    border-left-color: #a0aec0;
-    opacity: 0.8;
-    background-color: #f7fafc;
-}
-
 .event-cal-date {
     display: flex;
     align-items: center;
@@ -498,17 +509,6 @@ body {
     margin-top: 10px;
     background: #c6f6d5;
     color: #22543d;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-
-.tag-pasado {
-    align-self: flex-start;
-    margin-top: 10px;
-    background: #e2e8f0;
-    color: #4a5568;
     font-size: 11px;
     font-weight: bold;
     padding: 2px 8px;
@@ -594,12 +594,21 @@ body {
     background: none;
     border: none;
     color: #fff;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
+    line-height: 1;
 }
 
-/* RESPONSIVE MÓVIL */
+/* RESPONSIVE MÓVIL ESPECÍFICO */
 @media (max-width: 768px) {
+    .main-header {
+        padding: 10px 12px;
+    }
+
+    .header-left h1 {
+        display: none; /* Oculta título largo en móvil para no sobrecargar */
+    }
+
     .mobile-menu-toggle {
         display: block;
     }
@@ -655,5 +664,9 @@ body {
 
     .calendario-grid {
         grid-template-columns: 1fr;
+    }
+
+    #user-name {
+        max-width: 80px;
     }
 }
