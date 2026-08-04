@@ -9,9 +9,9 @@
     <meta http-equiv="Expires" content="0">
     
     <title>Portal de Eventos BA - Deporte Social</title>
-    <link rel="stylesheet" href="styles.css?v=3.0">
-    <!-- Librería para generación de PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="styles.css?v=4.0">
+    <!-- Librería jsPDF pura (vectorial, indestructible) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -492,7 +492,7 @@
         </div>
     </div>
 
-    <!-- CARGA DINÁMICA DE JS PARA EVITAR CACHÉ -->
+    <!-- CARGA DINÁMICA DE JS ANTI-CACHÉ -->
     <script>
         document.write('<script src="script.js?v=' + Date.now() + '"><\/script>');
     </script>

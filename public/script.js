@@ -573,13 +573,20 @@ async function eliminarPedido(id) {
     }
 }
 
-// NUEVA FUNCIÓN A PRUEBA DE HOJAS EN BLANCO
-async function descargarReporteEventoPDF(id) {
+// SISTEMA VECTORIAL PURO CON JSPDF - IMPOSIBLE QUE SALGA EN BLANCO
+function descargarReporteEventoPDF(id) {
     const p = pedidosCargadosCache.find(item => item._id === id);
     if (!p) {
         alert('No se encontraron los datos del evento.');
         return;
     }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+    });
 
     const profesores = (p.profesoresAsignados && p.profesoresAsignados.length > 0)
         ? p.profesoresAsignados.join(', ')
@@ -587,120 +594,102 @@ async function descargarReporteEventoPDF(id) {
 
     const fechaHoy = new Date().toLocaleDateString('es-AR');
 
-    // Creamos el contenedor asegurando que esté en el DOM activo con opacidad 0
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.top = '0';
-    container.style.left = '0';
-    container.style.width = '750px';
-    container.style.opacity = '0.01'; // Leve opacidad pero visible para html2canvas
-    container.style.pointerEvents = 'none';
-    container.style.zIndex = '-9999';
-    container.style.backgroundColor = '#ffffff';
-    container.style.padding = '30px';
-    container.style.boxSizing = 'border-box';
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.color = '#1f2937';
+    // Encabezado
+    doc.setFillColor(0, 43, 102); // Azul BA
+    doc.rect(15, 12, 180, 2, 'F');
 
-    container.innerHTML = `
-        <div style="border-bottom: 3px solid #002b66; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div>
-                <h1 style="font-size: 20px; margin: 0; color: #002b66; font-weight: bold; text-transform: uppercase;">REPORTE DE SOLICITUD DE EVENTO</h1>
-                <p style="font-size: 12px; color: #4b5563; margin: 4px 0 0 0;">Dirección General de Deporte Social y Desarrollo Deportivo - CABA</p>
-            </div>
-            <div style="text-align: right;">
-                <p style="font-size: 11px; color: #6b7280; margin: 0;"><strong>Emisión:</strong> ${fechaHoy}</p>
-            </div>
-        </div>
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(15);
+    doc.setTextColor(0, 43, 102);
+    doc.text("REPORTE DE SOLICITUD DE EVENTO", 15, 22);
 
-        <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 20px; background-color: #ffffff;">
-            <div style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; padding: 10px 14px; margin: -20px -20px 15px -20px; border-top-left-radius: 6px; border-top-right-radius: 6px;">
-                <h2 style="font-size: 16px; margin: 0; color: #002b66; font-weight: bold;">
-                    ${p.titulo || 'Sin Título'}
-                </h2>
-            </div>
-            
-            <table style="width: 100%; font-size: 12px; border-collapse: collapse; line-height: 1.8; color: #1f2937;">
-                <tr>
-                    <td style="padding: 5px 0; width: 50%;"><strong>Gerencia:</strong> ${p.gerencia || p.areaResponsable || '-'}</td>
-                    <td style="padding: 5px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;"><strong>Fecha Evento:</strong> ${p.fecha || '-'}</td>
-                    <td style="padding: 5px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;"><strong>Solicitante:</strong> ${p.responsableNombre || '-'}</td>
-                    <td style="padding: 5px 0;"><strong>Contacto:</strong> DNI ${p.responsableDni || '-'} | Tel: ${p.responsableTelefono || '-'}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;"><strong>Participantes Est.:</strong> ${p.participantesAprox || 0}</td>
-                    <td style="padding: 5px 0;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 'N/A'}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
-                    <td style="padding: 5px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;"><strong>Transporte:</strong> ${p.transportePasajeros || 'No'}</td>
-                    <td style="padding: 5px 0;"><strong>Salida/Regreso:</strong> ${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}</td>
-                </tr>
-                ${p.transporteRespNombre ? `
-                <tr>
-                    <td style="padding: 5px 0;" colspan="2"><strong>Resp. Micro:</strong> ${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})</td>
-                </tr>` : ''}
-                <tr>
-                    <td style="padding: 5px 0;" colspan="2"><strong>Profesores Asignados:</strong> ${profesores} (Horario: ${p.horarioDocente || '-'})</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0;"><strong>Prensa / Redes:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
-                    <td style="padding: 5px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}</td>
-                </tr>
-            </table>
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Dirección General de Deporte Social y Desarrollo Deportivo - CABA", 15, 27);
+    doc.text(`Emisión: ${fechaHoy}`, 195, 27, { align: 'right' });
 
-            ${(p.necesidades || p.descripcion || p.objetivo) ? `
-            <div style="font-size: 12px; margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 12px; color: #374151;">
-                ${p.necesidades ? `<p style="margin: 4px 0;"><strong>Necesidades Técnicas:</strong> ${p.necesidades}</p>` : ''}
-                ${p.descripcion ? `<p style="margin: 4px 0;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
-                ${p.objetivo ? `<p style="margin: 4px 0;"><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
-            </div>` : ''}
-        </div>
-    `;
+    // Tarjeta contenedora
+    doc.setDrawColor(203, 213, 225);
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(15, 32, 180, 245, 3, 3, 'FD');
 
-    document.body.appendChild(container);
+    // Título del evento
+    doc.setFillColor(241, 245, 249);
+    doc.rect(15, 32, 180, 12, 'F');
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(0, 43, 102);
+    doc.text(p.titulo || 'Sin Título', 20, 40);
 
-    // Forzamos al motor gráfico del navegador a procesar el alto e imagen
-    void container.offsetHeight;
+    // Grid de datos
+    let y = 52;
+    doc.setFontSize(9.5);
 
-    const tituloSanitizado = (p.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
-    
-    const opt = {
-        margin:       8,
-        filename:     `evento-${tituloSanitizado}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-            scale: 2, 
-            useCORS: true, 
-            logging: false,
-            scrollX: 0,
-            scrollY: 0
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+    function addRow(label1, val1, label2, val2) {
+        doc.setFont("Helvetica", "bold");
+        doc.setTextColor(31, 41, 55);
+        doc.text(label1, 20, y);
+        doc.setFont("Helvetica", "normal");
+        doc.text(String(val1 || '-'), 20 + doc.getTextWidth(label1) + 2, y);
 
-    // Esperamos 250ms asegurando pintado completo antes de guardar
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    try {
-        await html2pdf().set(opt).from(container).save();
-    } catch (err) {
-        alert('Ocurrió un error al generar el PDF.');
-    } finally {
-        if (document.body.contains(container)) {
-            document.body.removeChild(container);
+        if (label2) {
+            doc.setFont("Helvetica", "bold");
+            doc.text(label2, 110, y);
+            doc.setFont("Helvetica", "normal");
+            doc.text(String(val2 || '-'), 110 + doc.getTextWidth(label2) + 2, y);
         }
+        y += 8;
     }
+
+    addRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
+    addRow("Fecha Evento:", p.fecha, "Horario:", p.horario);
+    
+    doc.setFont("Helvetica", "bold");
+    doc.text("Lugar / Sede:", 20, y);
+    doc.setFont("Helvetica", "normal");
+    doc.text(String(p.lugar || '-'), 45, y);
+    y += 8;
+
+    addRow("Solicitante:", p.responsableNombre, "DNI / Tel:", `${p.responsableDni || '-'} / ${p.responsableTelefono || '-'}`);
+    addRow("Participantes Est.:", p.participantesAprox, "Público General:", p.publicoGeneral ?? 'N/A');
+    addRow("Ambulancia:", `${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}`, "Extensión ART:", p.extensionArt || 'No');
+    addRow("Transporte:", p.transportePasajeros || 'No', "Salida/Regreso:", `${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}`);
+
+    if (p.transporteRespNombre) {
+        addRow("Resp. Micro:", `${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})`);
+    }
+
+    doc.setFont("Helvetica", "bold");
+    doc.text("Profesores:", 20, y);
+    doc.setFont("Helvetica", "normal");
+    const profLines = doc.splitTextToSize(`${profesores} (Horario: ${p.horarioDocente || '-'})`, 135);
+    doc.text(profLines, 42, y);
+    y += (profLines.length * 6) + 2;
+
+    addRow("Prensa / Redes:", `${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}`, "Suspende por Lluvia:", `${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}`);
+
+    // Línea divisoria
+    doc.setDrawColor(203, 213, 225);
+    doc.line(20, y, 190, y);
+    y += 8;
+
+    function addBlock(title, text) {
+        if (!text) return;
+        doc.setFont("Helvetica", "bold");
+        doc.text(title, 20, y);
+        y += 5;
+        doc.setFont("Helvetica", "normal");
+        const lines = doc.splitTextToSize(text, 165);
+        doc.text(lines, 20, y);
+        y += (lines.length * 5) + 4;
+    }
+
+    addBlock("Necesidades Técnicas e Infraestructura:", p.necesidades);
+    addBlock("Descripción General:", p.descripcion);
+    addBlock("Objetivos de la Jornada:", p.objetivo);
+
+    // Guardar archivo
+    const tituloSanitizado = (p.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
+    doc.save(`evento-${tituloSanitizado}.pdf`);
 }
