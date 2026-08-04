@@ -7,6 +7,25 @@ document.addEventListener('DOMContentLoaded', () => {
     checkSession();
 });
 
+// Función global para cambiar pestañas desde botones de bienvenida
+function switchTab(targetTabId) {
+    const navItems = document.querySelectorAll('.nav-list .nav-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    navItems.forEach(i => i.classList.remove('active'));
+    tabContents.forEach(c => c.classList.remove('active'));
+
+    const itemToActivate = document.querySelector(`.nav-item[data-target="${targetTabId}"]`);
+    if (itemToActivate) itemToActivate.classList.add('active');
+
+    const contentToActivate = document.getElementById(targetTabId);
+    if (contentToActivate) contentToActivate.classList.add('active');
+
+    if (targetTabId === 'tab-calendario') {
+        cargarCalendarioEventos();
+    }
+}
+
 function checkSession() {
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
@@ -71,25 +90,10 @@ function applyRolePermissions(user) {
 
 function initNavigationTabs() {
     const navItems = document.querySelectorAll('.nav-list .nav-item');
-    const tabContents = document.querySelectorAll('.tab-content');
-
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const targetId = item.getAttribute('data-target');
-
-            navItems.forEach(i => i.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-
-            item.classList.add('active');
-            const targetContent = document.getElementById(targetId);
-            if (targetContent) {
-                targetContent.classList.add('active');
-            }
-
-            if (targetId === 'tab-calendario') {
-                cargarCalendarioEventos();
-            }
-
+            switchTab(targetId);
             closeMobileMenu();
         });
     });
@@ -224,7 +228,6 @@ function initAuthEvents() {
     }
 }
 
-// Generador dinámico de casilleros para profesores
 function generarCamposProfesores(cantidad) {
     const container = document.getElementById('contenedor-profesores');
     if (!container) return;
@@ -234,11 +237,11 @@ function generarCamposProfesores(cantidad) {
 
     for (let i = 1; i <= num; i++) {
         const div = document.createElement('div');
-        div.className = 'form-group professor-input-group';
+        div.className = 'form-group';
         div.style.marginTop = '8px';
         div.innerHTML = `
             <label style="font-size: 13px; font-weight: 600;">Nombre y Apellido del Profesor/a ${i}:</label>
-            <input type="text" class="input-profesor" placeholder="Ej: Juan Pérez" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <input type="text" class="input-profesor" placeholder="Ej: Juan Pérez">
         `;
         container.appendChild(div);
     }
@@ -432,7 +435,6 @@ async function cargarCalendarioEventos() {
     }
 }
 
-// Carga TODOS los datos en el Modal de Edición
 function abrirModalEdicion(id) {
     const pedido = pedidosCargadosCache.find(p => p._id === id);
     if (!pedido) return;
@@ -571,16 +573,12 @@ async function eliminarPedido(id) {
     }
 }
 
-// ======================================================
-// GENERADOR PDF CORREGIDO (ANCHO 100% Y TARJETAS LINDAS)
-// ======================================================
 function descargarReportePDF() {
     if (!pedidosCargadosCache || pedidosCargadosCache.length === 0) {
         alert('No hay pedidos registrados para descargar.');
         return;
     }
 
-    // Crear contenedor temporal fuera de vista con ancho fijo para renderizado canvas
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
