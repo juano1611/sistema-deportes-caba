@@ -89,7 +89,7 @@ const PedidoSchema = new mongoose.Schema({
     ambulanciaHorario: String,
     extensionArt: String,
     horarioDocente: String,
-    profesoresAsignados: [String],
+    profesoresAsignados: mongoose.Schema.Types.Mixed, // Permite arrays de strings o de objetos con datos completos
     prensa: String,
     tipoDifusion: String,
     suspendeLluvia: String,

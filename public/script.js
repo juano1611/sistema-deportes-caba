@@ -227,6 +227,7 @@ function initAuthEvents() {
     }
 }
 
+// NUEVA GENERACIÓN DINÁMICA DE CAMPOS POR DOCENTE
 function generarCamposProfesores(cantidad) {
     const container = document.getElementById('contenedor-profesores');
     if (!container) return;
@@ -236,11 +237,32 @@ function generarCamposProfesores(cantidad) {
 
     for (let i = 1; i <= num; i++) {
         const div = document.createElement('div');
-        div.className = 'form-group';
-        div.style.marginTop = '8px';
+        div.className = 'bloque-profesor-item';
+        div.style.cssText = 'background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; margin-top: 10px; border-radius: 6px;';
+        
         div.innerHTML = `
-            <label style="font-size: 13px; font-weight: 600;">Nombre y Apellido del Profesor/a ${i}:</label>
-            <input type="text" class="input-profesor" placeholder="Ej: Juan Pérez">
+            <h5 style="margin: 0 0 8px 0; color: #002b66; font-size: 14px;">Docente / Profesor/a #${i}</h5>
+            <div class="form-group">
+                <label style="font-size: 12px; font-weight: 600;">Nombre y Apellido *</label>
+                <input type="text" class="input-prof-nombre" placeholder="Ej: Juan Pérez" required style="width: 100%; padding: 6px; margin-top: 2px;">
+            </div>
+            <div class="form-grid" style="margin-top: 8px;">
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Situación de Revista</label>
+                    <select class="input-prof-revista" style="width: 100%; padding: 6px; margin-top: 2px;">
+                        <option value="Titular">Titular</option>
+                        <option value="Planta Permanente">Planta Permanente</option>
+                        <option value="Planta Transitoria">Planta Transitoria</option>
+                        <option value="Interino">Interino</option>
+                        <option value="Suplente">Suplente</option>
+                        <option value="Contratado">Contratado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Horario Laboral</label>
+                    <input type="text" class="input-prof-horario" placeholder="Ej: De 08:00 a 13:00 hs" style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+            </div>
         `;
         container.appendChild(div);
     }
@@ -268,10 +290,22 @@ function initPedidoForm() {
             e.preventDefault();
             if (msgBox) msgBox.classList.add('hidden');
 
-            const inputsProfesores = document.querySelectorAll('.input-profesor');
-            const listaProfesores = Array.from(inputsProfesores)
-                .map(input => input.value.trim())
-                .filter(v => v !== '');
+            const bloques = document.querySelectorAll('.bloque-profesor-item');
+            const listaProfesores = [];
+
+            bloques.forEach(b => {
+                const nombre = b.querySelector('.input-prof-nombre')?.value.trim();
+                const revista = b.querySelector('.input-prof-revista')?.value;
+                const horario = b.querySelector('.input-prof-horario')?.value.trim();
+
+                if (nombre) {
+                    listaProfesores.push({
+                        nombre,
+                        situacionRevista: revista || 'Titular',
+                        horarioLaboral: horario || '-'
+                    });
+                }
+            });
 
             const publicoVal = document.getElementById('ped-pub-gral') ? document.getElementById('ped-pub-gral').value : '';
 
@@ -301,7 +335,7 @@ function initPedidoForm() {
                 necesidades: document.getElementById('ped-necesidades').value.trim(),
                 
                 extensionArt: document.getElementById('ped-ext-art') ? document.getElementById('ped-ext-art').value : 'No',
-                horarioDocente: document.getElementById('ped-horario-doc').value.trim(),
+                horarioDocente: document.getElementById('ped-horario-doc') ? document.getElementById('ped-horario-doc').value.trim() : '',
                 profesoresAsignados: listaProfesores,
 
                 prensa: document.getElementById('ped-prensa') ? document.getElementById('ped-prensa').value : 'No',
@@ -358,9 +392,17 @@ async function cargarPedidosDirector() {
         }
 
         listaContainer.innerHTML = pedidos.map(p => {
-            const listaProfsStr = (p.profesoresAsignados && p.profesoresAsignados.length > 0) 
-                ? p.profesoresAsignados.join(', ') 
-                : 'Sin especificar';
+            let listaProfsStr = 'Sin especificar';
+
+            if (p.profesoresAsignados && p.profesoresAsignados.length > 0) {
+                if (typeof p.profesoresAsignados[0] === 'object') {
+                    listaProfsStr = p.profesoresAsignados.map(prof => 
+                        `${prof.nombre} (${prof.situacionRevista || 'S/D'} - Horario: ${prof.horarioLaboral || 'S/D'})`
+                    ).join('; ');
+                } else {
+                    listaProfsStr = p.profesoresAsignados.join(', ');
+                }
+            }
 
             return `
                 <div class="pedido-card">
@@ -381,7 +423,7 @@ async function cargarPedidosDirector() {
                         <p><strong>Transporte:</strong> ${p.transportePasajeros || 'No'} (Salida: ${p.transporteSalida || '-'} / Regreso: ${p.transporteRegreso || '-'})</p>
                         <p><strong>Resp. Transporte:</strong> ${p.transporteRespNombre || '-'} (${p.transporteRespTel || '-'})</p>
                         <p><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''} | <strong>ART:</strong> ${p.extensionArt || 'No'}</p>
-                        <p><strong>Profesores:</strong> ${listaProfsStr} (Horario: ${p.horarioDocente || '-'})</p>
+                        <p><strong>Docentes / Profesores:</strong> ${listaProfsStr}</p>
                         <p><strong>Prensa/Difusión:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `- ${p.tipoDifusion}` : ''}</p>
                         <p><strong>Lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprograma: ${p.fechaReprogramacion})` : ''}</p>
                     </div>
@@ -462,12 +504,17 @@ function abrirModalEdicion(id) {
 
     document.getElementById('edit-necesidades').value = pedido.necesidades || '';
     document.getElementById('edit-ext-art').value = pedido.extensionArt || 'No';
-    document.getElementById('edit-horario-doc').value = pedido.horarioDocente || '';
+    if(document.getElementById('edit-horario-doc')) document.getElementById('edit-horario-doc').value = pedido.horarioDocente || '';
     
-    const profs = (pedido.profesoresAsignados && Array.isArray(pedido.profesoresAsignados)) 
-        ? pedido.profesoresAsignados.join(', ') 
-        : '';
-    document.getElementById('edit-profesores').value = profs;
+    let profsText = '';
+    if (pedido.profesoresAsignados && Array.isArray(pedido.profesoresAsignados)) {
+        if (typeof pedido.profesoresAsignados[0] === 'object') {
+            profsText = pedido.profesoresAsignados.map(prof => prof.nombre).join(', ');
+        } else {
+            profsText = pedido.profesoresAsignados.join(', ');
+        }
+    }
+    document.getElementById('edit-profesores').value = profsText;
 
     document.getElementById('edit-prensa').value = pedido.prensa || 'No';
     document.getElementById('edit-difusion').value = pedido.tipoDifusion || '';
@@ -493,7 +540,9 @@ function initEditForm() {
             const id = document.getElementById('edit-id').value;
 
             const profsInput = document.getElementById('edit-profesores').value.trim();
-            const profesoresArray = profsInput ? profsInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+            const profesoresArray = profsInput 
+                ? profsInput.split(',').map(s => ({ nombre: s.trim(), situacionRevista: 'Titular', horarioLaboral: '-' })).filter(p => p.nombre) 
+                : [];
 
             const datosActualizados = {
                 titulo: document.getElementById('edit-titulo').value.trim(),
@@ -518,7 +567,7 @@ function initEditForm() {
 
                 necesidades: document.getElementById('edit-necesidades').value.trim(),
                 extensionArt: document.getElementById('edit-ext-art').value,
-                horarioDocente: document.getElementById('edit-horario-doc').value.trim(),
+                horarioDocente: document.getElementById('edit-horario-doc') ? document.getElementById('edit-horario-doc').value.trim() : '',
                 profesoresAsignados: profesoresArray,
 
                 prensa: document.getElementById('edit-prensa').value,
@@ -573,7 +622,7 @@ async function eliminarPedido(id) {
     }
 }
 
-// SISTEMA VECTORIAL PURO CON JSPDF - IMPOSIBLE QUE SALGA EN BLANCO
+// GENERADOR VECTORIAL CON DETALLE DE DOCENTES CADA UNO CON SU REVISTA Y HORARIO
 function descargarReporteEventoPDF(id) {
     const p = pedidosCargadosCache.find(item => item._id === id);
     if (!p) {
@@ -588,14 +637,10 @@ function descargarReporteEventoPDF(id) {
         format: 'a4'
     });
 
-    const profesores = (p.profesoresAsignados && p.profesoresAsignados.length > 0)
-        ? p.profesoresAsignados.join(', ')
-        : 'Sin especificar';
-
     const fechaHoy = new Date().toLocaleDateString('es-AR');
 
     // Encabezado
-    doc.setFillColor(0, 43, 102); // Azul BA
+    doc.setFillColor(0, 43, 102);
     doc.rect(15, 12, 180, 2, 'F');
 
     doc.setFont("Helvetica", "bold");
@@ -660,12 +705,29 @@ function descargarReporteEventoPDF(id) {
         addRow("Resp. Micro:", `${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})`);
     }
 
+    // IMPRESIÓN DETALLADA DE DOCENTES
     doc.setFont("Helvetica", "bold");
-    doc.text("Profesores:", 20, y);
-    doc.setFont("Helvetica", "normal");
-    const profLines = doc.splitTextToSize(`${profesores} (Horario: ${p.horarioDocente || '-'})`, 135);
-    doc.text(profLines, 42, y);
-    y += (profLines.length * 6) + 2;
+    doc.text("Docentes Asignados:", 20, y);
+    y += 5;
+
+    if (p.profesoresAsignados && p.profesoresAsignados.length > 0) {
+        p.profesoresAsignados.forEach((prof, idx) => {
+            doc.setFont("Helvetica", "normal");
+            let txt = '';
+            if (typeof prof === 'object') {
+                txt = `• ${prof.nombre} - Revista: ${prof.situacionRevista || 'S/D'} - Horario: ${prof.horarioLaboral || 'S/D'}`;
+            } else {
+                txt = `• ${prof}`;
+            }
+            doc.text(txt, 25, y);
+            y += 5;
+        });
+    } else {
+        doc.setFont("Helvetica", "normal");
+        doc.text("Sin docentes asignados", 25, y);
+        y += 5;
+    }
+    y += 3;
 
     addRow("Prensa / Redes:", `${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}`, "Suspende por Lluvia:", `${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}`);
 
