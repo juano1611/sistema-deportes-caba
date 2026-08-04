@@ -1,24 +1,23 @@
 /* ==========================================================================
-   1. RESET Y VARIABLES GLOBALES
+   1. VARIABLES GLOBALES - PALETA CIUDAD DE BUENOS AIRES (BA)
    ========================================================================== */
 :root {
-    --primary: #1e56a0;
-    --primary-hover: #163f77;
-    --secondary: #d6e4f0;
+    --ba-blue-dark: #002b66;      /* Azul oscuro institucional BA */
+    --ba-blue-hover: #001f4d;     /* Hover para azul oscuro */
+    --ba-yellow: #ffcc00;         /* Amarillo BA */
+    --ba-yellow-hover: #e6b800;   /* Hover para amarillo */
     --background: #f4f6f9;
     --surface: #ffffff;
     --text-dark: #1f2937;
     --text-muted: #6b7280;
     --border: #e5e7eb;
     --danger: #ef4444;
-    --danger-hover: #dc2626;
     --success: #10b981;
-    --warning: #f59e0b;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --radius: 8px;
-    --transition: all 0.2s ease-in-out;
+    --radius: 12px;
+    --transition: all 0.25s ease-in-out;
 }
 
 * {
@@ -40,7 +39,7 @@ body {
 }
 
 /* ==========================================================================
-   2. CENTRADO Y ESTILOS DE AUTENTICACIÓN & BIENVENIDA
+   2. CENTRADO Y ESTILOS DE AUTENTICACIÓN (LOGIN / REGISTRO)
    ========================================================================== */
 .auth-wrapper {
     display: flex;
@@ -55,43 +54,11 @@ body {
 .auth-card {
     background: var(--surface);
     width: 100%;
-    max-width: 460px;
+    max-width: 440px;
     padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-}
-
-/* Tarjeta / Banner de Bienvenida */
-.welcome-card {
-    background-color: #f0f7ff;
     border-radius: var(--radius);
-    border: 1px solid var(--secondary);
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-    text-align: center;
-}
-
-.welcome-img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    display: block;
-}
-
-.welcome-text {
-    padding: 1rem;
-}
-
-.welcome-text h3 {
-    color: var(--primary);
-    font-size: 1.1rem;
-    margin-bottom: 0.25rem;
-}
-
-.welcome-text p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    box-shadow: var(--shadow-lg);
+    border-top: 6px solid var(--ba-yellow);
 }
 
 .auth-header {
@@ -99,11 +66,21 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* Título e Identidad BA */
 .auth-header h2 {
-    color: var(--primary);
-    font-size: 1.6rem;
-    font-weight: 700;
+    color: var(--ba-blue-dark);
+    font-size: 1.75rem;
+    font-weight: 800;
     margin-bottom: 0.25rem;
+    letter-spacing: -0.5px;
+}
+
+.ba-highlight {
+    color: var(--ba-yellow);
+    background-color: var(--ba-blue-dark);
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
 }
 
 .auth-header p {
@@ -128,7 +105,7 @@ body {
     outline: none;
     padding: 10px 16px;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
     cursor: pointer;
     border-bottom: 3px solid transparent;
@@ -136,12 +113,12 @@ body {
 }
 
 .auth-tab-btn:hover {
-    color: var(--primary);
+    color: var(--ba-blue-dark);
 }
 
 .auth-tab-btn.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
+    color: var(--ba-blue-dark);
+    border-bottom-color: var(--ba-yellow);
 }
 
 /* Formulario e Inputs */
@@ -164,7 +141,7 @@ body {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 8px;
     font-size: 0.95rem;
     outline: none;
     transition: var(--transition);
@@ -175,28 +152,30 @@ body {
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(30, 86, 160, 0.15);
+    border-color: var(--ba-blue-dark);
+    box-shadow: 0 0 0 3px rgba(0, 43, 102, 0.15);
     background-color: #fff;
 }
 
-/* Botones */
+/* Botones con paleta Azul Oscuro / BA */
 .btn-primary {
     width: 100%;
-    padding: 0.75rem 1.5rem;
-    background-color: var(--primary);
+    padding: 0.85rem 1.5rem;
+    background-color: var(--ba-blue-dark);
     color: white;
     border: none;
-    border-radius: var(--radius);
+    border-radius: 8px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
     margin-top: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 43, 102, 0.2);
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-hover);
+    background-color: var(--ba-blue-hover);
+    transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -204,7 +183,7 @@ body {
     background-color: #e5e7eb;
     color: var(--text-dark);
     border: none;
-    border-radius: var(--radius);
+    border-radius: 8px;
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
@@ -218,7 +197,7 @@ body {
 /* Mensajes de Alerta */
 .auth-error, .auth-success {
     padding: 0.75rem;
-    border-radius: var(--radius);
+    border-radius: 8px;
     font-size: 0.875rem;
     margin-bottom: 1rem;
     text-align: center;
@@ -247,8 +226,8 @@ body {
 
 .main-header {
     height: 64px;
-    background-color: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background-color: var(--ba-blue-dark);
+    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -256,6 +235,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 30;
+    box-shadow: var(--shadow);
 }
 
 .header-left {
@@ -265,8 +245,13 @@ body {
 }
 
 .header-title {
-    font-weight: 700;
-    color: var(--primary);
+    font-weight: 800;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.header-title .ba-highlight {
+    padding: 1px 6px;
     font-size: 1.1rem;
 }
 
@@ -286,27 +271,27 @@ body {
 
 .badge {
     padding: 0.25rem 0.5rem;
-    background-color: var(--secondary);
-    color: var(--primary);
+    background-color: var(--ba-yellow);
+    color: var(--ba-blue-dark);
     border-radius: 4px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .btn-logout {
     background: none;
     border: none;
-    color: var(--text-muted);
+    color: #cbd5e1;
     font-size: 0.9rem;
     cursor: pointer;
     transition: var(--transition);
 }
 
 .btn-logout:hover {
-    color: var(--danger);
+    color: #fca5a5;
 }
 
-/* Layout Body */
+/* Layout Body & Sidebar */
 .layout-body {
     display: flex;
     flex: 1;
@@ -324,32 +309,34 @@ body {
 }
 
 .nav-item {
-    padding: 0.75rem 1.5rem;
+    padding: 0.85rem 1.5rem;
     cursor: pointer;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
     transition: var(--transition);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .nav-item:hover, .nav-item.active {
     background-color: #f0f7ff;
-    color: var(--primary);
-    border-left: 4px solid var(--primary);
+    color: var(--ba-blue-dark);
+    border-left: 5px solid var(--ba-yellow);
 }
 
 .content-wrapper {
     flex: 1;
     padding: 2rem;
     max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .panel {
     background: var(--surface);
     padding: 2rem;
-    border-radius: 12px;
+    border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
 
@@ -362,15 +349,84 @@ body {
 }
 
 /* ==========================================================================
-   4. FORMULARIO DE SOLICITUDES Y SECCIONES
+   4. SECCIÓN DE INICIO (HOME) - TARJETA ELEGANTE Y CENTRADA
+   ========================================================================== */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.welcome-hero-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    width: 100%;
+    text-align: center;
+}
+
+.welcome-hero-banner {
+    width: 100%;
+    height: 320px;
+    background-color: var(--ba-blue-dark);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+}
+
+.welcome-hero-content {
+    padding: 2.5rem;
+}
+
+.welcome-hero-content h2 {
+    color: var(--ba-blue-dark);
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.welcome-hero-content p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-hero {
+    width: auto;
+    min-width: 200px;
+    padding: 0.9rem 1.8rem;
+}
+
+/* ==========================================================================
+   5. FORMULARIOS, PANEL DIRECTOR Y CALENDARIO
    ========================================================================== */
 .form-section-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--ba-blue-dark);
     margin: 1.5rem 0 1rem 0;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--secondary);
 }
 
 .form-grid {
@@ -381,7 +437,7 @@ body {
 
 .section-desc {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     margin-bottom: 1.5rem;
 }
 
@@ -395,20 +451,18 @@ body {
 .profesor-item {
     background-color: #f9fafb;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 8px;
     padding: 1rem;
     margin-top: 0.75rem;
 }
 
 .profesor-item h4 {
     font-size: 0.9rem;
-    color: var(--primary);
+    color: var(--ba-blue-dark);
     margin-bottom: 0.5rem;
 }
 
-/* ==========================================================================
-   5. PANEL DE DIRECTOR Y TARJETAS DE PEDIDOS
-   ========================================================================== */
+/* Panel de Director */
 .director-header {
     display: flex;
     justify-content: space-between;
@@ -420,7 +474,7 @@ body {
 
 .btn-pdf {
     width: auto;
-    background-color: #2b6cb0;
+    background-color: var(--ba-blue-dark);
 }
 
 .pedidos-list {
@@ -432,7 +486,7 @@ body {
 .pedido-card {
     background-color: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 8px;
     padding: 1.25rem;
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
@@ -453,7 +507,7 @@ body {
 
 .pedido-card-header h3 {
     font-size: 1.1rem;
-    color: var(--primary);
+    color: var(--ba-blue-dark);
 }
 
 .pedido-card-body {
@@ -474,7 +528,7 @@ body {
 .btn-action-edit {
     padding: 0.4rem 0.8rem;
     background-color: var(--secondary);
-    color: var(--primary);
+    color: var(--ba-blue-dark);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -493,9 +547,7 @@ body {
     font-weight: 600;
 }
 
-/* ==========================================================================
-   6. VISTA DE CALENDARIO
-   ========================================================================== */
+/* Calendario */
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -505,8 +557,8 @@ body {
 
 .cal-card {
     background-color: #f8fafc;
-    border-left: 4px solid var(--primary);
-    border-radius: var(--radius);
+    border-left: 5px solid var(--ba-yellow);
+    border-radius: 8px;
     padding: 1rem;
     box-shadow: var(--shadow-sm);
 }
@@ -514,7 +566,7 @@ body {
 .cal-card .cal-date {
     font-size: 0.8rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--ba-blue-dark);
     text-transform: uppercase;
     margin-bottom: 0.25rem;
 }
@@ -525,9 +577,7 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* ==========================================================================
-   7. MODAL DE EDICIÓN
-   ========================================================================== */
+/* Modal */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -544,7 +594,7 @@ body {
 
 .modal-card {
     background: var(--surface);
-    border-radius: 12px;
+    border-radius: var(--radius);
     width: 100%;
     max-width: 700px;
     max-height: 90vh;
@@ -563,7 +613,7 @@ body {
 }
 
 .modal-header h3 {
-    color: var(--primary);
+    color: var(--ba-blue-dark);
 }
 
 .btn-close-modal {
@@ -583,11 +633,12 @@ body {
     border-top: 1px solid var(--border);
 }
 
-/* Responsive Sidebar & Header */
+/* Mobile & Responsividad */
 .mobile-menu-toggle {
     display: none;
     background: none;
     border: none;
+    color: white;
     font-size: 1.5rem;
     cursor: pointer;
 }
@@ -601,5 +652,14 @@ body {
     }
     .content-wrapper {
         padding: 1rem;
+    }
+    .welcome-hero-banner {
+        height: 200px;
+    }
+    .welcome-hero-content {
+        padding: 1.5rem;
+    }
+    .welcome-hero-content h2 {
+        font-size: 1.5rem;
     }
 }
