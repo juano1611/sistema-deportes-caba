@@ -9,8 +9,11 @@ const PDFDocument = require('pdfkit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración del correo de destino oficial
-const MAIL_DESTINO = 'solicituddepedidos_dgdsydd@buenosaires.gob.ar';
+// Configuración de los correos de destino oficiales (ambas direcciones)
+const DESTINATARIOS = [
+    'solicituddepedidos_dgdsydd@buenosaires.gob.ar',
+    'direccionpedagogica_DGDSYDD@buenosaires.gob.ar'
+].join(', ');
 
 // Configuración del transportador de correos (Nodemailer)
 const transporter = nodemailer.createTransport({
@@ -253,7 +256,7 @@ async function enviarEmailBackground(pedidoData) {
 
         const mailOptions = {
             from: '"Portal de Eventos BA" <no-reply@buenosaires.gob.ar>',
-            to: MAIL_DESTINO,
+            to: DESTINATARIOS,
             subject: `📌 Nueva Solicitud de Evento: ${pedidoData.titulo}`,
             html: `
                 <h2 style="color: #002B66;">NUEVA SOLICITUD DE EVENTO REGISTRADA</h2>
@@ -276,7 +279,7 @@ async function enviarEmailBackground(pedidoData) {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`✉️ Email con PDF completo adjunto enviado exitosamente a ${MAIL_DESTINO}`);
+        console.log(`✉️ Email con PDF completo adjunto enviado exitosamente a: ${DESTINATARIOS}`);
     } catch (err) {
         console.error('⚠️ Error en segundo plano al enviar el email:', err.message);
     }
