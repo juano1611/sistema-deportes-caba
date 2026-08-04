@@ -244,43 +244,34 @@
                                 <textarea id="ped-necesidades" rows="3" placeholder="Ej: Puesto de nutrición, Sonido, Gazebos, Material deportivo..."></textarea>
                             </div>
 
-                            <div class="form-section-title">6. Personal y Docentes</div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="ped-ext-art">¿Extensión de ART?</label>
-                                    <select id="ped-ext-art">
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
-                                <!-- REEMPLAZAR EL INICIO DE LA SECCIÓN 6 EN index.html -->
-<div class="form-grid">
-    <div class="form-group">
-        <label for="ped-ext-art">¿Extensión de ART?</label>
-        <select id="ped-ext-art">
-            <option value="No">No</option>
-            <option value="Sí">Sí</option>
-        </select>
-    </div>
+                            <!-- 6. Personal y Docentes -->
+<h3>6. Personal y Docentes</h3>
+<div class="form-group" style="margin-bottom: 15px;">
+    <label for="ped-ext-art">¿Extensión de ART?</label>
+    <select id="ped-ext-art" style="width: 100%;">
+        <option value="No">No</option>
+        <option value="Sí">Sí</option>
+    </select>
 </div>
-                            </div>
 
-                            <div class="form-group" style="margin-top: 10px;">
-                                <label for="select-cant-profesores">Cantidad de profesores asignados al evento:</label>
-                                <select id="select-cant-profesores" onchange="generarCamposProfesores(this.value)">
-                                    <option value="0">Seleccionar cantidad...</option>
-                                    <option value="1">1 Profesor/a</option>
-                                    <option value="2">2 Profesores/as</option>
-                                    <option value="3">3 Profesores/as</option>
-                                    <option value="4">4 Profesores/as</option>
-                                    <option value="5">5 Profesores/as</option>
-                                    <option value="6">6 Profesores/as</option>
-                                    <option value="7">7 Profesores/as</option>
-                                    <option value="8">8 Profesores/as</option>
-                                </select>
-                            </div>
+<div class="form-group" style="margin-bottom: 15px;">
+    <label for="cant-profesores">Cantidad de profesores asignados al evento:</label>
+    <select id="cant-profesores" onchange="generarCamposProfesores(this.value)" style="width: 100%;">
+        <option value="0">Seleccionar cantidad...</option>
+        <option value="1">1 Profesor/a</option>
+        <option value="2">2 Profesores/as</option>
+        <option value="3">3 Profesores/as</option>
+        <option value="4">4 Profesores/as</option>
+        <option value="5">5 Profesores/as</option>
+        <option value="6">6 Profesores/as</option>
+        <option value="7">7 Profesores/as</option>
+        <option value="8">8 Profesores/as</option>
+        <option value="9">9 Profesores/as</option>
+        <option value="10">10 Profesores/as</option>
+    </select>
+</div>
 
-                            <div id="contenedor-profesores"></div>
+<div id="contenedor-profesores"></div>
 
                             <div class="form-section-title">7. Prensa y Difusión</div>
                             <div class="form-group">
