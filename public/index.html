@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- EVITAR CACHÉ EN NAVEGADORES -->
+    <!-- DESACTIVAR CACHÉ ABSOLUTO -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
     <title>Portal de Eventos BA - Deporte Social</title>
-    <link rel="stylesheet" href="styles.css?v=4.0">
-    <!-- Librería jsPDF pura (vectorial, indestructible) -->
+    <link rel="stylesheet" href="styles.css?v=5.0.0">
+    <!-- Librería jsPDF pura -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -492,9 +492,6 @@
         </div>
     </div>
 
-    <!-- CARGA DINÁMICA DE JS ANTI-CACHÉ -->
-    <script>
-        document.write('<script src="script.js?v=' + Date.now() + '"><\/script>');
-    </script>
+    <script src="script.js?v=5.0.0"></script>
 </body>
 </html>
