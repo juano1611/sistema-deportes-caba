@@ -294,7 +294,14 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ msg: 'El DNI ya se encuentra registrado' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const role = (dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
+        
+        // Asignación de rol por DNI en el registro
+        let role = 'DOCENTE';
+        if (dni === '23377971') {
+            role = 'DIRECTOR';
+        } else if (['41173333', '31175023'].includes(dni)) {
+            role = 'ADMINISTRADOR';
+        }
 
         const nuevoUsuario = new Usuario({ dni, nombre, password: hashedPassword, role });
         await nuevoUsuario.save();
@@ -316,9 +323,17 @@ app.post('/api/auth/login', async (req, res) => {
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ msg: 'Contraseña incorrecta' });
 
+        // Garantizar el rol correcto según el DNI al iniciar sesión
+        let assignedRole = user.role;
+        if (user.dni === '23377971') {
+            assignedRole = 'DIRECTOR';
+        } else if (['41173333', '31175023'].includes(user.dni)) {
+            assignedRole = 'ADMINISTRADOR';
+        }
+
         return res.json({
             msg: 'Login exitoso',
-            user: { id: user._id, dni: user.dni, nombre: user.nombre, role: user.role }
+            user: { id: user._id, dni: user.dni, nombre: user.nombre, role: assignedRole }
         });
     } catch (err) {
         return res.status(500).json({ msg: 'Error interno del servidor' });

@@ -30,7 +30,15 @@ function checkSession() {
     if (storedUser) {
         try {
             const user = JSON.parse(storedUser);
-            user.role = (user.dni === '23377971') ? 'DIRECTOR' : 'DOCENTE';
+            // Asignación automática de roles por DNI si vienen de sesión previa
+            if (user.dni === '23377971') {
+                user.role = 'DIRECTOR';
+            } else if (['41173333', '31175023'].includes(user.dni)) {
+                user.role = 'ADMINISTRADOR';
+            } else if (!user.role) {
+                user.role = 'DOCENTE';
+            }
+            
             renderUserProfile(user);
             applyRolePermissions(user);
             showPortal();
@@ -60,10 +68,12 @@ function renderUserProfile(user) {
 
     if (badge) {
         badge.textContent = user.role;
+        badge.classList.remove('badge-director', 'badge-admin');
+
         if (user.role === 'DIRECTOR') {
             badge.classList.add('badge-director');
-        } else {
-            badge.classList.remove('badge-director');
+        } else if (user.role === 'ADMINISTRADOR') {
+            badge.classList.add('badge-admin');
         }
     }
     if (nameSpan) {
@@ -75,7 +85,8 @@ function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
 
-    if (user.role === 'DIRECTOR') {
+    // Tanto DIRECTOR como ADMINISTRADOR ven el panel de gestión y no envían solicitudes
+    if (user.role === 'DIRECTOR' || user.role === 'ADMINISTRADOR') {
         if (formPedidoSection) formPedidoSection.classList.add('hidden');
         if (directorSection) {
             directorSection.classList.remove('hidden');
@@ -621,7 +632,7 @@ async function eliminarPedido(id) {
     }
 }
 
-// GENERACIÓN DE PDF COMPLETO EN EL NAVEGADOR CON EL 100% DE CAMPOS
+// GENERACIÓN DE PDF COMPLETO EN EL NAVEGADOR
 function descargarReporteEventoPDF(id) {
     const p = pedidosCargadosCache.find(item => item._id === id);
     if (!p) {
