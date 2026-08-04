@@ -103,16 +103,20 @@
                 <!-- SECCIÓN 0: INICIO (HOME / BIENVENIDA) -->
                 <section id="tab-inicio" class="tab-content active">
                     <div class="home-container">
-                        <div class="welcome-hero-card">
-                            <div class="welcome-hero-banner">
-                                <img src="banner-bienvenida.jpg" alt="Deporte Social BA" class="welcome-hero-img" onerror="this.style.display='none'">
+                        <div class="welcome-card-hero">
+                            <!-- BANNER DE IMAGEN -->
+                            <div class="welcome-banner-wrapper">
+                                <img src="banner-deportes-3.jpg" alt="Dirección General de Deporte Social y Desarrollo Deportivo" class="welcome-banner-img" onerror="this.style.display='none'">
                             </div>
-                            <div class="welcome-hero-content">
+
+                            <!-- CONTENIDO INTERNO -->
+                            <div class="welcome-card-body">
                                 <h2>¡Bienvenido/a al Portal de Eventos BA!</h2>
-                                <p>Plataforma oficial de la Dirección General de Deporte Social y Desarrollo Deportivo para la gestión, planificación y coordinación integral de eventos y jornadas en la Ciudad.</p>
-                                <div class="welcome-actions">
-                                    <button onclick="switchTab('tab-solicitudes')" class="btn-primary btn-hero">Solicitar Evento</button>
-                                    <button onclick="switchTab('tab-calendario')" class="btn-secondary btn-hero">Ver Calendario</button>
+                                <p>Plataforma oficial de la <strong>Dirección General de Deporte Social y Desarrollo Deportivo</strong> para la gestión, planificación y coordinación integral de eventos y jornadas deportivas en la Ciudad de Buenos Aires.</p>
+                                
+                                <div class="welcome-card-actions">
+                                    <button onclick="switchTab('tab-solicitudes')" class="btn-primary btn-welcome">📝 Solicitar Evento</button>
+                                    <button onclick="switchTab('tab-calendario')" class="btn-secondary btn-welcome">📅 Ver Calendario General</button>
                                 </div>
                             </div>
                         </div>

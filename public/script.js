@@ -224,11 +224,7 @@ function initAuthEvents() {
     }
 }
 
-// ==========================================
-// FUNCIONES AUXILIARES DE INTERFAZ
-// ==========================================
-
-// Genera casilleros dinámicos para profesores
+// Generador dinámico de casilleros para profesores
 function generarCamposProfesores(cantidad) {
     const container = document.getElementById('contenedor-profesores');
     if (!container) return;
@@ -248,7 +244,6 @@ function generarCamposProfesores(cantidad) {
     }
 }
 
-// Muestra/oculta el campo de fecha de reprogramación según la opción de lluvia
 function toggleReprogramacion(valor) {
     const box = document.getElementById('campo-reprogramacion');
     if (!box) return;
@@ -271,7 +266,6 @@ function initPedidoForm() {
             e.preventDefault();
             if (msgBox) msgBox.classList.add('hidden');
 
-            // Recolectar lista de profesores dinámicos
             const inputsProfesores = document.querySelectorAll('.input-profesor');
             const listaProfesores = Array.from(inputsProfesores)
                 .map(input => input.value.trim())
@@ -281,7 +275,7 @@ function initPedidoForm() {
 
             const nuevoPedido = {
                 titulo: document.getElementById('ped-titulo').value.trim(),
-                gerencia: document.getElementById('ped-area').value.trim(), // Gerencia
+                gerencia: document.getElementById('ped-area').value.trim(),
                 programa: document.getElementById('ped-programa').value.trim(),
                 fecha: document.getElementById('ped-fecha').value,
                 horario: document.getElementById('ped-horario').value.trim(),
@@ -292,11 +286,10 @@ function initPedidoForm() {
                 responsableDni: document.getElementById('ped-resp-dni').value.trim(),
                 responsableTelefono: document.getElementById('ped-resp-tel').value.trim(),
                 participantesAprox: Number(document.getElementById('ped-part-aprox').value),
-                publicoGeneral: publicoVal !== '' ? Number(publicoVal) : 0, // Opcional
+                publicoGeneral: publicoVal !== '' ? Number(publicoVal) : 0,
                 ambulancia: document.getElementById('ped-ambulancia').value,
                 ambulanciaHorario: document.getElementById('ped-amb-horario').value.trim(),
                 
-                // Transporte ampliado
                 transportePasajeros: document.getElementById('ped-transporte') ? document.getElementById('ped-transporte').value.trim() : '',
                 transporteSalida: document.getElementById('ped-transporte-salida') ? document.getElementById('ped-transporte-salida').value.trim() : '',
                 transporteRegreso: document.getElementById('ped-transporte-regreso') ? document.getElementById('ped-transporte-regreso').value.trim() : '',
@@ -305,16 +298,13 @@ function initPedidoForm() {
 
                 necesidades: document.getElementById('ped-necesidades').value.trim(),
                 
-                // Punto 6: Personal y ART
                 extensionArt: document.getElementById('ped-ext-art') ? document.getElementById('ped-ext-art').value : 'No',
                 horarioDocente: document.getElementById('ped-horario-doc').value.trim(),
                 profesoresAsignados: listaProfesores,
 
-                // Punto 7: Prensa
                 prensa: document.getElementById('ped-prensa') ? document.getElementById('ped-prensa').value : 'No',
                 tipoDifusion: document.getElementById('ped-difusion') ? document.getElementById('ped-difusion').value.trim() : '',
 
-                // Lluvia y Reprogramación
                 suspendeLluvia: document.getElementById('ped-lluvia').value,
                 fechaReprogramacion: document.getElementById('ped-fecha-reprogramacion') ? document.getElementById('ped-fecha-reprogramacion').value : ''
             };
@@ -385,12 +375,15 @@ async function cargarPedidosDirector() {
                         <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
                         <p><strong>Solicitante:</strong> ${p.responsableNombre || '-'} (DNI: ${p.responsableDni || '-'}) - Tel: ${p.responsableTelefono || '-'}</p>
                         <p><strong>Participantes Est.:</strong> ${p.participantesAprox || 0} | <strong>Público:</strong> ${p.publicoGeneral ?? '-'}</p>
+                        <p><strong>Transporte:</strong> ${p.transportePasajeros || 'No'} (Salida: ${p.transporteSalida || '-'} / Regreso: ${p.transporteRegreso || '-'})</p>
+                        <p><strong>Resp. Transporte:</strong> ${p.transporteRespNombre || '-'} (${p.transporteRespTel || '-'})</p>
                         <p><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''} | <strong>ART:</strong> ${p.extensionArt || 'No'}</p>
                         <p><strong>Profesores:</strong> ${listaProfsStr} (Horario: ${p.horarioDocente || '-'})</p>
                         <p><strong>Prensa/Difusión:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `- ${p.tipoDifusion}` : ''}</p>
                         <p><strong>Lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprograma: ${p.fechaReprogramacion})` : ''}</p>
                     </div>
-                    ${p.descripcion ? `<p style="font-size:13px; margin-top:8px;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
+                    ${p.necesidades ? `<p style="font-size:13px; margin-top:6px;"><strong>Necesidades Técnicas:</strong> ${p.necesidades}</p>` : ''}
+                    ${p.descripcion ? `<p style="font-size:13px; margin-top:4px;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
                 </div>
             `;
         }).join('');
@@ -439,6 +432,7 @@ async function cargarCalendarioEventos() {
     }
 }
 
+// Carga TODOS los datos en el Modal de Edición
 function abrirModalEdicion(id) {
     const pedido = pedidosCargadosCache.find(p => p._id === id);
     if (!pedido) return;
@@ -457,7 +451,28 @@ function abrirModalEdicion(id) {
     document.getElementById('edit-pub-gral').value = pedido.publicoGeneral ?? '';
     document.getElementById('edit-ambulancia').value = pedido.ambulancia || 'No';
     document.getElementById('edit-amb-horario').value = pedido.ambulanciaHorario || '';
+    
+    document.getElementById('edit-transporte').value = pedido.transportePasajeros || '';
+    document.getElementById('edit-transporte-salida').value = pedido.transporteSalida || '';
+    document.getElementById('edit-transporte-regreso').value = pedido.transporteRegreso || '';
+    document.getElementById('edit-transporte-resp-nombre').value = pedido.transporteRespNombre || '';
+    document.getElementById('edit-transporte-resp-tel').value = pedido.transporteRespTel || '';
+
+    document.getElementById('edit-necesidades').value = pedido.necesidades || '';
+    document.getElementById('edit-ext-art').value = pedido.extensionArt || 'No';
+    document.getElementById('edit-horario-doc').value = pedido.horarioDocente || '';
+    
+    const profs = (pedido.profesoresAsignados && Array.isArray(pedido.profesoresAsignados)) 
+        ? pedido.profesoresAsignados.join(', ') 
+        : '';
+    document.getElementById('edit-profesores').value = profs;
+
+    document.getElementById('edit-prensa').value = pedido.prensa || 'No';
+    document.getElementById('edit-difusion').value = pedido.tipoDifusion || '';
+
     document.getElementById('edit-lluvia').value = pedido.suspendeLluvia || 'No';
+    document.getElementById('edit-fecha-reprogramacion').value = pedido.fechaReprogramacion || '';
+
     document.getElementById('edit-descripcion').value = pedido.descripcion || '';
     document.getElementById('edit-objetivo').value = pedido.objetivo || '';
 
@@ -475,6 +490,9 @@ function initEditForm() {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
 
+            const profsInput = document.getElementById('edit-profesores').value.trim();
+            const profesoresArray = profsInput ? profsInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+
             const datosActualizados = {
                 titulo: document.getElementById('edit-titulo').value.trim(),
                 gerencia: document.getElementById('edit-area').value.trim(),
@@ -489,7 +507,24 @@ function initEditForm() {
                 publicoGeneral: document.getElementById('edit-pub-gral').value !== '' ? Number(document.getElementById('edit-pub-gral').value) : 0,
                 ambulancia: document.getElementById('edit-ambulancia').value,
                 ambulanciaHorario: document.getElementById('edit-amb-horario').value.trim(),
+                
+                transportePasajeros: document.getElementById('edit-transporte').value.trim(),
+                transporteSalida: document.getElementById('edit-transporte-salida').value.trim(),
+                transporteRegreso: document.getElementById('edit-transporte-regreso').value.trim(),
+                transporteRespNombre: document.getElementById('edit-transporte-resp-nombre').value.trim(),
+                transporteRespTel: document.getElementById('edit-transporte-resp-tel').value.trim(),
+
+                necesidades: document.getElementById('edit-necesidades').value.trim(),
+                extensionArt: document.getElementById('edit-ext-art').value,
+                horarioDocente: document.getElementById('edit-horario-doc').value.trim(),
+                profesoresAsignados: profesoresArray,
+
+                prensa: document.getElementById('edit-prensa').value,
+                tipoDifusion: document.getElementById('edit-difusion').value.trim(),
+
                 suspendeLluvia: document.getElementById('edit-lluvia').value,
+                fechaReprogramacion: document.getElementById('edit-fecha-reprogramacion').value,
+
                 descripcion: document.getElementById('edit-descripcion').value.trim(),
                 objetivo: document.getElementById('edit-objetivo').value.trim()
             };
@@ -536,115 +571,120 @@ async function eliminarPedido(id) {
     }
 }
 
-// ==========================================
-// DESCARGA PDF FORMATO A4 COMPLETO
-// ==========================================
+// ======================================================
+// GENERADOR PDF CORREGIDO (ANCHO 100% Y TARJETAS LINDAS)
+// ======================================================
 function descargarReportePDF() {
     if (!pedidosCargadosCache || pedidosCargadosCache.length === 0) {
         alert('No hay pedidos registrados para descargar.');
         return;
     }
 
-    const printArea = document.createElement('div');
-    printArea.style.width = '190mm';
-    printArea.style.padding = '0';
-    printArea.style.margin = '0 auto';
-    printArea.style.backgroundColor = '#ffffff';
-    printArea.style.fontFamily = 'Arial, sans-serif';
-    printArea.style.boxSizing = 'border-box';
-    printArea.style.color = '#1a202c';
+    // Crear contenedor temporal fuera de vista con ancho fijo para renderizado canvas
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '800px';
+    container.style.backgroundColor = '#ffffff';
+    container.style.padding = '20px';
+    container.style.boxSizing = 'border-box';
+    container.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    container.style.color = '#1a202c';
 
-    let contentHTML = `
-        <div style="border-bottom: 3px solid #0056b3; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+    let html = `
+        <div style="border-bottom: 3px solid #0056b3; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
-                <h1 style="font-size: 20px; margin: 0; color: #1d2b36; font-weight: bold;">Reporte Oficial de Pedidos de Eventos</h1>
-                <p style="font-size: 11px; color: #4a5568; margin: 4px 0 0 0;">Dirección General de Deporte Social y Desarrollo Deportivo - CABA</p>
+                <h1 style="font-size: 22px; margin: 0; color: #1d2b36; font-weight: bold;">Reporte General de Solicitudes de Eventos</h1>
+                <p style="font-size: 12px; color: #4a5568; margin: 5px 0 0 0;">Dirección General de Deporte Social y Desarrollo Deportivo - CABA</p>
             </div>
             <div style="text-align: right;">
-                <p style="font-size: 10px; color: #718096; margin: 0;">Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}</p>
+                <p style="font-size: 11px; color: #718096; margin: 0;">Fecha: ${new Date().toLocaleDateString('es-AR')}</p>
             </div>
         </div>
     `;
 
-    pedidosCargadosCache.forEach((p, index) => {
-        const profesoresTexto = (p.profesoresAsignados && p.profesoresAsignados.length > 0)
+    pedidosCargadosCache.forEach((p, idx) => {
+        const profesores = (p.profesoresAsignados && p.profesoresAsignados.length > 0)
             ? p.profesoresAsignados.join(', ')
             : 'Sin especificar';
 
-        contentHTML += `
-            <div style="border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px; margin-bottom: 16px; page-break-inside: avoid; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px;">
-                    <h2 style="font-size: 15px; margin: 0; color: #0056b3; font-weight: bold;">
-                        ${index + 1}. ${p.titulo || 'Sin título'}
-                    </h2>
+        html += `
+            <div style="border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #ffffff; page-break-inside: avoid;">
+                <div style="background-color: #f7fafc; border-bottom: 1px solid #e2e8f0; padding: 8px 12px; margin: -16px -16px 12px -16px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                    <h3 style="font-size: 15px; margin: 0; color: #0056b3;">
+                        ${idx + 1}. ${p.titulo || 'Sin Título'}
+                    </h3>
                 </div>
-                <table style="width: 100%; font-size: 11px; border-collapse: collapse; line-height: 1.6; color: #2d3748;">
+                
+                <table style="width: 100%; font-size: 11px; border-collapse: collapse; line-height: 1.5; color: #2d3748;">
                     <tr>
-                        <td style="padding: 2px 0; width: 50%;"><strong>Gerencia:</strong> ${p.gerencia || p.areaResponsable || '-'}</td>
-                        <td style="padding: 2px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
+                        <td style="padding: 3px 0; width: 50%;"><strong>Gerencia:</strong> ${p.gerencia || p.areaResponsable || '-'}</td>
+                        <td style="padding: 3px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0;"><strong>Fecha:</strong> ${p.fecha || '-'}</td>
-                        <td style="padding: 2px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>Fecha Evento:</strong> ${p.fecha || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
+                        <td style="padding: 3px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0;"><strong>Responsable:</strong> ${p.responsableNombre || '-'}</td>
-                        <td style="padding: 2px 0;"><strong>Contacto:</strong> DNI ${p.responsableDni || '-'} | Tel: ${p.responsableTelefono || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>Solicitante:</strong> ${p.responsableNombre || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>Contacto:</strong> DNI ${p.responsableDni || '-'} | Tel: ${p.responsableTelefono || '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0;"><strong>Participantes Est.:</strong> ${p.participantesAprox || 0}</td>
-                        <td style="padding: 2px 0;"><strong>Público General:</strong> ${p.publicoGeneral ?? 'N/A'}</td>
+                        <td style="padding: 3px 0;"><strong>Participantes Est.:</strong> ${p.participantesAprox || 0}</td>
+                        <td style="padding: 3px 0;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 'N/A'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0;"><strong>Transporte:</strong> ${p.transportePasajeros || 'No'}</td>
-                        <td style="padding: 2px 0;"><strong>Salida/Regreso:</strong> ${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}</td>
+                        <td style="padding: 3px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
+                        <td style="padding: 3px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0;"><strong>Transporte:</strong> ${p.transportePasajeros || 'No'}</td>
+                        <td style="padding: 3px 0;"><strong>Salida/Regreso:</strong> ${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}</td>
                     </tr>
                     ${p.transporteRespNombre ? `
                     <tr>
-                        <td style="padding: 2px 0;" colspan="2"><strong>Resp. Transporte:</strong> ${p.transporteRespNombre} (${p.transporteRespTel || 'Sin tel'})</td>
+                        <td style="padding: 3px 0;" colspan="2"><strong>Resp. Micro:</strong> ${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})</td>
                     </tr>` : ''}
                     <tr>
-                        <td style="padding: 2px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
-                        <td style="padding: 2px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
+                        <td style="padding: 3px 0;" colspan="2"><strong>Profesores:</strong> ${profesores} (Horario: ${p.horarioDocente || '-'})</td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0;" colspan="2"><strong>Profesores:</strong> ${profesoresTexto} (Horario docente: ${p.horarioDocente || '-'})</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 2px 0;"><strong>Prensa / Redes:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
-                        <td style="padding: 2px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}</td>
+                        <td style="padding: 3px 0;"><strong>Prensa / Redes:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
+                        <td style="padding: 3px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}</td>
                     </tr>
                 </table>
+
                 ${(p.necesidades || p.descripcion || p.objetivo) ? `
-                <div style="font-size: 11px; margin-top: 8px; border-top: 1px dashed #e2e8f0; padding-top: 6px; color: #4a5568;">
-                    ${p.necesidades ? `<p style="margin: 2px 0;"><strong>Necesidades Técnicas:</strong> ${p.necesidades}</p>` : ''}
-                    ${p.descripcion ? `<p style="margin: 2px 0;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
-                    ${p.objetivo ? `<p style="margin: 2px 0;"><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
+                <div style="font-size: 11px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px; color: #4a5568;">
+                    ${p.necesidades ? `<p style="margin: 3px 0;"><strong>Necesidades Técnicas:</strong> ${p.necesidades}</p>` : ''}
+                    ${p.descripcion ? `<p style="margin: 3px 0;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
+                    ${p.objetivo ? `<p style="margin: 3px 0;"><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
                 </div>` : ''}
             </div>
         `;
     });
 
-    printArea.innerHTML = contentHTML;
-    document.body.appendChild(printArea);
+    container.innerHTML = html;
+    document.body.appendChild(container);
 
     const opt = {
         margin:       10,
         filename:     `reporte-pedidos-${new Date().toISOString().slice(0, 10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        html2canvas:  { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    html2pdf().set(opt).from(printArea).save().then(() => {
-        document.body.removeChild(printArea);
+    html2pdf().set(opt).from(container).save().then(() => {
+        document.body.removeChild(container);
     }).catch(err => {
-        if (document.body.contains(printArea)) {
-            document.body.removeChild(printArea);
+        if (document.body.contains(container)) {
+            document.body.removeChild(container);
         }
         alert('Error al generar el archivo PDF.');
     });
