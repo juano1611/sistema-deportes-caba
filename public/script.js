@@ -227,7 +227,6 @@ function initAuthEvents() {
     }
 }
 
-// NUEVA GENERACIÓN DINÁMICA DE CAMPOS POR DOCENTE
 function generarCamposProfesores(cantidad) {
     const container = document.getElementById('contenedor-profesores');
     if (!container) return;
@@ -622,7 +621,7 @@ async function eliminarPedido(id) {
     }
 }
 
-// GENERADOR VECTORIAL CON DETALLE DE DOCENTES CADA UNO CON SU REVISTA Y HORARIO
+// GENERACIÓN DE PDF COMPLETO EN EL NAVEGADOR CON EL 100% DE CAMPOS
 function descargarReporteEventoPDF(id) {
     const p = pedidosCargadosCache.find(item => item._id === id);
     if (!p) {
@@ -639,44 +638,41 @@ function descargarReporteEventoPDF(id) {
 
     const fechaHoy = new Date().toLocaleDateString('es-AR');
 
-    // Encabezado
+    // Franja Superior
     doc.setFillColor(0, 43, 102);
-    doc.rect(15, 12, 180, 2, 'F');
+    doc.rect(15, 12, 180, 3, 'F');
 
     doc.setFont("Helvetica", "bold");
-    doc.setFontSize(15);
+    doc.setFontSize(14);
     doc.setTextColor(0, 43, 102);
-    doc.text("REPORTE DE SOLICITUD DE EVENTO", 15, 22);
+    doc.text("REPORTE COMPLETO DE SOLICITUD DE EVENTO", 15, 22);
 
     doc.setFont("Helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(100, 100, 100);
     doc.text("Dirección General de Deporte Social y Desarrollo Deportivo - CABA", 15, 27);
-    doc.text(`Emisión: ${fechaHoy}`, 195, 27, { align: 'right' });
+    doc.text(`Fecha de Emisión: ${fechaHoy}`, 195, 27, { align: 'right' });
 
-    // Tarjeta contenedora
-    doc.setDrawColor(203, 213, 225);
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(15, 32, 180, 245, 3, 3, 'FD');
+    let y = 33;
 
-    // Título del evento
+    // Título de la actividad
     doc.setFillColor(241, 245, 249);
-    doc.rect(15, 32, 180, 12, 'F');
+    doc.setDrawColor(203, 213, 225);
+    doc.rect(15, y, 180, 10, 'FD');
     doc.setFont("Helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setTextColor(0, 43, 102);
-    doc.text(p.titulo || 'Sin Título', 20, 40);
+    doc.text(p.titulo || 'Sin Título', 19, y + 6.5);
 
-    // Grid de datos
-    let y = 52;
-    doc.setFontSize(9.5);
+    y += 15;
+    doc.setFontSize(8.5);
 
-    function addRow(label1, val1, label2, val2) {
+    function printRow(label1, val1, label2, val2) {
         doc.setFont("Helvetica", "bold");
         doc.setTextColor(31, 41, 55);
-        doc.text(label1, 20, y);
+        doc.text(label1, 18, y);
         doc.setFont("Helvetica", "normal");
-        doc.text(String(val1 || '-'), 20 + doc.getTextWidth(label1) + 2, y);
+        doc.text(String(val1 || '-'), 18 + doc.getTextWidth(label1) + 2, y);
 
         if (label2) {
             doc.setFont("Helvetica", "bold");
@@ -684,30 +680,54 @@ function descargarReporteEventoPDF(id) {
             doc.setFont("Helvetica", "normal");
             doc.text(String(val2 || '-'), 110 + doc.getTextWidth(label2) + 2, y);
         }
-        y += 8;
+        y += 6;
     }
 
-    addRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
-    addRow("Fecha Evento:", p.fecha, "Horario:", p.horario);
-    
-    doc.setFont("Helvetica", "bold");
-    doc.text("Lugar / Sede:", 20, y);
-    doc.setFont("Helvetica", "normal");
-    doc.text(String(p.lugar || '-'), 45, y);
-    y += 8;
+    function printSectionHeader(title) {
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(0, 43, 102);
+        doc.text(title, 15, y);
+        doc.setDrawColor(0, 43, 102);
+        doc.line(15, y + 1.5, 195, y + 1.5);
+        y += 6;
+        doc.setFontSize(8.5);
+    }
 
-    addRow("Solicitante:", p.responsableNombre, "DNI / Tel:", `${p.responsableDni || '-'} / ${p.responsableTelefono || '-'}`);
-    addRow("Participantes Est.:", p.participantesAprox, "Público General:", p.publicoGeneral ?? 'N/A');
-    addRow("Ambulancia:", `${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}`, "Extensión ART:", p.extensionArt || 'No');
-    addRow("Transporte:", p.transportePasajeros || 'No', "Salida/Regreso:", `${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}`);
+    // 1. DATOS GENERALES
+    printSectionHeader("1. DATOS GENERALES Y UBICACIÓN");
+    printRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
+    printRow("Fecha Evento:", p.fecha, "Horario Jornada:", p.horario);
+    printRow("Sede / Lugar:", p.lugar);
 
+    y += 2;
+    // 2. RESPONSABLE DE LA SOLICITUD
+    printSectionHeader("2. RESPONSABLE DE LA SOLICITUD");
+    printRow("Solicitante:", p.responsableNombre, "DNI:", p.responsableDni);
+    printRow("Teléfono Contacto:", p.responsableTelefono);
+
+    y += 2;
+    // 3. ESTIMACIÓN DE CONCURRENCIA
+    printSectionHeader("3. ESTIMACIÓN DE CONCURRENCIA");
+    printRow("Participantes Est.:", p.participantesAprox, "Público General Est.:", p.publicoGeneral ?? 'N/A');
+
+    y += 2;
+    // 4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE
+    printSectionHeader("4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE");
+    printRow("Requiere Ambulancia:", `${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}`);
+    printRow("Transporte Pasajeros:", p.transportePasajeros || 'No', "Salida/Regreso:", `${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}`);
     if (p.transporteRespNombre) {
-        addRow("Resp. Micro:", `${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})`);
+        printRow("Resp. Micro:", `${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})`);
     }
 
-    // IMPRESIÓN DETALLADA DE DOCENTES
+    y += 2;
+    // 5. PERSONAL Y COBERTURA DOCENTE
+    printSectionHeader("5. PERSONAL Y COBERTURA DOCENTE");
+    printRow("Extensión ART:", p.extensionArt || 'No', "Horario Docente:", p.horarioDocente || 'N/A');
+
     doc.setFont("Helvetica", "bold");
-    doc.text("Docentes Asignados:", 20, y);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Detalle de Docentes:", 18, y);
     y += 5;
 
     if (p.profesoresAsignados && p.profesoresAsignados.length > 0) {
@@ -715,43 +735,42 @@ function descargarReporteEventoPDF(id) {
             doc.setFont("Helvetica", "normal");
             let txt = '';
             if (typeof prof === 'object') {
-                txt = `• ${prof.nombre} - Revista: ${prof.situacionRevista || 'S/D'} - Horario: ${prof.horarioLaboral || 'S/D'}`;
+                txt = `${idx + 1}. ${prof.nombre} | Revista: ${prof.situacionRevista || 'S/D'} | Horario: ${prof.horarioLaboral || 'S/D'}`;
             } else {
-                txt = `• ${prof}`;
+                txt = `${idx + 1}. ${prof}`;
             }
-            doc.text(txt, 25, y);
+            doc.text(txt, 22, y);
             y += 5;
         });
     } else {
         doc.setFont("Helvetica", "normal");
-        doc.text("Sin docentes asignados", 25, y);
+        doc.text("No se asignaron docentes específicos", 22, y);
         y += 5;
     }
+
+    y += 2;
+    // 6. PRENSA Y CONDICIÓN CLIMÁTICA
+    printSectionHeader("6. PRENSA Y CONDICIÓN CLIMÁTICA");
+    printRow("Prensa / Cobertura:", `${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}`);
+    printRow("Suspende por Lluvia:", `${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}`);
+
     y += 3;
 
-    addRow("Prensa / Redes:", `${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}`, "Suspende por Lluvia:", `${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}`);
-
-    // Línea divisoria
-    doc.setDrawColor(203, 213, 225);
-    doc.line(20, y, 190, y);
-    y += 8;
-
-    function addBlock(title, text) {
+    function printBlock(title, text) {
         if (!text) return;
-        doc.setFont("Helvetica", "bold");
-        doc.text(title, 20, y);
-        y += 5;
+        printSectionHeader(title);
         doc.setFont("Helvetica", "normal");
-        const lines = doc.splitTextToSize(text, 165);
-        doc.text(lines, 20, y);
-        y += (lines.length * 5) + 4;
+        doc.setTextColor(31, 41, 55);
+        const lines = doc.splitTextToSize(text, 175);
+        doc.text(lines, 18, y);
+        y += (lines.length * 4) + 4;
     }
 
-    addBlock("Necesidades Técnicas e Infraestructura:", p.necesidades);
-    addBlock("Descripción General:", p.descripcion);
-    addBlock("Objetivos de la Jornada:", p.objetivo);
+    printBlock("7. NECESIDADES TÉCNICAS E INFRAESTRUCTURA", p.necesidades);
+    printBlock("8. DESCRIPCIÓN GENERAL DEL EVENTO", p.descripcion);
+    printBlock("9. OBJETIVOS DE LA JORNADA", p.objetivo);
 
-    // Guardar archivo
+    // Guardar archivo PDF
     const tituloSanitizado = (p.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
     doc.save(`evento-${tituloSanitizado}.pdf`);
 }

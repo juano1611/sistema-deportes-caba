@@ -112,7 +112,7 @@ const PedidoSchema = new mongoose.Schema({
 
 const Pedido = mongoose.model('Pedido', PedidoSchema);
 
-// GENERADOR DE PDF EXHAUSTIVO
+// GENERADOR DE PDF EXHAUSTIVO EN BACKEND
 function generarBufferPDF(p) {
     return new Promise((resolve, reject) => {
         try {
@@ -136,7 +136,6 @@ function generarBufferPDF(p) {
             doc.fontSize(8.5).font('Helvetica').fillColor('#666666').text('Dirección General de Deporte Social y Desarrollo Deportivo - CABA', 35, 58);
             doc.text(`Fecha de Emisión: ${fechaHoy}`, 380, 58, { align: 'right' });
 
-            // Título de la actividad
             let y = 72;
             doc.rect(35, y, 525, 22).fill('#F1F5F9').stroke('#CBD5E1');
             doc.fillColor('#002B66').fontSize(11).font('Helvetica-Bold').text(p.titulo || 'Sin Título', 42, y + 6);
@@ -223,7 +222,6 @@ function generarBufferPDF(p) {
             doc.moveTo(35, y).lineTo(560, y).strokeColor('#CBD5E1').stroke();
             y += 12;
 
-            // BLOQUES TEXTUALES AMPLIOS
             function printBlock(title, text) {
                 if (!text) return;
                 doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text(title, 35, y);
@@ -243,7 +241,7 @@ function generarBufferPDF(p) {
     });
 }
 
-// FUNCIÓN AUXILIAR DE ENVÍO DE EMAIL ASÍNCRONO
+// ENVÍO DE EMAIL ASÍNCRONO
 async function enviarEmailBackground(pedidoData) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.log('ℹ️ Omitiendo envío de correo: EMAIL_USER y EMAIL_PASS no están configurados.');
@@ -327,7 +325,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Rutas Pedidos (RESPUESTA INSTANTÁNEA + EMAIL EN BACKGROUND)
+// Rutas Pedidos
 app.post('/api/pedidos', async (req, res) => {
     const p = req.body;
     if (!p.titulo || !p.fecha || !p.lugar) {
@@ -337,10 +335,8 @@ app.post('/api/pedidos', async (req, res) => {
         const nuevoPedido = new Pedido(p);
         await nuevoPedido.save();
 
-        // Responder al frontend de inmediato sin esperar la conexión del correo
         res.status(201).json({ msg: 'Pedido registrado correctamente' });
 
-        // Disparar el envío de correo en segundo plano
         enviarEmailBackground(nuevoPedido.toObject());
     } catch (err) {
         console.error('❌ Error al guardar el pedido:', err);
