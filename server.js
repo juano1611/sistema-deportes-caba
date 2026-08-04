@@ -9,13 +9,11 @@ const PDFDocument = require('pdfkit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de los correos de destino oficiales (ambas direcciones)
 const DESTINATARIOS = [
     'solicituddepedidos_dgdsydd@buenosaires.gob.ar',
     'direccionpedagogica_DGDSYDD@buenosaires.gob.ar'
 ].join(', ');
 
-// Configuración del transportador de correos (Nodemailer)
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -24,11 +22,9 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// REGLA DEFINITIVA ANTI-CACHÉ
 app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
@@ -37,13 +33,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// Servir archivos estáticos deshabilitando ETag
 app.use(express.static(path.join(__dirname, 'public'), {
     etag: false,
     lastModified: false
 }));
 
-// Conexión a MongoDB Atlas
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://juano1611:juano1611@cluster0.lldgqos.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(MONGO_URI)
     .then(() => {
@@ -71,7 +65,6 @@ async function eliminarEventosPasados() {
 
 setInterval(eliminarEventosPasados, 12 * 60 * 60 * 1000);
 
-// Modelos
 const UsuarioSchema = new mongoose.Schema({
     dni: { type: String, required: true, unique: true },
     nombre: { type: String, required: true },
@@ -105,7 +98,6 @@ const PedidoSchema = new mongoose.Schema({
     ambulancia: String,
     ambulanciaHorario: String,
     extensionArt: String,
-    horarioDocente: String,
     profesoresAsignados: mongoose.Schema.Types.Mixed,
     prensa: String,
     tipoDifusion: String,
@@ -115,7 +107,6 @@ const PedidoSchema = new mongoose.Schema({
 
 const Pedido = mongoose.model('Pedido', PedidoSchema);
 
-// GENERADOR DE PDF EXHAUSTIVO EN BACKEND
 function generarBufferPDF(p) {
     return new Promise((resolve, reject) => {
         try {
@@ -131,7 +122,6 @@ function generarBufferPDF(p) {
 
             const fechaHoy = new Date().toLocaleDateString('es-AR');
 
-            // Encabezado
             doc.rect(35, 30, 525, 3).fill('#002B66');
             doc.moveDown(0.5);
 
@@ -157,7 +147,6 @@ function generarBufferPDF(p) {
                 y += 15;
             }
 
-            // 1. DATOS GENERALES
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('1. DATOS GENERALES Y UBICACIÓN', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
@@ -166,7 +155,6 @@ function generarBufferPDF(p) {
             printRow('Sede / Lugar:', p.lugar, '', '');
 
             y += 4;
-            // 2. RESPONSABLE DE LA SOLICITUD
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('2. RESPONSABLE DE LA SOLICITUD', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
@@ -174,14 +162,12 @@ function generarBufferPDF(p) {
             printRow('Teléfono Contacto:', p.responsableTelefono, '', '');
 
             y += 4;
-            // 3. CONCURRENCIA ESTIMADA
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('3. ESTIMACIÓN DE CONCURRENCIA', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
             printRow('Participantes Est.:', p.participantesAprox, 'Público General Est.:', p.publicoGeneral ?? 'N/A');
 
             y += 4;
-            // 4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
@@ -190,11 +176,10 @@ function generarBufferPDF(p) {
             printRow('Lugar/Horario Regreso:', p.transporteRegreso || 'N/A', 'Responsable Micro:', `${p.transporteRespNombre || '-'} ${p.transporteRespTel ? `(${p.transporteRespTel})` : ''}`);
 
             y += 4;
-            // 5. PERSONAL Y DOCENTES
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('5. PERSONAL Y COBERTURA DOCENTE', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
-            printRow('Extensión de ART:', p.extensionArt || 'No', 'Horario Laboral Docente:', p.horarioDocente || 'N/A');
+            printRow('Extensión de ART:', p.extensionArt || 'No', '', '');
 
             doc.font('Helvetica-Bold').text('Detalle de Docentes:', 42, y);
             y += 12;
@@ -214,7 +199,6 @@ function generarBufferPDF(p) {
             }
 
             y += 4;
-            // 6. PRENSA Y CONDICIÓN CLIMÁTICA
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('6. PRENSA Y CONDICIÓN CLIMÁTICA', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
@@ -244,7 +228,6 @@ function generarBufferPDF(p) {
     });
 }
 
-// ENVÍO DE EMAIL ASÍNCRONO
 async function enviarEmailBackground(pedidoData) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.log('ℹ️ Omitiendo envío de correo: EMAIL_USER y EMAIL_PASS no están configurados.');
@@ -285,7 +268,6 @@ async function enviarEmailBackground(pedidoData) {
     }
 }
 
-// Rutas Autenticación
 app.post('/api/auth/register', async (req, res) => {
     const { nombre, dni, password } = req.body;
     if (!nombre || !dni || !password) {
@@ -298,7 +280,6 @@ app.post('/api/auth/register', async (req, res) => {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Asignación de rol por DNI en el registro
         let role = 'DOCENTE';
         if (dni === '23377971') {
             role = 'DIRECTOR';
@@ -326,7 +307,6 @@ app.post('/api/auth/login', async (req, res) => {
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ msg: 'Contraseña incorrecta' });
 
-        // Garantizar el rol correcto según el DNI al iniciar sesión
         let assignedRole = user.role;
         if (user.dni === '23377971') {
             assignedRole = 'DIRECTOR';
@@ -343,7 +323,6 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Rutas Pedidos
 app.post('/api/pedidos', async (req, res) => {
     const p = req.body;
     if (!p.titulo || !p.fecha || !p.lugar) {

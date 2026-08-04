@@ -30,7 +30,6 @@ function checkSession() {
     if (storedUser) {
         try {
             const user = JSON.parse(storedUser);
-            // Asignación automática de roles por DNI si vienen de sesión previa
             if (user.dni === '23377971') {
                 user.role = 'DIRECTOR';
             } else if (['41173333', '31175023'].includes(user.dni)) {
@@ -85,7 +84,6 @@ function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
 
-    // Tanto DIRECTOR como ADMINISTRADOR ven el panel de gestión y no envían solicitudes
     if (user.role === 'DIRECTOR' || user.role === 'ADMINISTRADOR') {
         if (formPedidoSection) formPedidoSection.classList.add('hidden');
         if (directorSection) {
@@ -345,7 +343,6 @@ function initPedidoForm() {
                 necesidades: document.getElementById('ped-necesidades').value.trim(),
                 
                 extensionArt: document.getElementById('ped-ext-art') ? document.getElementById('ped-ext-art').value : 'No',
-                horarioDocente: document.getElementById('ped-horario-doc') ? document.getElementById('ped-horario-doc').value.trim() : '',
                 profesoresAsignados: listaProfesores,
 
                 prensa: document.getElementById('ped-prensa') ? document.getElementById('ped-prensa').value : 'No',
@@ -514,7 +511,6 @@ function abrirModalEdicion(id) {
 
     document.getElementById('edit-necesidades').value = pedido.necesidades || '';
     document.getElementById('edit-ext-art').value = pedido.extensionArt || 'No';
-    if(document.getElementById('edit-horario-doc')) document.getElementById('edit-horario-doc').value = pedido.horarioDocente || '';
     
     let profsText = '';
     if (pedido.profesoresAsignados && Array.isArray(pedido.profesoresAsignados)) {
@@ -577,7 +573,6 @@ function initEditForm() {
 
                 necesidades: document.getElementById('edit-necesidades').value.trim(),
                 extensionArt: document.getElementById('edit-ext-art').value,
-                horarioDocente: document.getElementById('edit-horario-doc') ? document.getElementById('edit-horario-doc').value.trim() : '',
                 profesoresAsignados: profesoresArray,
 
                 prensa: document.getElementById('edit-prensa').value,
@@ -632,7 +627,6 @@ async function eliminarPedido(id) {
     }
 }
 
-// GENERACIÓN DE PDF COMPLETO EN EL NAVEGADOR
 function descargarReporteEventoPDF(id) {
     const p = pedidosCargadosCache.find(item => item._id === id);
     if (!p) {
@@ -649,7 +643,6 @@ function descargarReporteEventoPDF(id) {
 
     const fechaHoy = new Date().toLocaleDateString('es-AR');
 
-    // Franja Superior
     doc.setFillColor(0, 43, 102);
     doc.rect(15, 12, 180, 3, 'F');
 
@@ -666,7 +659,6 @@ function descargarReporteEventoPDF(id) {
 
     let y = 33;
 
-    // Título de la actividad
     doc.setFillColor(241, 245, 249);
     doc.setDrawColor(203, 213, 225);
     doc.rect(15, y, 180, 10, 'FD');
@@ -705,25 +697,21 @@ function descargarReporteEventoPDF(id) {
         doc.setFontSize(8.5);
     }
 
-    // 1. DATOS GENERALES
     printSectionHeader("1. DATOS GENERALES Y UBICACIÓN");
     printRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
     printRow("Fecha Evento:", p.fecha, "Horario Jornada:", p.horario);
     printRow("Sede / Lugar:", p.lugar);
 
     y += 2;
-    // 2. RESPONSABLE DE LA SOLICITUD
     printSectionHeader("2. RESPONSABLE DE LA SOLICITUD");
     printRow("Solicitante:", p.responsableNombre, "DNI:", p.responsableDni);
     printRow("Teléfono Contacto:", p.responsableTelefono);
 
     y += 2;
-    // 3. ESTIMACIÓN DE CONCURRENCIA
     printSectionHeader("3. ESTIMACIÓN DE CONCURRENCIA");
     printRow("Participantes Est.:", p.participantesAprox, "Público General Est.:", p.publicoGeneral ?? 'N/A');
 
     y += 2;
-    // 4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE
     printSectionHeader("4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE");
     printRow("Requiere Ambulancia:", `${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}`);
     printRow("Transporte Pasajeros:", p.transportePasajeros || 'No', "Salida/Regreso:", `${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}`);
@@ -732,9 +720,8 @@ function descargarReporteEventoPDF(id) {
     }
 
     y += 2;
-    // 5. PERSONAL Y COBERTURA DOCENTE
     printSectionHeader("5. PERSONAL Y COBERTURA DOCENTE");
-    printRow("Extensión ART:", p.extensionArt || 'No', "Horario Docente:", p.horarioDocente || 'N/A');
+    printRow("Extensión ART:", p.extensionArt || 'No');
 
     doc.setFont("Helvetica", "bold");
     doc.setTextColor(31, 41, 55);
@@ -760,7 +747,6 @@ function descargarReporteEventoPDF(id) {
     }
 
     y += 2;
-    // 6. PRENSA Y CONDICIÓN CLIMÁTICA
     printSectionHeader("6. PRENSA Y CONDICIÓN CLIMÁTICA");
     printRow("Prensa / Cobertura:", `${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}`);
     printRow("Suspende por Lluvia:", `${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}`);
@@ -781,7 +767,6 @@ function descargarReporteEventoPDF(id) {
     printBlock("8. DESCRIPCIÓN GENERAL DEL EVENTO", p.descripcion);
     printBlock("9. OBJETIVOS DE LA JORNADA", p.objetivo);
 
-    // Guardar archivo PDF
     const tituloSanitizado = (p.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
     doc.save(`evento-${tituloSanitizado}.pdf`);
 }
