@@ -573,7 +573,7 @@ async function eliminarPedido(id) {
     }
 }
 
-// DESCARGA DE PDF INDIVIDUAL CON IMPRESIÓN NATIVA (GARANTIZA PDF PERFECTO)
+// DESCARGA DIRECTA DE ARCHIVO PDF EN UN CLIC
 function descargarReporteEventoPDF(id) {
     const p = pedidosCargadosCache.find(item => item._id === id);
     if (!p) {
@@ -581,12 +581,19 @@ function descargarReporteEventoPDF(id) {
         return;
     }
 
-    let printContainer = document.getElementById('print-container');
-    if (!printContainer) {
-        printContainer = document.createElement('div');
-        printContainer.id = 'print-container';
-        document.body.appendChild(printContainer);
-    }
+    const container = document.createElement('div');
+    // Para asegurar que html2pdf renderice perfectamente sin hoja en blanco, 
+    // lo ubicamos en el viewport pero con un z-index extremo y sin opacidad 0.
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '750px';
+    container.style.zIndex = '999999';
+    container.style.backgroundColor = '#ffffff';
+    container.style.padding = '30px';
+    container.style.boxSizing = 'border-box';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.color = '#1f2937';
 
     const profesores = (p.profesoresAsignados && p.profesoresAsignados.length > 0)
         ? p.profesoresAsignados.join(', ')
@@ -594,77 +601,94 @@ function descargarReporteEventoPDF(id) {
 
     const fechaHoy = new Date().toLocaleDateString('es-AR');
 
-    printContainer.innerHTML = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
-            <div style="border-bottom: 3px solid #002b66; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
-                <div>
-                    <h1 style="font-size: 20px; margin: 0; color: #002b66; font-weight: bold; text-transform: uppercase;">REPORTE DE SOLICITUD DE EVENTO</h1>
-                    <p style="font-size: 12px; color: #4b5563; margin: 4px 0 0 0;">Dirección General de Deporte Social y Desarrollo Deportivo - CABA</p>
-                </div>
-                <div style="text-align: right;">
-                    <p style="font-size: 11px; color: #6b7280; margin: 0;"><strong>Fecha de Emisión:</strong> ${fechaHoy}</p>
-                </div>
+    container.innerHTML = `
+        <div style="border-bottom: 3px solid #002b66; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="font-size: 20px; margin: 0; color: #002b66; font-weight: bold; text-transform: uppercase;">REPORTE DE SOLICITUD DE EVENTO</h1>
+                <p style="font-size: 12px; color: #4b5563; margin: 4px 0 0 0;">Dirección General de Deporte Social y Desarrollo Deportivo - CABA</p>
             </div>
-
-            <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; background-color: #ffffff;">
-                <div style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; padding: 10px 14px; margin: -20px -20px 18px -20px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                    <h2 style="font-size: 16px; margin: 0; color: #002b66; font-weight: bold;">
-                        ${p.titulo || 'Sin Título'}
-                    </h2>
-                </div>
-                
-                <table style="width: 100%; font-size: 12px; border-collapse: collapse; line-height: 1.8; color: #1f2937;">
-                    <tr>
-                        <td style="padding: 6px 0; width: 50%;"><strong>Gerencia:</strong> ${p.gerencia || p.areaResponsable || '-'}</td>
-                        <td style="padding: 6px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><strong>Fecha Evento:</strong> ${p.fecha || '-'}</td>
-                        <td style="padding: 6px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><strong>Solicitante:</strong> ${p.responsableNombre || '-'}</td>
-                        <td style="padding: 6px 0;"><strong>Contacto:</strong> DNI ${p.responsableDni || '-'} | Tel: ${p.responsableTelefono || '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><strong>Participantes Est.:</strong> ${p.participantesAprox || 0}</td>
-                        <td style="padding: 6px 0;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
-                        <td style="padding: 6px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><strong>Transporte:</strong> ${p.transportePasajeros || 'No'}</td>
-                        <td style="padding: 6px 0;"><strong>Salida/Regreso:</strong> ${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}</td>
-                    </tr>
-                    ${p.transporteRespNombre ? `
-                    <tr>
-                        <td style="padding: 6px 0;" colspan="2"><strong>Resp. Micro:</strong> ${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})</td>
-                    </tr>` : ''}
-                    <tr>
-                        <td style="padding: 6px 0;" colspan="2"><strong>Profesores Asignados:</strong> ${profesores} (Horario: ${p.horarioDocente || '-'})</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0;"><strong>Prensa / Redes:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
-                        <td style="padding: 6px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}</td>
-                    </tr>
-                </table>
-
-                ${(p.necesidades || p.descripcion || p.objetivo) ? `
-                <div style="font-size: 12px; margin-top: 16px; border-top: 1px dashed #cbd5e1; padding-top: 12px; color: #374151;">
-                    ${p.necesidades ? `<p style="margin: 4px 0;"><strong>Necesidades Técnicas:</strong> ${p.necesidades}</p>` : ''}
-                    ${p.descripcion ? `<p style="margin: 4px 0;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
-                    ${p.objetivo ? `<p style="margin: 4px 0;"><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
-                </div>` : ''}
+            <div style="text-align: right;">
+                <p style="font-size: 11px; color: #6b7280; margin: 0;"><strong>Fecha de Emisión:</strong> ${fechaHoy}</p>
             </div>
+        </div>
+
+        <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; background-color: #ffffff;">
+            <div style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; padding: 10px 14px; margin: -20px -20px 18px -20px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                <h2 style="font-size: 16px; margin: 0; color: #002b66; font-weight: bold;">
+                    ${p.titulo || 'Sin Título'}
+                </h2>
+            </div>
+            
+            <table style="width: 100%; font-size: 12px; border-collapse: collapse; line-height: 1.8; color: #1f2937;">
+                <tr>
+                    <td style="padding: 6px 0; width: 50%;"><strong>Gerencia:</strong> ${p.gerencia || p.areaResponsable || '-'}</td>
+                    <td style="padding: 6px 0; width: 50%;"><strong>Programa:</strong> ${p.programa || '-'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><strong>Fecha Evento:</strong> ${p.fecha || '-'}</td>
+                    <td style="padding: 6px 0;"><strong>Horario:</strong> ${p.horario || '-'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;" colspan="2"><strong>Lugar / Sede:</strong> ${p.lugar || '-'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><strong>Solicitante:</strong> ${p.responsableNombre || '-'}</td>
+                    <td style="padding: 6px 0;"><strong>Contacto:</strong> DNI ${p.responsableDni || '-'} | Tel: ${p.responsableTelefono || '-'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><strong>Participantes Est.:</strong> ${p.participantesAprox || 0}</td>
+                    <td style="padding: 6px 0;"><strong>Público General Est.:</strong> ${p.publicoGeneral ?? 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}</td>
+                    <td style="padding: 6px 0;"><strong>Extensión ART:</strong> ${p.extensionArt || 'No'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><strong>Transporte:</strong> ${p.transportePasajeros || 'No'}</td>
+                    <td style="padding: 6px 0;"><strong>Salida/Regreso:</strong> ${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}</td>
+                </tr>
+                ${p.transporteRespNombre ? `
+                <tr>
+                    <td style="padding: 6px 0;" colspan="2"><strong>Resp. Micro:</strong> ${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})</td>
+                </tr>` : ''}
+                <tr>
+                    <td style="padding: 6px 0;" colspan="2"><strong>Profesores Asignados:</strong> ${profesores} (Horario: ${p.horarioDocente || '-'})</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 0;"><strong>Prensa / Redes:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `(${p.tipoDifusion})` : ''}</td>
+                    <td style="padding: 6px 0;"><strong>Se suspende por lluvia:</strong> ${p.suspendeLluvia || 'No'} ${p.fechaReprogramacion ? `(Reprog: ${p.fechaReprogramacion})` : ''}</td>
+                </tr>
+            </table>
+
+            ${(p.necesidades || p.descripcion || p.objetivo) ? `
+            <div style="font-size: 12px; margin-top: 16px; border-top: 1px dashed #cbd5e1; padding-top: 12px; color: #374151;">
+                ${p.necesidades ? `<p style="margin: 4px 0;"><strong>Necesidades Técnicas:</strong> ${p.necesidades}</p>` : ''}
+                ${p.descripcion ? `<p style="margin: 4px 0;"><strong>Descripción:</strong> ${p.descripcion}</p>` : ''}
+                ${p.objetivo ? `<p style="margin: 4px 0;"><strong>Objetivo:</strong> ${p.objetivo}</p>` : ''}
+            </div>` : ''}
         </div>
     `;
 
-    setTimeout(() => {
-        window.print();
-    }, 100);
+    document.body.appendChild(container);
+
+    const tituloSanitizado = (p.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const opt = {
+        margin:       10,
+        filename:     `evento-${tituloSanitizado}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Generar el archivo y luego eliminar el div temporal
+    html2pdf().set(opt).from(container).save().then(() => {
+        if (document.body.contains(container)) {
+            document.body.removeChild(container);
+        }
+    }).catch(() => {
+        if (document.body.contains(container)) {
+            document.body.removeChild(container);
+        }
+        alert('Error al descargar el archivo PDF.');
+    });
 }
