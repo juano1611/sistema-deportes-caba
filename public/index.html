@@ -3,500 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Eventos - Dirección General de Deporte Social y Desarrollo Deportivo</title>
+    <!-- DESACTIVAR CACHÉ ABSOLUTO -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     
-    <!-- Favicon con Iso / Logo de la Ciudad de Buenos Aires (BA) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23002B66'/><path d='M22 25 h20 c10 0 16 5 16 13 c0 6-4 10-9 12 c7 2 11 7 11 14 c0 9-7 15-18 15 H22 V25 z M34 34 v12 h8 c4 0 7-2 7-6 s-3-6-7-6 h-8 z M34 54 v15 h9 c5 0 8-2 8-7.5 s-3-7.5-8-7.5 h-9 z M58 79 L72 25 h12 L98 79 H86 L83 67 H73 L70 79 H58 z M75 57 h6 L78 43 z' fill='%23FFD100'/></svg>">
-
-    <link rel="stylesheet" href="styles.css">
-    <!-- Librería jsPDF para descarga de reportes PDF -->
+    <title>Portal de Eventos BA - Deporte Social</title>
+    <link rel="stylesheet" href="styles.css?v=5.0.0">
+    <!-- Librería jsPDF pura -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-    <!-- VISTA DE AUTENTICACIÓN (LOGIN / REGISTRO) -->
+    <!-- VISTA DE LOGIN -->
     <div id="login-view" class="auth-wrapper">
         <div class="auth-card">
             <div class="auth-header">
-                <div class="ba-logo-badge">BA</div>
-                <h2>Portal de Solicitudes</h2>
+                <h2>Portal de Eventos <span class="ba-highlight">BA</span></h2>
                 <p>Dirección General de Deporte Social y Desarrollo Deportivo</p>
             </div>
-
+            
             <div class="auth-tabs">
-                <button id="tab-login-btn" class="auth-tab-btn active">Iniciar Sesión</button>
-                <button id="tab-register-btn" class="auth-tab-btn">Registrarse</button>
+                <button id="tab-login-btn" class="auth-tab-btn active" type="button">Iniciar Sesión</button>
+                <button id="tab-register-btn" class="auth-tab-btn" type="button">Registrarse</button>
             </div>
 
-            <!-- Formularios -->
-            <form id="login-form" class="auth-form">
+            <!-- FORMULARIO DE LOGIN -->
+            <form id="login-form">
+                <div id="login-error" class="auth-error hidden"></div>
                 <div class="form-group">
-                    <label for="username">DNI (Usuario)</label>
-                    <input type="text" id="username" placeholder="Ingresá tu DNI sin puntos" required>
+                    <label for="username">DNI / Usuario:</label>
+                    <input type="text" id="username" required placeholder="Ingresá tu DNI">
                 </div>
                 <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" required placeholder="••••••••">
                 </div>
-                <div id="login-error" class="alert-box alert-error hidden"></div>
-                <button type="submit" class="btn-primary w-100">Ingresar</button>
+                <button type="submit" class="btn-primary">Ingresar</button>
             </form>
 
-            <form id="register-form" class="auth-form hidden">
+            <!-- FORMULARIO DE REGISTRO -->
+            <form id="register-form" class="hidden">
+                <div id="register-error" class="auth-error hidden"></div>
+                <div id="register-success" class="auth-success hidden"></div>
                 <div class="form-group">
-                    <label for="reg-nombre">Nombre y Apellido</label>
-                    <input type="text" id="reg-nombre" placeholder="Ej: Maria Gonzalez" required>
+                    <label for="reg-nombre">Nombre y Apellido:</label>
+                    <input type="text" id="reg-nombre" required placeholder="Ej: María González">
                 </div>
                 <div class="form-group">
-                    <label for="reg-dni">DNI (Usuario)</label>
-                    <input type="text" id="reg-dni" placeholder="Ingresá tu DNI sin puntos" required>
+                    <label for="reg-dni">DNI:</label>
+                    <input type="text" id="reg-dni" required placeholder="Ingresá tu DNI">
                 </div>
                 <div class="form-group">
-                    <label for="reg-password">Contraseña</label>
-                    <input type="password" id="reg-password" placeholder="Creá una contraseña" required>
+                    <label for="reg-password">Contraseña:</label>
+                    <input type="password" id="reg-password" required placeholder="Crea una contraseña">
                 </div>
-                <div id="register-error" class="alert-box alert-error hidden"></div>
-                <div id="register-success" class="alert-box alert-success hidden"></div>
-                <button type="submit" class="btn-primary w-100">Crear Cuenta</button>
+                <button type="submit" class="btn-primary">Registrarse</button>
             </form>
         </div>
     </div>
 
     <!-- VISTA DEL PORTAL PRINCIPAL -->
-    <div id="portal-view" class="portal-wrapper hidden">
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-        <!-- Sidebar / Menú Lateral -->
-        <aside class="sidebar" id="main-sidebar">
-            <div class="sidebar-brand">
-                <div class="ba-logo-badge">BA</div>
-                <div>
-                    <h3>Deporte Social</h3>
-                    <span>Gobierno de la Ciudad</span>
-                </div>
+    <div id="portal-view" class="portal-wrapper">
+        <header class="main-header">
+            <div class="header-left">
+                <button id="mobile-menu-btn" class="mobile-menu-toggle">☰</button>
+                <span class="header-title">Portal de Eventos <span class="ba-highlight">BA</span></span>
             </div>
-
-            <nav class="sidebar-nav">
-                <ul class="nav-list">
-                    <li class="nav-item active" data-target="tab-solicitud">
-                        <span class="nav-icon">📋</span>
-                        <span class="nav-text">Solicitudes</span>
-                    </li>
-                    <li class="nav-item" data-target="tab-calendario">
-                        <span class="nav-icon">📅</span>
-                        <span class="nav-text">Calendario de Eventos</span>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="btn-logout" class="btn-logout">
-                    <span class="nav-icon">🚪</span>
-                    <span>Cerrar Sesión</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Contenido Principal -->
-        <div class="main-layout">
-            <header class="topbar">
-                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
-                <div class="topbar-title">
-                    <h2>Gestión de Eventos y Actividades</h2>
-                </div>
-                <div class="topbar-user">
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="user-name">Usuario</span>
                     <span id="user-badge" class="badge">DOCENTE</span>
-                    <span id="user-name" class="user-name-text">Usuario</span>
                 </div>
-            </header>
+                <button id="btn-logout" class="btn-logout">🚪 Cerrar Sesión</button>
+            </div>
+        </header>
 
-            <main class="content-area">
-                <!-- TAB 1: SOLICITUDES -->
-                <section id="tab-solicitud" class="tab-content active">
-                    
-                    <!-- Formulario de Solicitud (Para Docentes) -->
-                    <form id="form-nuevo-pedido" class="card-form">
-                        <div class="card-header">
-                            <h3>Formulario de Carga de Eventos</h3>
-                            <p>Completá todos los datos para registrar la solicitud del evento o actividad deportiva.</p>
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+        <div class="layout-body">
+            <aside id="main-sidebar" class="sidebar">
+                <nav class="sidebar-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item" data-target="tab-inicio">
+                            <span>🏠 Inicio</span>
+                        </li>
+                        <li class="nav-item active" data-target="tab-solicitudes">
+                            <span>📝 Solicitud de Eventos</span>
+                        </li>
+                        <li class="nav-item" data-target="tab-calendario">
+                            <span>📅 Calendario General</span>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main class="content-wrapper">
+                <section id="tab-inicio" class="tab-content">
+                    <div class="home-container">
+                        <div class="welcome-card-hero">
+                            <div class="welcome-banner-wrapper">
+                                <img src="banner-deportes.jpg" alt="Dirección General de Deporte Social y Desarrollo Deportivo" class="welcome-banner-img" onerror="this.style.display='none'">
+                            </div>
+
+                            <div class="welcome-card-body">
+                                <h2>¡Bienvenido/a al Portal de Eventos BA!</h2>
+                                <p>Plataforma oficial de la <strong>Dirección General de Deporte Social y Desarrollo Deportivo</strong> para la gestión, planificación y coordinación integral de eventos y jornadas deportivas en la Ciudad de Buenos Aires.</p>
+                                
+                                <div class="welcome-card-actions">
+                                    <button onclick="switchTab('tab-solicitudes')" class="btn-primary btn-welcome">📝 Solicitar Evento</button>
+                                    <button onclick="switchTab('tab-calendario')" class="btn-secondary btn-welcome">📅 Ver Calendario General</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-solicitudes" class="tab-content active">
+                    <div class="panel">
+                        <div id="director-pedidos-container" class="director-panel">
+                            <div class="director-header">
+                                <div>
+                                    <h2>Gestión de Eventos y Actividades</h2>
+                                    <p class="section-desc">Supervisión, edición y descarga de reportes PDF de las actividades registradas.</p>
+                                </div>
+                            </div>
+                            
+                            <div id="lista-pedidos" class="pedidos-list">
+                                <!-- Tarjetas de pedidos dinámicas -->
+                            </div>
                         </div>
 
-                        <!-- 1. DATOS GENERALES -->
-                        <div class="form-section">
-                            <h4 class="section-title">1. Datos Generales y Ubicación</h4>
+                        <form id="form-nuevo-pedido" class="pedido-form hidden">
+                            <h2>Formulario de Solicitud de Evento</h2>
+                            <p class="section-desc">Completá los datos correspondientes para solicitar la actividad</p>
+                            
+                            <div id="pedido-msg" class="auth-success hidden"></div>
+
+                            <div class="form-section-title">1. Datos Generales del Evento</div>
+                            <div class="form-group">
+                                <label for="ped-titulo">Título del Evento / Actividad *</label>
+                                <input type="text" id="ped-titulo" required placeholder="Ej: Torneo Intercolegial de Atletismo">
+                            </div>
+
                             <div class="form-grid">
-                                <div class="form-group grid-span-2">
-                                    <label for="ped-titulo">Título o Nombre de la Actividad *</label>
-                                    <input type="text" id="ped-titulo" placeholder="Ej: Torneo Interescolar de Atletismo" required>
-                                </div>
                                 <div class="form-group">
-                                    <label for="ped-area">Gerencia / Áreas Responsables *</label>
-                                    <input type="text" id="ped-area" placeholder="Ej: Gerencia de Deporte Social" required>
+                                    <label for="ped-area">Gerencia *</label>
+                                    <input type="text" id="ped-area" required placeholder="Ej: Gerencia de Deporte Social">
                                 </div>
                                 <div class="form-group">
                                     <label for="ped-programa">Programa *</label>
-                                    <input type="text" id="ped-programa" placeholder="Ej: Deporte Escolar" required>
+                                    <input type="text" id="ped-programa" required placeholder="Ej: Plazas Activas">
                                 </div>
                                 <div class="form-group">
                                     <label for="ped-fecha">Fecha del Evento *</label>
                                     <input type="date" id="ped-fecha" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-horario">Horario de la Jornada *</label>
-                                    <input type="text" id="ped-horario" placeholder="Ej: De 09:00 a 16:00 hs" required>
-                                </div>
-                                <div class="form-group grid-span-2">
-                                    <label for="ped-lugar">Sede / Lugar de Realización *</label>
-                                    <input type="text" id="ped-lugar" placeholder="Ej: Polideportivo Parque Chacabuco" required>
+                                    <label for="ped-horario">Horario (Inicio y Fin) *</label>
+                                    <input type="text" id="ped-horario" required placeholder="Ej: 09:00 a 14:00 hs">
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 2. RESPONSABLE DE LA SOLICITUD -->
-                        <div class="form-section">
-                            <h4 class="section-title">2. Responsable de la Solicitud</h4>
+                            <div class="form-group">
+                                <label for="ped-lugar">Lugar / Sede *</label>
+                                <input type="text" id="ped-lugar" required placeholder="Ej: Parque Chacabuco - Pista de Atletismo">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ped-descripcion">Descripción General del Evento</label>
+                                <textarea id="ped-descripcion" rows="3" placeholder="Breve resumen de las actividades a realizar..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ped-objetivo">Objetivos del Evento</label>
+                                <textarea id="ped-objetivo" rows="2" placeholder="Objetivos principales de la jornada..."></textarea>
+                            </div>
+
+                            <div class="form-section-title">2. Responsable de la Solicitud</div>
+                            <div class="form-group">
+                                <label for="ped-resp-nombre">Nombre y Apellido del Responsable *</label>
+                                <input type="text" id="ped-resp-nombre" required placeholder="Nombre completo">
+                            </div>
                             <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="ped-resp-nombre">Nombre y Apellido *</label>
-                                    <input type="text" id="ped-resp-nombre" placeholder="Ej: Juan Pérez" required>
-                                </div>
                                 <div class="form-group">
                                     <label for="ped-resp-dni">DNI *</label>
-                                    <input type="text" id="ped-resp-dni" placeholder="Sin puntos" required>
+                                    <input type="text" id="ped-resp-dni" required placeholder="Número de DNI">
                                 </div>
-                                <div class="form-group grid-span-2">
-                                    <label for="ped-resp-tel">Teléfono de Contacto Directo *</label>
-                                    <input type="text" id="ped-resp-tel" placeholder="Ej: 11 2345-6789" required>
+                                <div class="form-group">
+                                    <label for="ped-resp-tel">Teléfono de Contacto *</label>
+                                    <input type="tel" id="ped-resp-tel" required placeholder="Ej: 11 1234-5678">
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 3. ESTIMACIÓN DE CONCURRENCIA -->
-                        <div class="form-section">
-                            <h4 class="section-title">3. Estimación de Concurrencia</h4>
+                            <div class="form-section-title">3. Estimación de Concurrencia</div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="ped-part-aprox">Participantes Estimados (Inscriptos/Deportistas) *</label>
-                                    <input type="number" id="ped-part-aprox" min="0" placeholder="Ej: 150" required>
+                                    <label for="ped-part-aprox">Cantidad aproximada de Participantes *</label>
+                                    <input type="number" id="ped-part-aprox" required min="0" placeholder="Ej: 150">
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-pub-gral">Público General / Espectadores Estimados *</label>
-                                    <input type="number" id="ped-pub-gral" min="0" placeholder="Ej: 50" required>
+                                    <label for="ped-pub-gral">Público General (Opcional)</label>
+                                    <input type="number" id="ped-pub-gral" min="0" placeholder="Ej: 50">
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE -->
-                        <div class="form-section">
-                            <h4 class="section-title">4. Logística, Emergencias Médicas y Transporte</h4>
+                            <div class="form-section-title">4. Logística, Emergencias y Transporte</div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="ped-ambulancia">¿Requiere Cobertura de Ambulancia? *</label>
-                                    <select id="ped-ambulancia" required>
+                                    <label for="ped-ambulancia">¿Requiere Ambulancia?</label>
+                                    <select id="ped-ambulancia">
                                         <option value="No">No</option>
                                         <option value="Sí">Sí</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-amb-horario">Horario Cobertura Ambulancia</label>
-                                    <input type="text" id="ped-amb-horario" placeholder="Ej: De 08:30 a 16:30 hs">
+                                    <label for="ped-amb-horario">Horario cobertura de ambulancia</label>
+                                    <input type="text" id="ped-amb-horario" placeholder="Ej: De 08:30 a 14:30 hs">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label for="ped-transporte">Transporte de Pasajeros:</label>
+                                <input type="text" id="ped-transporte" placeholder="Ej: 2 micros, 1 combi, etc.">
+                                
+                                <div class="form-grid" style="margin-top: 8px;">
+                                    <input type="text" id="ped-transporte-salida" placeholder="Horario y lugar de salida">
+                                    <input type="text" id="ped-transporte-regreso" placeholder="Horario y lugar de regreso">
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="ped-transporte">¿Requiere Transporte de Pasajeros? *</label>
-                                    <select id="ped-transporte" required>
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="ped-transporte-salida">Lugar y Horario de Salida</label>
-                                    <input type="text" id="ped-transporte-salida" placeholder="Ej: Sede Central 07:30 hs">
-                                </div>
-                                <div class="form-group">
-                                    <label for="ped-transporte-regreso">Lugar y Horario de Regreso</label>
-                                    <input type="text" id="ped-transporte-regreso" placeholder="Ej: Polideportivo 17:00 hs">
-                                </div>
-                                <div class="form-group">
-                                    <label for="ped-transporte-resp-nombre">Nombre Resp. Micro / Colectivo</label>
-                                    <input type="text" id="ped-transporte-resp-nombre" placeholder="Ej: Carlos Gómez">
-                                </div>
-                                <div class="form-group grid-span-2">
-                                    <label for="ped-transporte-resp-tel">Teléfono Resp. Micro</label>
-                                    <input type="text" id="ped-transporte-resp-tel" placeholder="Ej: 11 9876-5432">
+                                <div class="form-grid" style="margin-top: 8px;">
+                                    <input type="text" id="ped-transporte-resp-nombre" placeholder="Nombre del responsable del micro">
+                                    <input type="tel" id="ped-transporte-resp-tel" placeholder="Teléfono del responsable">
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 5. PERSONAL Y COBERTURA DOCENTE -->
-                        <div class="form-section">
-                            <h4 class="section-title">5. Personal y Cobertura Docente</h4>
+                            <div class="form-section-title">5. Necesidades Técnicas e Infraestructura</div>
+                            <div class="form-group">
+                                <label for="ped-necesidades">Detalle de requerimientos:</label>
+                                <textarea id="ped-necesidades" rows="3" placeholder="Ej: Puesto de nutrición, Sonido, Gazebos, Material deportivo..."></textarea>
+                            </div>
+
+                            <div class="form-section-title">6. Personal y Docentes</div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="ped-ext-art">¿Requiere Extensión de Cobertura ART? *</label>
-                                    <select id="ped-ext-art" required>
+                                    <label for="ped-ext-art">¿Extensión de ART?</label>
+                                    <select id="ped-ext-art">
                                         <option value="No">No</option>
                                         <option value="Sí">Sí</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-horario-doc">Horario Cobertura Laboral Docente</label>
-                                    <input type="text" id="ped-horario-doc" placeholder="Ej: De 08:00 a 14:00 hs">
-                                </div>
-                                <div class="form-group grid-span-2">
-                                    <label for="ped-cant-profesores">Cantidad de Profesores / Docentes a Asignar</label>
-                                    <input type="number" id="ped-cant-profesores" min="0" max="20" placeholder="Ingrese cantidad" onchange="generarCamposProfesores(this.value)">
+                                    <label for="ped-horario-doc">Horario laboral docente:</label>
+                                    <input type="text" id="ped-horario-doc" placeholder="Ej: De 8 a 12 hs">
                                 </div>
                             </div>
-                            <div id="contenedor-profesores" style="margin-top: 10px;"></div>
-                        </div>
 
-                        <!-- 6. PRENSA Y CONDICIÓN CLIMÁTICA -->
-                        <div class="form-section">
-                            <h4 class="section-title">6. Prensa y Condición Climática</h4>
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label for="select-cant-profesores">Cantidad de profesores asignados al evento:</label>
+                                <select id="select-cant-profesores" onchange="generarCamposProfesores(this.value)">
+                                    <option value="0">Seleccionar cantidad...</option>
+                                    <option value="1">1 Profesor/a</option>
+                                    <option value="2">2 Profesores/as</option>
+                                    <option value="3">3 Profesores/as</option>
+                                    <option value="4">4 Profesores/as</option>
+                                    <option value="5">5 Profesores/as</option>
+                                    <option value="6">6 Profesores/as</option>
+                                    <option value="7">7 Profesores/as</option>
+                                    <option value="8">8 Profesores/as</option>
+                                </select>
+                            </div>
+
+                            <div id="contenedor-profesores"></div>
+
+                            <div class="form-section-title">7. Prensa y Difusión</div>
+                            <div class="form-group">
+                                <label for="ped-prensa">¿Requiere Cobertura de Prensa / Redes?</label>
+                                <select id="ped-prensa">
+                                    <option value="No">No</option>
+                                    <option value="Sí">Sí</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ped-difusion">Tipo de difusión requerida:</label>
+                                <textarea id="ped-difusion" rows="2" placeholder="Ej: Cobertura fotográfica, historias en Instagram..."></textarea>
+                            </div>
+
+                            <div class="form-section-title">8. Condición Climática</div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="ped-prensa">¿Prensa / Cobertura de Difusión? *</label>
-                                    <select id="ped-prensa" required>
+                                    <label for="ped-lluvia">¿Se suspende por lluvia?</label>
+                                    <select id="ped-lluvia" onchange="toggleReprogramacion(this.value)">
                                         <option value="No">No</option>
                                         <option value="Sí">Sí</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label for="ped-difusion">Tipo de Cobertura / Canal</label>
-                                    <input type="text" id="ped-difusion" placeholder="Ej: Redes Sociales, Fotografía">
-                                </div>
-                                <div class="form-group">
-                                    <label for="ped-lluvia">¿Se Suspende por Lluvia? *</label>
-                                    <select id="ped-lluvia" onchange="toggleReprogramacion(this.value)" required>
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
+
                                 <div id="campo-reprogramacion" class="form-group hidden">
-                                    <label for="ped-fecha-reprogramacion">Fecha de Reprogramación</label>
+                                    <label for="ped-fecha-reprogramacion">Fecha sugerida de reprogramación:</label>
                                     <input type="date" id="ped-fecha-reprogramacion">
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 7. DETALLES OPERATIVOS -->
-                        <div class="form-section">
-                            <h4 class="section-title">7. Detalles Operativos y Objetivos</h4>
-                            <div class="form-group">
-                                <label for="ped-necesidades">Necesidades Técnicas e Infraestructura *</label>
-                                <textarea id="ped-necesidades" rows="2" placeholder="Ej: 2 Arcos de Futsal, Sonido, 50 Sillas, Banners BA" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="ped-descripcion">Descripción General del Evento *</label>
-                                <textarea id="ped-descripcion" rows="3" placeholder="Detalle sintético de las actividades..." required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="ped-objetivo">Objetivos de la Jornada *</label>
-                                <textarea id="ped-objetivo" rows="2" placeholder="Describa el propósito pedagógico o social..." required></textarea>
-                            </div>
-                        </div>
-
-                        <div id="pedido-msg" class="alert-box alert-success hidden"></div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary">Enviar Solicitud de Evento</button>
-                        </div>
-                    </form>
-
-                    <!-- Panel Exclusivo para DIRECTOR y ADMINISTRADOR -->
-                    <div id="director-pedidos-container" class="director-container hidden">
-                        <div class="director-header">
-                            <h3>Gestión Institucional de Eventos</h3>
-                            <p>Supervisión, edición y descarga de reportes PDF de las actividades registradas.</p>
-                        </div>
-                        <div id="lista-pedidos" class="pedidos-grid">
-                            <!-- Se renderiza dinámicamente mediante JS -->
-                        </div>
+                            <button type="submit" class="btn-primary btn-submit-pedido">Enviar Solicitud de Evento</button>
+                        </form>
                     </div>
-
                 </section>
 
-                <!-- TAB 2: CALENDARIO -->
                 <section id="tab-calendario" class="tab-content">
-                    <div class="card-form">
-                        <div class="card-header">
-                            <h3>Calendario de Eventos Programados</h3>
-                            <p>Cronograma cronológico de las próximas actividades confirmadas.</p>
-                        </div>
-                        <div id="calendario-container" class="calendario-list">
-                            <!-- Se cargan eventos dinámicamente mediante JS -->
-                        </div>
+                    <div class="panel">
+                        <h2>Calendario General de Eventos</h2>
+                        <p class="section-desc">Cronograma de actividades y jornadas planificadas</p>
+                        <div id="calendario-container" class="calendario-grid"></div>
                     </div>
                 </section>
             </main>
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN DE EVENTOS -->
-    <div id="modal-editar" class="modal-backdrop hidden">
+    <!-- MODAL DE EDICIÓN -->
+    <div id="modal-editar" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>Editar Datos del Evento</h3>
-                <button class="btn-close-modal" onclick="cerrarModalEdicion()">✕</button>
+                <h3>Editar Solicitud de Evento</h3>
+                <button type="button" class="btn-close-modal" onclick="cerrarModalEdicion()">✕</button>
             </div>
             <form id="form-editar-pedido" class="modal-body">
                 <input type="hidden" id="edit-id">
-
+                
                 <div class="form-group">
-                    <label>Título / Nombre de la Actividad</label>
+                    <label>Título:</label>
                     <input type="text" id="edit-titulo" required>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Gerencia / Área Responsable</label>
+                        <label>Gerencia:</label>
                         <input type="text" id="edit-area" required>
                     </div>
                     <div class="form-group">
-                        <label>Programa</label>
+                        <label>Programa:</label>
                         <input type="text" id="edit-programa" required>
                     </div>
                     <div class="form-group">
-                        <label>Fecha del Evento</label>
+                        <label>Fecha:</label>
                         <input type="date" id="edit-fecha" required>
                     </div>
                     <div class="form-group">
-                        <label>Horario de Jornada</label>
+                        <label>Horario:</label>
                         <input type="text" id="edit-horario" required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Sede / Lugar</label>
+                    <label>Lugar / Sede:</label>
                     <input type="text" id="edit-lugar" required>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <input type="text" id="edit-resp-nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label>DNI Responsable</label>
-                        <input type="text" id="edit-resp-dni" required>
-                    </div>
-                    <div class="form-group grid-span-2">
-                        <label>Teléfono Contacto</label>
-                        <input type="text" id="edit-resp-tel" required>
-                    </div>
+                <div class="form-group">
+                    <label>Responsable Nombre:</label>
+                    <input type="text" id="edit-resp-nombre" required>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Participantes Est.</label>
+                        <label>DNI:</label>
+                        <input type="text" id="edit-resp-dni" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono:</label>
+                        <input type="tel" id="edit-resp-tel" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Participantes Est.:</label>
                         <input type="number" id="edit-part-aprox" required>
                     </div>
                     <div class="form-group">
-                        <label>Público General Est.</label>
-                        <input type="number" id="edit-pub-gral" required>
+                        <label>Público General Est.:</label>
+                        <input type="number" id="edit-pub-gral">
                     </div>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Requiere Ambulancia</label>
+                        <label>¿Ambulancia?:</label>
                         <select id="edit-ambulancia">
                             <option value="No">No</option>
                             <option value="Sí">Sí</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Horario Ambulancia</label>
+                        <label>Horario Ambulancia:</label>
                         <input type="text" id="edit-amb-horario">
+                    </div>
+                    <div class="form-group">
+                        <label>¿Se suspende por lluvia?:</label>
+                        <select id="edit-lluvia">
+                            <option value="No">No</option>
+                            <option value="Sí">Sí</option>
+                        </select>
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Transporte:</label>
+                    <input type="text" id="edit-transporte">
+                </div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Transporte Pasajeros</label>
-                        <input type="text" id="edit-transporte">
-                    </div>
-                    <div class="form-group">
-                        <label>Lugar/Horario Salida</label>
+                        <label>Salida:</label>
                         <input type="text" id="edit-transporte-salida">
                     </div>
                     <div class="form-group">
-                        <label>Lugar/Horario Regreso</label>
+                        <label>Regreso:</label>
                         <input type="text" id="edit-transporte-regreso">
                     </div>
+                </div>
+                <div class="form-grid">
                     <div class="form-group">
-                        <label>Resp. Micro / Teléfono</label>
-                        <input type="text" id="edit-transporte-resp-nombre" placeholder="Nombre">
-                        <input type="text" id="edit-transporte-resp-tel" placeholder="Teléfono" style="margin-top: 4px;">
+                        <label>Resp. Micro:</label>
+                        <input type="text" id="edit-transporte-resp-nombre">
                     </div>
+                    <div class="form-group">
+                        <label>Tel. Resp. Micro:</label>
+                        <input type="tel" id="edit-transporte-resp-tel">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Necesidades Técnicas:</label>
+                    <textarea id="edit-necesidades" rows="2"></textarea>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Extensión ART</label>
+                        <label>¿Extensión ART?:</label>
                         <select id="edit-ext-art">
                             <option value="No">No</option>
                             <option value="Sí">Sí</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Horario Docente</label>
+                        <label>Horario Docente:</label>
                         <input type="text" id="edit-horario-doc">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Docentes Asignados (Nombres separados por coma)</label>
-                    <input type="text" id="edit-profesores">
+                    <label>Profesores Asignados (separados por coma):</label>
+                    <input type="text" id="edit-profesores" placeholder="Ej: Juan Pérez, María Gómez">
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Prensa / Difusión</label>
+                        <label>¿Prensa?:</label>
                         <select id="edit-prensa">
                             <option value="No">No</option>
                             <option value="Sí">Sí</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Tipo de Difusión</label>
-                        <input type="text" id="edit-difusion">
-                    </div>
-                    <div class="form-group">
-                        <label>Suspende por Lluvia</label>
-                        <select id="edit-lluvia">
-                            <option value="No">No</option>
-                            <option value="Sí">Sí</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha Reprogramación</label>
+                        <label>Fecha Reprogramación:</label>
                         <input type="date" id="edit-fecha-reprogramacion">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Necesidades Técnicas</label>
-                    <textarea id="edit-necesidades" rows="2"></textarea>
+                    <label>Tipo de Difusión:</label>
+                    <input type="text" id="edit-difusion">
                 </div>
+
                 <div class="form-group">
-                    <label>Descripción General</label>
-                    <textarea id="edit-descripcion" rows="3"></textarea>
+                    <label>Descripción General:</label>
+                    <textarea id="edit-descripcion" rows="2"></textarea>
                 </div>
+
                 <div class="form-group">
-                    <label>Objetivo</label>
+                    <label>Objetivos:</label>
                     <textarea id="edit-objetivo" rows="2"></textarea>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=5.0.0"></script>
 </body>
 </html>
