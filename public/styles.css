@@ -1,11 +1,11 @@
 /* ==========================================================================
-   1. VARIABLES GLOBALES - PALETA CIUDAD DE BUENOS AIRES (BA)
+   1. VARIABLES GLOBALES Y RESET
    ========================================================================== */
 :root {
-    --ba-blue-dark: #002b66;      /* Azul oscuro institucional BA */
-    --ba-blue-hover: #001f4d;     /* Hover para azul oscuro */
+    --ba-blue-dark: #002b66;      /* Azul institucional oficial BA */
+    --ba-blue-hover: #001f4d;
     --ba-yellow: #ffcc00;         /* Amarillo BA */
-    --ba-yellow-hover: #e6b800;   /* Hover para amarillo */
+    --ba-yellow-hover: #e6b800;
     --background: #f4f6f9;
     --surface: #ffffff;
     --text-dark: #1f2937;
@@ -28,7 +28,7 @@
 }
 
 body {
-    background-color: var(--background);
+    background-color: var(--background) !important;
     color: var(--text-dark);
     line-height: 1.5;
     min-height: 100vh;
@@ -39,7 +39,7 @@ body {
 }
 
 /* ==========================================================================
-   2. CENTRADO Y ESTILOS DE AUTENTICACIÓN (LOGIN / REGISTRO)
+   2. AUTENTICACIÓN (LOGIN Y REGISTRO)
    ========================================================================== */
 .auth-wrapper {
     display: flex;
@@ -75,8 +75,8 @@ body {
 }
 
 .ba-highlight {
-    color: var(--ba-yellow);
-    background-color: var(--ba-blue-dark);
+    color: var(--ba-yellow) !important;
+    background-color: var(--ba-blue-dark) !important;
     padding: 2px 8px;
     border-radius: 6px;
     display: inline-block;
@@ -158,8 +158,8 @@ body {
 .btn-primary {
     width: 100%;
     padding: 0.85rem 1.5rem;
-    background-color: var(--ba-blue-dark);
-    color: white;
+    background-color: var(--ba-blue-dark) !important;
+    color: #ffffff !important;
     border: none;
     border-radius: 8px;
     font-size: 1rem;
@@ -171,7 +171,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: var(--ba-blue-hover);
+    background-color: var(--ba-blue-hover) !important;
     transform: translateY(-1px);
 }
 
@@ -222,7 +222,7 @@ body {
 
 .main-header {
     height: 64px;
-    background-color: var(--ba-blue-dark);
+    background-color: var(--ba-blue-dark) !important;
     color: white;
     display: flex;
     justify-content: space-between;
@@ -267,8 +267,8 @@ body {
 
 .badge {
     padding: 0.25rem 0.5rem;
-    background-color: var(--ba-yellow);
-    color: var(--ba-blue-dark);
+    background-color: var(--ba-yellow) !important;
+    color: var(--ba-blue-dark) !important;
     border-radius: 4px;
     font-size: 0.75rem;
     font-weight: 800;
@@ -344,13 +344,13 @@ body {
 }
 
 /* ==========================================================================
-   4. ESTILOS DE LA TARJETA DE INICIO (HOME HERO Y BANNER)
+   4. CONTROL RIGUROSO DEL BANNER EN INICIO (Evita el tamaño enorme)
    ========================================================================== */
 .home-container {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 0.5rem 0;
+    padding: 1rem 0;
     width: 100%;
 }
 
@@ -360,16 +360,16 @@ body {
     border-top: 6px solid var(--ba-yellow);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
-    max-width: 900px;
+    max-width: 850px !important; /* Límite de ancho exacto */
     width: 100%;
     overflow: hidden;
     margin: 0 auto;
-    transition: var(--transition);
 }
 
 .welcome-banner-wrapper {
     width: 100%;
-    max-height: 280px; /* Alto controlado para que no quede enorme */
+    height: 260px !important; /* Fijamos altura estricta */
+    max-height: 260px !important;
     overflow: hidden;
     background-color: #ffffff;
     display: flex;
@@ -380,14 +380,15 @@ body {
 
 .welcome-banner-img {
     width: 100%;
-    height: 280px;
-    object-fit: cover; /* Mantiene la proporción y cubre el espacio limpiamente */
+    height: 100% !important;
+    max-height: 260px !important;
+    object-fit: cover !important; /* Mantiene proporciones sin deformar */
     object-position: center;
     display: block;
 }
 
 .welcome-card-body {
-    padding: 2rem 2rem 2.5rem 2rem;
+    padding: 2rem;
     text-align: center;
 }
 
@@ -396,14 +397,13 @@ body {
     font-size: 1.75rem;
     font-weight: 800;
     margin-bottom: 0.75rem;
-    letter-spacing: -0.5px;
 }
 
 .welcome-card-body p {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: 0.98rem;
     line-height: 1.6;
-    max-width: 720px;
+    max-width: 700px;
     margin: 0 auto 1.75rem auto;
 }
 
@@ -468,7 +468,7 @@ body {
 
 .btn-pdf {
     width: auto;
-    background-color: var(--ba-blue-dark);
+    background-color: var(--ba-blue-dark) !important;
 }
 
 .pedidos-list {
@@ -687,19 +687,17 @@ body {
         padding: 1rem;
     }
     .welcome-banner-wrapper {
-        max-height: 180px;
+        height: 180px !important;
+        max-height: 180px !important;
     }
     .welcome-banner-img {
-        height: 180px;
+        height: 180px !important;
     }
     .welcome-card-body {
         padding: 1.5rem 1.25rem;
     }
     .welcome-card-body h2 {
         font-size: 1.35rem;
-    }
-    .welcome-card-body p {
-        font-size: 0.95rem;
     }
     .welcome-card-actions {
         flex-direction: column;
