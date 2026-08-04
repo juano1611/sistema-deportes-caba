@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- EVITAR CACHÉ EN NAVEGADORES -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>Portal de Eventos BA - Deporte Social</title>
-    <link rel="stylesheet" href="styles.css?v=2.1">
+    <link rel="stylesheet" href="styles.css?v=2.2">
     <!-- Librería para generación de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -13,7 +18,6 @@
     <!-- VISTA DE LOGIN -->
     <div id="login-view" class="auth-wrapper">
         <div class="auth-card">
-            
             <div class="auth-header">
                 <h2>Portal de Eventos <span class="ba-highlight">BA</span></h2>
                 <p>Dirección General de Deporte Social y Desarrollo Deportivo</p>
@@ -61,8 +65,6 @@
 
     <!-- VISTA DEL PORTAL PRINCIPAL -->
     <div id="portal-view" class="portal-wrapper hidden">
-        
-        <!-- HEADER PRINCIPAL BA -->
         <header class="main-header">
             <div class="header-left">
                 <button id="mobile-menu-btn" class="mobile-menu-toggle">☰</button>
@@ -80,7 +82,6 @@
         <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
         <div class="layout-body">
-            <!-- SIDEBAR DE NAVEGACIÓN -->
             <aside id="main-sidebar" class="sidebar">
                 <nav class="sidebar-nav">
                     <ul class="nav-list">
@@ -97,19 +98,14 @@
                 </nav>
             </aside>
 
-            <!-- CONTENIDO PRINCIPAL -->
             <main class="content-wrapper">
-                
-                <!-- SECCIÓN 0: INICIO (HOME / BIENVENIDA) -->
                 <section id="tab-inicio" class="tab-content active">
                     <div class="home-container">
                         <div class="welcome-card-hero">
-                            <!-- BANNER DE IMAGEN -->
                             <div class="welcome-banner-wrapper">
                                 <img src="banner-deportes.jpg" alt="Dirección General de Deporte Social y Desarrollo Deportivo" class="welcome-banner-img" onerror="this.style.display='none'">
                             </div>
 
-                            <!-- CONTENIDO INTERNO -->
                             <div class="welcome-card-body">
                                 <h2>¡Bienvenido/a al Portal de Eventos BA!</h2>
                                 <p>Plataforma oficial de la <strong>Dirección General de Deporte Social y Desarrollo Deportivo</strong> para la gestión, planificación y coordinación integral de eventos y jornadas deportivas en la Ciudad de Buenos Aires.</p>
@@ -123,10 +119,8 @@
                     </div>
                 </section>
 
-                <!-- SECCIÓN 1: SOLICITUDES -->
                 <section id="tab-solicitudes" class="tab-content">
                     <div class="panel">
-                        <!-- VISTA DE DIRECTOR -->
                         <div id="director-pedidos-container" class="director-panel hidden">
                             <div class="director-header">
                                 <div>
@@ -136,18 +130,16 @@
                             </div>
                             
                             <div id="lista-pedidos" class="pedidos-list">
-                                <!-- Las tarjetas de pedidos se cargan dinámicamente -->
+                                <!-- Tarjetas de pedidos dinámicas -->
                             </div>
                         </div>
 
-                        <!-- FORMULARIO DE DOCENTES -->
                         <form id="form-nuevo-pedido" class="pedido-form">
                             <h2>Formulario de Solicitud de Evento</h2>
                             <p class="section-desc">Completá los datos correspondientes para solicitar la actividad</p>
                             
                             <div id="pedido-msg" class="auth-success hidden"></div>
 
-                            <!-- PUNTO 1: DATOS GENERALES -->
                             <div class="form-section-title">1. Datos Generales del Evento</div>
                             <div class="form-group">
                                 <label for="ped-titulo">Título del Evento / Actividad *</label>
@@ -188,7 +180,6 @@
                                 <textarea id="ped-objetivo" rows="2" placeholder="Objetivos principales de la jornada..."></textarea>
                             </div>
 
-                            <!-- PUNTO 2: RESPONSABLE -->
                             <div class="form-section-title">2. Responsable de la Solicitud</div>
                             <div class="form-group">
                                 <label for="ped-resp-nombre">Nombre y Apellido del Responsable *</label>
@@ -205,7 +196,6 @@
                                 </div>
                             </div>
 
-                            <!-- PUNTO 3: ESTIMACIÓN DE CONCURRENCIA -->
                             <div class="form-section-title">3. Estimación de Concurrencia</div>
                             <div class="form-grid">
                                 <div class="form-group">
@@ -218,7 +208,6 @@
                                 </div>
                             </div>
 
-                            <!-- PUNTO 4: LOGÍSTICA & TRANSPORTE -->
                             <div class="form-section-title">4. Logística, Emergencias y Transporte</div>
                             <div class="form-grid">
                                 <div class="form-group">
@@ -249,14 +238,12 @@
                                 </div>
                             </div>
 
-                            <!-- PUNTO 5: NECESIDADES TÉCNICAS -->
                             <div class="form-section-title">5. Necesidades Técnicas e Infraestructura</div>
                             <div class="form-group">
                                 <label for="ped-necesidades">Detalle de requerimientos:</label>
                                 <textarea id="ped-necesidades" rows="3" placeholder="Ej: Puesto de nutrición, Sonido, Gazebos, Material deportivo..."></textarea>
                             </div>
 
-                            <!-- PUNTO 6: PERSONAL Y ART -->
                             <div class="form-section-title">6. Personal y Docentes</div>
                             <div class="form-grid">
                                 <div class="form-group">
@@ -289,7 +276,6 @@
 
                             <div id="contenedor-profesores"></div>
 
-                            <!-- PUNTO 7: PRENSA Y DIFUSIÓN -->
                             <div class="form-section-title">7. Prensa y Difusión</div>
                             <div class="form-group">
                                 <label for="ped-prensa">¿Requiere Cobertura de Prensa / Redes?</label>
@@ -304,7 +290,6 @@
                                 <textarea id="ped-difusion" rows="2" placeholder="Ej: Cobertura fotográfica, historias en Instagram..."></textarea>
                             </div>
 
-                            <!-- PUNTO 8: CONDICIÓN CLIMÁTICA -->
                             <div class="form-section-title">8. Condición Climática</div>
                             <div class="form-grid">
                                 <div class="form-group">
@@ -326,17 +311,13 @@
                     </div>
                 </section>
 
-                <!-- SECCIÓN 2: CALENDARIO -->
                 <section id="tab-calendario" class="tab-content">
                     <div class="panel">
                         <h2>Calendario General de Eventos</h2>
                         <p class="section-desc">Cronograma de actividades y jornadas planificadas</p>
-                        <div id="calendario-container" class="calendario-grid">
-                            <!-- Eventos cargados dinámicamente -->
-                        </div>
+                        <div id="calendario-container" class="calendario-grid"></div>
                     </div>
                 </section>
-
             </main>
         </div>
     </div>
@@ -511,7 +492,9 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE LÓGICA -->
-    <script src="script.js?v=2.1"></script>
+    <!-- SCRIPT CON TIMESTAMP DINÁMICO CONTRA CACHÉ -->
+    <script>
+        document.write('<script src="script.js?v=' + Date.now() + '"><\/script>');
+    </script>
 </body>
 </html>
