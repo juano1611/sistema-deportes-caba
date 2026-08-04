@@ -711,3 +711,37 @@ body {
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   6. REGLAS DE IMPRESIÓN / GENERACIÓN DE PDF VECTORIAL Y LIMPIO
+   ========================================================================== */
+#print-container {
+    display: none;
+}
+
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+    
+    #print-container, #print-container * {
+        visibility: visible !important;
+    }
+
+    #print-container {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    @page {
+        size: A4;
+        margin: 15mm;
+    }
+}
