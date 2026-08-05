@@ -78,13 +78,14 @@ function renderUserProfile(user) {
         }
     }
     if (nameSpan) {
-        nameSpan.textContent = user.nombre || `DNI: ${user.dni}`;
+        nameSpan.textContent = user.nombre || user.nombreCompleto || `DNI: ${user.dni}`;
     }
 }
 
 function applyRolePermissions(user) {
     const directorSection = document.getElementById('director-pedidos-container');
     const formPedidoSection = document.getElementById('form-nuevo-pedido');
+    const navRealizados = document.getElementById('nav-item-realizados');
 
     if (user.role === 'DIRECTOR' || user.role === 'ADMINISTRADOR') {
         if (formPedidoSection) formPedidoSection.classList.add('hidden');
@@ -92,9 +93,11 @@ function applyRolePermissions(user) {
             directorSection.classList.remove('hidden');
             cargarPedidosDirector();
         }
+        if (navRealizados) navRealizados.classList.remove('hidden');
     } else {
         if (formPedidoSection) formPedidoSection.classList.remove('hidden');
         if (directorSection) directorSection.classList.add('hidden');
+        if (navRealizados) navRealizados.classList.add('hidden');
     }
 }
 
@@ -315,16 +318,24 @@ function initPedidoForm() {
             e.preventDefault();
 
             const currentUserRaw = sessionStorage.getItem('currentUser');
-            let creadorInfo = 'Usuario Registrado';
+            let creadorInfo = '';
+            
             if (currentUserRaw) {
                 try {
                     const parsed = JSON.parse(currentUserRaw);
-                    if (parsed.nombre) {
-                        creadorInfo = parsed.nombre;
-                    } else if (parsed.dni) {
-                        creadorInfo = `DNI: ${parsed.dni}`;
-                    }
+                    creadorInfo = parsed.nombre || parsed.nombreCompleto || '';
                 } catch(e) {}
+            }
+
+            if (!creadorInfo) {
+                const headerName = document.getElementById('user-name')?.textContent;
+                if (headerName && headerName !== 'Cargando...') {
+                    creadorInfo = headerName.trim();
+                }
+            }
+
+            if (!creadorInfo) {
+                creadorInfo = document.getElementById('ped-resp-nombre').value.trim();
             }
 
             const bloques = document.querySelectorAll('.bloque-profesor-item');
@@ -441,9 +452,9 @@ async function cargarPedidosDirector() {
                 }
             }
 
-            const nombreCreador = (p.creadoPor && p.creadoPor !== 'Docente') 
+            const nombreCreador = (p.creadoPor && p.creadoPor.trim() !== '' && p.creadoPor !== 'Docente') 
                 ? p.creadoPor 
-                : (p.responsableNombre || 'Docente Registrado');
+                : (p.responsableNombre || 'Usuario Registrado');
 
             return `
                 <div class="pedido-card">
@@ -534,9 +545,9 @@ async function cargarEventosRealizados() {
 
         realizadosContainer.innerHTML = realizados.map(p => {
             const fechaFormateada = p.fecha ? p.fecha.split('-').reverse().join('/') : 'Sin fecha';
-            const nombreCreador = (p.creadoPor && p.creadoPor !== 'Docente') 
+            const nombreCreador = (p.creadoPor && p.creadoPor.trim() !== '' && p.creadoPor !== 'Docente') 
                 ? p.creadoPor 
-                : (p.responsableNombre || 'Docente Registrado');
+                : (p.responsableNombre || 'Usuario Registrado');
 
             return `
                 <div class="pedido-card style-realizado" style="border-left: 5px solid #64748b; background-color: #f8fafc;">
@@ -775,9 +786,9 @@ function descargarReporteEventoPDF(id) {
         doc.setFontSize(8.5);
     }
 
-    const nombreCreadorPDF = (p.creadoPor && p.creadoPor !== 'Docente') 
+    const nombreCreadorPDF = (p.creadoPor && p.creadoPor.trim() !== '' && p.creadoPor !== 'Docente') 
         ? p.creadoPor 
-        : (p.responsableNombre || 'Docente Registrado');
+        : (p.responsableNombre || 'Usuario Registrado');
 
     printSectionHeader("1. DATOS DE ORIGEN Y UBICACIÓN");
     printRow("Creado Por:", nombreCreadorPDF);
