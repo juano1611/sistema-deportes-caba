@@ -169,6 +169,10 @@
                                 <label>Sede / Lugar del Evento *</label>
                                 <input type="text" id="ped-lugar" required placeholder="Ej: Polideportivo Patricios">
                             </div>
+                            <div class="form-group">
+                                <label>Espacio Físico *</label>
+                                <input type="text" id="ped-espacio-fisico" required placeholder="Ej: Cancha 3">
+                            </div>
                         </div>
 
                         <h3 class="form-section-title">Responsable de la Solicitud</h3>
@@ -220,7 +224,15 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Transporte de Pasajeros (Micros/Colectivos)</label>
-                                <input type="text" id="ped-transporte" placeholder="Ej: 2 micros de 50 pasajeros">
+                                <select id="ped-transporte">
+                                    <option value="No">No</option>
+                                    <option value="1 micro">1 micro</option>
+                                    <option value="2 micros">2 micros</option>
+                                    <option value="3 micros">3 micros</option>
+                                    <option value="4 micros">4 micros</option>
+                                    <option value="5 micros">5 micros</option>
+                                    <option value="6 micros">6 micros</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Lugar y Horario de Salida</label>
@@ -234,7 +246,7 @@
 
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Nombre del Responsables de Micro/Transporte</label>
+                                <label>Nombre del Responsable de Micro/Transporte</label>
                                 <input type="text" id="ped-transporte-resp-nombre" placeholder="Ej: Maria Lopez">
                             </div>
                             <div class="form-group">
@@ -378,6 +390,10 @@
                         <label>Sede / Lugar</label>
                         <input type="text" id="edit-lugar" required>
                     </div>
+                    <div class="form-group">
+                        <label>Espacio Físico</label>
+                        <input type="text" id="edit-espacio-fisico" required>
+                    </div>
                 </div>
 
                 <div class="form-grid">
@@ -423,7 +439,15 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Transporte</label>
-                        <input type="text" id="edit-transporte">
+                        <select id="edit-transporte">
+                            <option value="No">No</option>
+                            <option value="1 micro">1 micro</option>
+                            <option value="2 micros">2 micros</option>
+                            <option value="3 micros">3 micros</option>
+                            <option value="4 micros">4 micros</option>
+                            <option value="5 micros">5 micros</option>
+                            <option value="6 micros">6 micros</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Salida Transporte</label>

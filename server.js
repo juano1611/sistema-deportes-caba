@@ -61,6 +61,7 @@ const PedidoSchema = new mongoose.Schema({
     fecha: String,
     horario: String,
     lugar: String,
+    espacioFisico: String,
     descripcion: String,
     responsableNombre: String,
     responsableDni: String,
@@ -132,7 +133,7 @@ function generarBufferPDF(p) {
             printRow('Creado Por:', p.creadoPor || 'Docente', '', '');
             printRow('Gerencia:', p.gerencia || p.areaResponsable, 'Programa:', p.programa);
             printRow('Fecha del Evento:', p.fecha, 'Horario de Jornada:', p.horario);
-            printRow('Sede / Lugar:', p.lugar, '', '');
+            printRow('Sede / Lugar:', p.lugar, 'Espacio Físico:', p.espacioFisico);
 
             y += 4;
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('2. RESPONSABLE DE LA SOLICITUD', 35, y);
@@ -229,6 +230,7 @@ async function enviarEmailBackground(pedidoData) {
                     <li><strong>Creado por:</strong> ${pedidoData.creadoPor || 'Docente'}</li>
                     <li><strong>Fecha:</strong> ${pedidoData.fecha}</li>
                     <li><strong>Lugar:</strong> ${pedidoData.lugar}</li>
+                    <li><strong>Espacio Físico:</strong> ${pedidoData.espacioFisico || '-'}</li>
                     <li><strong>Solicitante:</strong> ${pedidoData.responsableNombre} (DNI: ${pedidoData.responsableDni})</li>
                 </ul>
                 <p>Se adjunta a este correo el <strong>reporte en PDF con la totalidad de los campos completados</strong>.</p>
