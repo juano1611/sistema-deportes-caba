@@ -22,6 +22,8 @@ function switchTab(targetTabId) {
 
     if (targetTabId === 'tab-calendario') {
         cargarCalendarioEventos();
+    } else if (targetTabId === 'tab-realizados') {
+        cargarEventosRealizados();
     }
 }
 
@@ -312,7 +314,6 @@ function initPedidoForm() {
         formPedido.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Guardar nombre específico del creador
             const currentUserRaw = sessionStorage.getItem('currentUser');
             let creadorInfo = 'Usuario Registrado';
             if (currentUserRaw) {
@@ -417,10 +418,13 @@ async function cargarPedidosDirector() {
     try {
         const res = await fetch('/api/pedidos');
         const pedidos = await res.json();
-        pedidosCargadosCache = pedidos;
+
+        const resRealizados = await fetch('/api/pedidos/realizados');
+        const realizados = await resRealizados.json();
+        pedidosCargadosCache = [...pedidos, ...realizados];
 
         if (pedidos.length === 0) {
-            listaContainer.innerHTML = '<p>No hay solicitudes vigentes o pendientes.</p>';
+            listaContainer.innerHTML = '<p>No hay solicitudes vigentes pendientes.</p>';
             return;
         }
 
@@ -437,7 +441,6 @@ async function cargarPedidosDirector() {
                 }
             }
 
-            // Nombre preciso del creador o del solicitante
             const nombreCreador = (p.creadoPor && p.creadoPor !== 'Docente') 
                 ? p.creadoPor 
                 : (p.responsableNombre || 'Docente Registrado');
@@ -513,6 +516,49 @@ async function cargarCalendarioEventos() {
         }).join('');
     } catch (err) {
         calContainer.innerHTML = '<p>Error al cargar el calendario de eventos.</p>';
+    }
+}
+
+async function cargarEventosRealizados() {
+    const realizadosContainer = document.getElementById('lista-eventos-realizados');
+    if (!realizadosContainer) return;
+
+    try {
+        const res = await fetch('/api/pedidos/realizados');
+        const realizados = await res.json();
+
+        if (realizados.length === 0) {
+            realizadosContainer.innerHTML = '<p>No hay eventos registrados en el historial de realizados.</p>';
+            return;
+        }
+
+        realizadosContainer.innerHTML = realizados.map(p => {
+            const fechaFormateada = p.fecha ? p.fecha.split('-').reverse().join('/') : 'Sin fecha';
+            const nombreCreador = (p.creadoPor && p.creadoPor !== 'Docente') 
+                ? p.creadoPor 
+                : (p.responsableNombre || 'Docente Registrado');
+
+            return `
+                <div class="pedido-card style-realizado" style="border-left: 5px solid #64748b; background-color: #f8fafc;">
+                    <div class="pedido-card-header">
+                        <h4>${p.titulo || 'Sin título'} <span style="font-size:12px; color:#64748b; font-weight:normal;">(Finalizado el ${fechaFormateada})</span></h4>
+                        <div class="card-actions">
+                            <button class="btn-action btn-pdf-single" onclick="descargarReporteEventoPDF('${p._id}')">📄 PDF</button>
+                        </div>
+                    </div>
+                    <div class="pedido-card-body-grid">
+                        <p><strong>Creado por:</strong> ${nombreCreador}</p>
+                        <p><strong>Gerencia / Programa:</strong> ${p.gerencia || p.areaResponsable || '-'} | ${p.programa || '-'}</p>
+                        <p><strong>Fecha y Horario:</strong> ${fechaFormateada} (${p.horario || '-'})</p>
+                        <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
+                        <p><strong>Solicitante:</strong> ${p.responsableNombre || '-'} (DNI: ${p.responsableDni || '-'})</p>
+                        <p><strong>Participantes:</strong> ${p.participantesAprox || 0} | <strong>Público:</strong> ${p.publicoGeneral ?? '-'}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        realizadosContainer.innerHTML = '<p>Error al obtener el historial de eventos realizados.</p>';
     }
 }
 

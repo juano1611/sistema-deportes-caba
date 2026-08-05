@@ -40,30 +40,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://juano1611:juano1611@cluster0.lldgqos.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(MONGO_URI)
-    .then(() => {
-        console.log('✅ Conectado con éxito a MongoDB Cloud');
-        eliminarEventosPasados();
-    })
+    .then(() => console.log('✅ Conectado con éxito a MongoDB Cloud'))
     .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
-
-async function eliminarEventosPasados() {
-    try {
-        const hoy = new Date();
-        const year = hoy.getFullYear();
-        const month = String(hoy.getMonth() + 1).padStart(2, '0');
-        const day = String(hoy.getDate()).padStart(2, '0');
-        const fechaHoyStr = `${year}-${month}-${day}`;
-
-        const resultado = await Pedido.deleteMany({ fecha: { $lt: fechaHoyStr } });
-        if (resultado.deletedCount > 0) {
-            console.log(`🧹 Limpieza automática: Se eliminaron ${resultado.deletedCount} evento(s) vencido(s).`);
-        }
-    } catch (err) {
-        console.error('❌ Error al ejecutar la limpieza automática:', err);
-    }
-}
-
-setInterval(eliminarEventosPasados, 12 * 60 * 60 * 1000);
 
 const UsuarioSchema = new mongoose.Schema({
     dni: { type: String, required: true, unique: true },
@@ -344,19 +322,35 @@ app.post('/api/pedidos', async (req, res) => {
     }
 });
 
+// GET Pedidos Vigentes (Fechas futuras estrictas: fecha > hoy)
 app.get('/api/pedidos', async (req, res) => {
     try {
-        await eliminarEventosPasados();
         const hoy = new Date();
         const year = hoy.getFullYear();
         const month = String(hoy.getMonth() + 1).padStart(2, '0');
         const day = String(hoy.getDate()).padStart(2, '0');
         const fechaHoyStr = `${year}-${month}-${day}`;
 
-        const pedidos = await Pedido.find({ fecha: { $gte: fechaHoyStr } }).sort({ fecha: 1 });
+        const pedidos = await Pedido.find({ fecha: { $gt: fechaHoyStr } }).sort({ fecha: 1 });
         return res.json(pedidos);
     } catch (err) {
         return res.status(500).json({ msg: 'Error al consultar la base de datos' });
+    }
+});
+
+// GET Eventos Realizados (Fechas cumplidas o pasadas: fecha <= hoy)
+app.get('/api/pedidos/realizados', async (req, res) => {
+    try {
+        const hoy = new Date();
+        const year = hoy.getFullYear();
+        const month = String(hoy.getMonth() + 1).padStart(2, '0');
+        const day = String(hoy.getDate()).padStart(2, '0');
+        const fechaHoyStr = `${year}-${month}-${day}`;
+
+        const pedidosRealizados = await Pedido.find({ fecha: { $lte: fechaHoyStr } }).sort({ fecha: -1 });
+        return res.json(pedidosRealizados);
+    } catch (err) {
+        return res.status(500).json({ msg: 'Error al consultar eventos realizados' });
     }
 });
 
