@@ -312,12 +312,17 @@ function initPedidoForm() {
         formPedido.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Guardar nombre específico del creador
             const currentUserRaw = sessionStorage.getItem('currentUser');
             let creadorInfo = 'Usuario Registrado';
             if (currentUserRaw) {
                 try {
                     const parsed = JSON.parse(currentUserRaw);
-                    creadorInfo = `${parsed.nombre || 'Sin nombre'} (DNI: ${parsed.dni || 'S/D'})`;
+                    if (parsed.nombre) {
+                        creadorInfo = parsed.nombre;
+                    } else if (parsed.dni) {
+                        creadorInfo = `DNI: ${parsed.dni}`;
+                    }
                 } catch(e) {}
             }
 
@@ -432,6 +437,11 @@ async function cargarPedidosDirector() {
                 }
             }
 
+            // Nombre preciso del creador o del solicitante
+            const nombreCreador = (p.creadoPor && p.creadoPor !== 'Docente') 
+                ? p.creadoPor 
+                : (p.responsableNombre || 'Docente Registrado');
+
             return `
                 <div class="pedido-card">
                     <div class="pedido-card-header">
@@ -443,7 +453,7 @@ async function cargarPedidosDirector() {
                         </div>
                     </div>
                     <div class="pedido-card-body-grid">
-                        <p><strong>Creado por:</strong> ${p.creadoPor || 'Docente'}</p>
+                        <p><strong>Creado por:</strong> ${nombreCreador}</p>
                         <p><strong>Gerencia / Programa:</strong> ${p.gerencia || p.areaResponsable || '-'} | ${p.programa || '-'}</p>
                         <p><strong>Fecha y Horario:</strong> ${p.fecha || '-'} (${p.horario || '-'})</p>
                         <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
@@ -719,8 +729,12 @@ function descargarReporteEventoPDF(id) {
         doc.setFontSize(8.5);
     }
 
+    const nombreCreadorPDF = (p.creadoPor && p.creadoPor !== 'Docente') 
+        ? p.creadoPor 
+        : (p.responsableNombre || 'Docente Registrado');
+
     printSectionHeader("1. DATOS DE ORIGEN Y UBICACIÓN");
-    printRow("Creado Por:", p.creadoPor || 'Docente');
+    printRow("Creado Por:", nombreCreadorPDF);
     printRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
     printRow("Fecha Evento:", p.fecha, "Horario Jornada:", p.horario);
     printRow("Sede / Lugar:", p.lugar);
