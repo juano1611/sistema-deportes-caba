@@ -105,15 +105,17 @@ function generarBufferPDF(p) {
             doc.rect(35, 30, 525, 3).fill('#002B66');
             doc.moveDown(0.5);
 
-            doc.fillColor('#002B66').fontSize(15).font('Helvetica-Bold').text('REPORTE COMPLETO DE SOLICITUD DE EVENTO', 35, 40);
-            doc.fontSize(8.5).font('Helvetica').fillColor('#666666').text('Dirección General de Deporte Social y Desarrollo Deportivo - CABA', 35, 58);
-            doc.text(`Fecha de Emisión: ${fechaHoy}`, 380, 58, { align: 'right' });
+            doc.fillColor('#002B66').fontSize(14).font('Helvetica-Bold').text('REPORTE COMPLETO DE SOLICITUD DE EVENTO', 35, 38);
+            doc.fontSize(8.5).font('Helvetica').fillColor('#666666').text('Dirección General de Deporte Social y Desarrollo Deportivo - CABA', 35, 54);
+            doc.text(`Fecha de Emisión: ${fechaHoy}`, 380, 54, { align: 'right' });
 
-            let y = 72;
-            doc.rect(35, y, 525, 22).fill('#F1F5F9').stroke('#CBD5E1');
-            doc.fillColor('#002B66').fontSize(11).font('Helvetica-Bold').text(p.titulo || 'Sin Título', 42, y + 6);
+            let y = 68;
+            
+            // SECCIÓN TÍTULO DEL EVENTO (AGRANDADO Y DESTACADO)
+            doc.rect(35, y, 525, 32).fill('#F1F5F9').stroke('#CBD5E1');
+            doc.fillColor('#002B66').fontSize(13.5).font('Helvetica-Bold').text(p.titulo || 'Sin Título', 42, y + 9, { width: 510, ellipsis: true });
 
-            y += 30;
+            y += 42;
             doc.fillColor('#1F2937').fontSize(9);
 
             function printRow(label1, val1, label2, val2) {
@@ -324,7 +326,6 @@ app.post('/api/pedidos', async (req, res) => {
     }
 });
 
-// GET Pedidos Vigentes (Fechas futuras estrictas: fecha > hoy)
 app.get('/api/pedidos', async (req, res) => {
     try {
         const hoy = new Date();
@@ -340,7 +341,6 @@ app.get('/api/pedidos', async (req, res) => {
     }
 });
 
-// GET Eventos Realizados (Fechas cumplidas o pasadas: fecha <= hoy)
 app.get('/api/pedidos/realizados', async (req, res) => {
     try {
         const hoy = new Date();
