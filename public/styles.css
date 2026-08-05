@@ -829,4 +829,27 @@ body {
     .btn-welcome {
         width: 100%;
     }
+}/* --- TÍTULO DE EVENTO EN TARJETAS DE CALENDARIO Y LISTADOS --- */
+.card-title, 
+.pedido-titulo,
+.evento-card h3,
+.pedido-card h3 {
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #002B66 !important;
+    margin-top: 8px !important;
+    margin-bottom: 10px !important;
+    line-height: 1.3 !important;
+    display: block !important;
+}
+
+/* --- TÍTULO DENTRO DEL PANEL DE GESTIÓN (DIRECTOR / ADMIN) --- */
+.pedido-header h3,
+.pedido-header h4,
+.director-pedido-title {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    color: #002B66 !important;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px !important;
 }
