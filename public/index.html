@@ -13,7 +13,7 @@
     <div id="login-view" class="auth-wrapper">
         <div class="auth-card">
             <div class="auth-header">
-                <h2>Portal de Eventos BA</h2>
+                <h2>Portal de Eventos <span class="ba-highlight">BA</span></h2>
                 <p>Dirección General de Deporte Social y Desarrollo Deportivo</p>
             </div>
             
@@ -32,8 +32,8 @@
                     <label for="password">Contraseña</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-                <div id="login-error" class="alert alert-error hidden"></div>
-                <button type="submit" class="btn btn-primary full-width">Ingresar al Portal</button>
+                <div id="login-error" class="auth-error hidden"></div>
+                <button type="submit" class="btn-primary">Ingresar al Portal</button>
             </form>
 
             <!-- Formulario de Registro -->
@@ -50,30 +50,30 @@
                     <label for="reg-password">Contraseña</label>
                     <input type="password" id="reg-password" placeholder="••••••••" required>
                 </div>
-                <div id="register-error" class="alert alert-error hidden"></div>
-                <div id="register-success" class="alert alert-success hidden"></div>
-                <button type="submit" class="btn btn-primary full-width">Crear Cuenta</button>
+                <div id="register-error" class="auth-error hidden"></div>
+                <div id="register-success" class="auth-success hidden"></div>
+                <button type="submit" class="btn-primary">Crear Cuenta</button>
             </form>
         </div>
     </div>
 
     <!-- Vista del Portal Principal -->
-    <div id="portal-view" class="portal-container hidden">
-        <header class="topbar">
-            <div class="topbar-left">
+    <div id="portal-view" class="portal-wrapper hidden">
+        <header class="main-header">
+            <div class="header-left">
                 <button id="mobile-menu-btn" class="mobile-menu-toggle" aria-label="Abrir menú">☰</button>
-                <h1 class="brand-title">Portal de Eventos <span>BA</span></h1>
+                <h1 class="header-title">Portal de Eventos <span class="ba-highlight">BA</span></h1>
             </div>
-            <div class="topbar-right">
+            <div class="header-right">
                 <div class="user-info">
-                    <span id="user-name" class="user-name-text">Cargando...</span>
+                    <span id="user-name">Cargando...</span>
                     <span id="user-badge" class="badge">DOCENTE</span>
                 </div>
                 <button id="btn-logout" class="btn-logout">Cerrar Sesión</button>
             </div>
         </header>
 
-        <div class="portal-body">
+        <div class="layout-body">
             <div id="sidebar-overlay" class="sidebar-overlay"></div>
             
             <aside id="main-sidebar" class="sidebar">
@@ -99,14 +99,23 @@
                 </nav>
             </aside>
 
-            <main class="main-content">
+            <main class="content-wrapper">
                 <!-- Solapa: Inicio -->
                 <div id="tab-inicio" class="tab-content active">
-                    <div class="card">
-                        <h3>Bienvenido/a al Portal de Gestión</h3>
-                        <p style="margin-top: 10px; color: #475569;">
-                            Utilizá el menú lateral para solicitar la logística de tus eventos deportivos, consultar el calendario institucional o revisar el histórico de eventos realizados.
-                        </p>
+                    <div class="home-container">
+                        <div class="welcome-card-hero">
+                            <div class="welcome-banner-wrapper">
+                                <img src="banner-deportes.jpg" alt="Banner Deportes" class="welcome-banner-img">
+                            </div>
+                            <div class="welcome-card-body">
+                                <h2>Bienvenido/a al Portal de Gestión</h2>
+                                <p>Utilizá el menú lateral para solicitar la logística de tus eventos deportivos, consultar el calendario institucional o revisar el histórico de eventos realizados.</p>
+                                <div class="welcome-card-actions">
+                                    <button class="btn-primary btn-welcome" onclick="switchTab('tab-solicitud')">📝 Solicitar Evento</button>
+                                    <button class="btn-secondary btn-welcome" onclick="switchTab('tab-calendario')">📅 Ver Calendario</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -114,233 +123,214 @@
                 <div id="tab-solicitud" class="tab-content">
                     
                     <!-- Panel para Directores/Administradores -->
-                    <div id="director-pedidos-container" class="hidden">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Gestión de Eventos y Actividades Vigentes</h3>
-                                <p style="font-size: 13px; color: #64748b;">Supervisión, edición y descarga de reportes PDF de las actividades registradas.</p>
+                    <div id="director-pedidos-container" class="panel hidden">
+                        <div class="director-header">
+                            <div>
+                                <h2>Gestión de Eventos y Actividades Vigentes</h2>
+                                <p class="section-desc">Supervisión, edición y descarga de reportes PDF de las actividades registradas.</p>
                             </div>
-                            <div class="card-body">
-                                <div id="lista-pedidos">
-                                    <p>Cargando solicitudes...</p>
-                                </div>
-                            </div>
+                        </div>
+                        <div id="lista-pedidos" class="pedidos-list">
+                            <p>Cargando solicitudes...</p>
                         </div>
                     </div>
 
                     <!-- Formulario de Carga para Docentes -->
-                    <form id="form-nuevo-pedido" class="card">
-                        <div class="card-header">
-                            <h3>Formulario de Solicitud de Logística para Eventos</h3>
+                    <form id="form-nuevo-pedido" class="panel">
+                        <h2>Formulario de Solicitud de Logística para Eventos</h2>
+                        <p class="section-desc">Completá los datos técnicos de la actividad para gestionar el apoyo de logística y servicios.</p>
+                        
+                        <div class="form-group">
+                            <label>Nombre / Título de la Actividad *</label>
+                            <input type="text" id="ped-titulo" required placeholder="Ej: Torneo de Fútbol Infantil">
                         </div>
-                        <div class="card-body">
-                            
+
+                        <div class="form-grid">
                             <div class="form-group">
-                                <label>Nombre / Título de la Actividad *</label>
-                                <input type="text" id="ped-titulo" required placeholder="Ej: Torneo de Fútbol Infantil">
+                                <label>Gerencia / Área Responsable *</label>
+                                <input type="text" id="ped-area" required placeholder="Ej: Gerencia de Desarrollo Deportivo">
                             </div>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>Gerencia / Área Responsable *</label>
-                                    <input type="text" id="ped-area" required placeholder="Ej: Gerencia de Desarrollo Deportivo">
-                                </div>
-                                <div class="form-group">
-                                    <label>Programa *</label>
-                                    <input type="text" id="ped-programa" required placeholder="Ej: Plazas Activas">
-                                </div>
-                            </div>
-
-                            <div class="form-grid-3">
-                                <div class="form-group">
-                                    <label>Fecha del Evento *</label>
-                                    <input type="date" id="ped-fecha" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Horario *</label>
-                                    <input type="text" id="ped-horario" required placeholder="Ej: De 09:00 a 14:00 hs">
-                                </div>
-                                <div class="form-group">
-                                    <label>Sede / Lugar del Evento *</label>
-                                    <input type="text" id="ped-lugar" required placeholder="Ej: Polideportivo Patricios">
-                                </div>
-                            </div>
-
-                            <hr class="form-divider">
-                            <h4 class="form-section-title">Responsable de la Solicitud</h4>
-
-                            <div class="form-grid-3">
-                                <div class="form-group">
-                                    <label>Nombre y Apellido *</label>
-                                    <input type="text" id="ped-resp-nombre" required placeholder="Ej: Juan Perez">
-                                </div>
-                                <div class="form-group">
-                                    <label>DNI *</label>
-                                    <input type="text" id="ped-resp-dni" required placeholder="Sin puntos">
-                                </div>
-                                <div class="form-group">
-                                    <label>Teléfono de Contacto *</label>
-                                    <input type="text" id="ped-resp-tel" required placeholder="Ej: 1123456789">
-                                </div>
-                            </div>
-
-                            <hr class="form-divider">
-                            <h4 class="form-section-title">Estimación de Concurrencia</h4>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>Participantes Estimados *</label>
-                                    <input type="number" id="ped-part-aprox" required min="0" placeholder="Ej: 150">
-                                </div>
-                                <div class="form-group">
-                                    <label>Público General Estimado</label>
-                                    <input type="number" id="ped-pub-gral" min="0" placeholder="Ej: 50">
-                                </div>
-                            </div>
-
-                            <hr class="form-divider">
-                            <h4 class="form-section-title">Logística, Emergencias y Transporte</h4>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>¿Requiere Cobertura de Ambulancia?</label>
-                                    <select id="ped-ambulancia">
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Horario de Cobertura de Ambulancia</label>
-                                    <input type="text" id="ped-amb-horario" placeholder="Ej: De 08:30 a 14:30 hs">
-                                </div>
-                            </div>
-
-                            <div class="form-grid-3">
-                                <div class="form-group">
-                                    <label>Transporte de Pasajeros (Micros/Colectivos)</label>
-                                    <input type="text" id="ped-transporte" placeholder="Ej: 2 micros de 50 pasajeros">
-                                </div>
-                                <div class="form-group">
-                                    <label>Lugar y Horario de Salida</label>
-                                    <input type="text" id="ped-transporte-salida" placeholder="Ej: Sede Central - 08:00 hs">
-                                </div>
-                                <div class="form-group">
-                                    <label>Lugar y Horario de Regreso</label>
-                                    <input type="text" id="ped-transporte-regreso" placeholder="Ej: Polideportivo - 15:00 hs">
-                                </div>
-                            </div>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>Nombre del Responsables de Micro/Transporte</label>
-                                    <input type="text" id="ped-transporte-resp-nombre" placeholder="Ej: Maria Lopez">
-                                </div>
-                                <div class="form-group">
-                                    <label>Teléfono Responsable de Micro</label>
-                                    <input type="text" id="ped-transporte-resp-tel" placeholder="Ej: 1198765432">
-                                </div>
-                            </div>
-
-                            <hr class="form-divider">
-                            <h4 class="form-section-title">Personal y Cobertura Docente</h4>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>¿Requiere Extensión de Cobertura ART?</label>
-                                    <select id="ped-ext-art">
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Cantidad de Profesores/Docentes Asignados</label>
-                                    <input type="number" id="ped-cant-profesores" min="0" max="20" placeholder="Ej: 2" onchange="generarCamposProfesores(this.value)">
-                                </div>
-                            </div>
-
-                            <div id="contenedor-profesores"></div>
-
-                            <hr class="form-divider">
-                            <h4 class="form-section-title">Prensa, Difusión y Clima</h4>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>¿Requiere Cobertura de Prensa/Difusión?</label>
-                                    <select id="ped-prensa">
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Tipo de Difusión Requerida</label>
-                                    <input type="text" id="ped-difusion" placeholder="Ej: Cobertura fotográfica y redes social">
-                                </div>
-                            </div>
-
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label>¿Se Suspende por Lluvia?</label>
-                                    <select id="ped-lluvia" onchange="toggleReprogramacion(this.value)">
-                                        <option value="No">No</option>
-                                        <option value="Sí">Sí</option>
-                                    </select>
-                                </div>
-                                <div id="campo-reprogramacion" class="form-group hidden">
-                                    <label>Fecha Alternativa de Reprogramación</label>
-                                    <input type="date" id="ped-fecha-reprogramacion">
-                                </div>
-                            </div>
-
-                            <hr class="form-divider">
-                            <h4 class="form-section-title">Detalles Adicionales del Evento</h4>
-
                             <div class="form-group">
-                                <label>Necesidades Técnicas e Infraestructura</label>
-                                <textarea id="ped-necesidades" rows="2" placeholder="Ej: Sonido, escenario, 100 sillas, gazebo..."></textarea>
+                                <label>Programa *</label>
+                                <input type="text" id="ped-programa" required placeholder="Ej: Plazas Activas">
                             </div>
-
-                            <div class="form-group">
-                                <label>Descripción General de la Actividad *</label>
-                                <textarea id="ped-descripcion" rows="3" required placeholder="Describí brevemente en qué consiste la jornada..."></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Objetivos de la Jornada *</label>
-                                <textarea id="ped-objetivo" rows="2" required placeholder="Objetivos pedagógicos, comunitarios o deportivos..."></textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary full-width style-submit-btn">Enviar Solicitud de Evento</button>
-
                         </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Fecha del Evento *</label>
+                                <input type="date" id="ped-fecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Horario *</label>
+                                <input type="text" id="ped-horario" required placeholder="Ej: De 09:00 a 14:00 hs">
+                            </div>
+                            <div class="form-group">
+                                <label>Sede / Lugar del Evento *</label>
+                                <input type="text" id="ped-lugar" required placeholder="Ej: Polideportivo Patricios">
+                            </div>
+                        </div>
+
+                        <h3 class="form-section-title">Responsable de la Solicitud</h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre y Apellido *</label>
+                                <input type="text" id="ped-resp-nombre" required placeholder="Ej: Juan Perez">
+                            </div>
+                            <div class="form-group">
+                                <label>DNI *</label>
+                                <input type="text" id="ped-resp-dni" required placeholder="Sin puntos">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono de Contacto *</label>
+                                <input type="text" id="ped-resp-tel" required placeholder="Ej: 1123456789">
+                            </div>
+                        </div>
+
+                        <h3 class="form-section-title">Estimación de Concurrencia</h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Participantes Estimados *</label>
+                                <input type="number" id="ped-part-aprox" required min="0" placeholder="Ej: 150">
+                            </div>
+                            <div class="form-group">
+                                <label>Público General Estimado</label>
+                                <input type="number" id="ped-pub-gral" min="0" placeholder="Ej: 50">
+                            </div>
+                        </div>
+
+                        <h3 class="form-section-title">Logística, Emergencias y Transporte</h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>¿Requiere Cobertura de Ambulancia?</label>
+                                <select id="ped-ambulancia">
+                                    <option value="No">No</option>
+                                    <option value="Sí">Sí</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Horario de Cobertura de Ambulancia</label>
+                                <input type="text" id="ped-amb-horario" placeholder="Ej: De 08:30 a 14:30 hs">
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Transporte de Pasajeros (Micros/Colectivos)</label>
+                                <input type="text" id="ped-transporte" placeholder="Ej: 2 micros de 50 pasajeros">
+                            </div>
+                            <div class="form-group">
+                                <label>Lugar y Horario de Salida</label>
+                                <input type="text" id="ped-transporte-salida" placeholder="Ej: Sede Central - 08:00 hs">
+                            </div>
+                            <div class="form-group">
+                                <label>Lugar y Horario de Regreso</label>
+                                <input type="text" id="ped-transporte-regreso" placeholder="Ej: Polideportivo - 15:00 hs">
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre del Responsables de Micro/Transporte</label>
+                                <input type="text" id="ped-transporte-resp-nombre" placeholder="Ej: Maria Lopez">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono Responsable de Micro</label>
+                                <input type="text" id="ped-transporte-resp-tel" placeholder="Ej: 1198765432">
+                            </div>
+                        </div>
+
+                        <h3 class="form-section-title">Personal y Cobertura Docente</h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>¿Requiere Extensión de Cobertura ART?</label>
+                                <select id="ped-ext-art">
+                                    <option value="No">No</option>
+                                    <option value="Sí">Sí</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cantidad de Profesores/Docentes Asignados</label>
+                                <input type="number" id="ped-cant-profesores" min="0" max="20" placeholder="Ej: 2" onchange="generarCamposProfesores(this.value)">
+                            </div>
+                        </div>
+
+                        <div id="contenedor-profesores"></div>
+
+                        <h3 class="form-section-title">Prensa, Difusión y Clima</h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>¿Requiere Cobertura de Prensa/Difusión?</label>
+                                <select id="ped-prensa">
+                                    <option value="No">No</option>
+                                    <option value="Sí">Sí</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Difusión Requerida</label>
+                                <input type="text" id="ped-difusion" placeholder="Ej: Cobertura fotográfica y redes social">
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>¿Se Suspende por Lluvia?</label>
+                                <select id="ped-lluvia" onchange="toggleReprogramacion(this.value)">
+                                    <option value="No">No</option>
+                                    <option value="Sí">Sí</option>
+                                </select>
+                            </div>
+                            <div id="campo-reprogramacion" class="form-group hidden">
+                                <label>Fecha Alternativa de Reprogramación</label>
+                                <input type="date" id="ped-fecha-reprogramacion">
+                            </div>
+                        </div>
+
+                        <h3 class="form-section-title">Detalles Adicionales del Evento</h3>
+
+                        <div class="form-group">
+                            <label>Necesidades Técnicas e Infraestructura</label>
+                            <textarea id="ped-necesidades" rows="2" placeholder="Ej: Sonido, escenario, 100 sillas, gazebo..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descripción General de la Actividad *</label>
+                            <textarea id="ped-descripcion" rows="3" required placeholder="Describí brevemente en qué consiste la jornada..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Objetivos de la Jornada *</label>
+                            <textarea id="ped-objetivo" rows="2" required placeholder="Objetivos pedagógicos, comunitarios o deportivos..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-submit-pedido">Enviar Solicitud de Evento</button>
+
                     </form>
                 </div>
 
                 <!-- Solapa: Calendario General -->
                 <div id="tab-calendario" class="tab-content">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>📅 Próximos Eventos Programados</h3>
-                            <p style="font-size: 13px; color: #64748b;">Cronograma general de actividades deportivas en la Ciudad.</p>
-                        </div>
-                        <div class="card-body">
-                            <div id="calendario-container">
-                                <p>Cargando el calendario...</p>
-                            </div>
+                    <div class="panel">
+                        <h2>📅 Próximos Eventos Programados</h2>
+                        <p class="section-desc">Cronograma general de actividades deportivas en la Ciudad.</p>
+                        <div id="calendario-container" class="calendario-grid">
+                            <p>Cargando el calendario...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Solapa: Eventos Realizados -->
                 <div id="tab-realizados" class="tab-content">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>📜 Histórico de Eventos Realizados</h3>
-                            <p style="font-size: 13px; color: #64748b;">Eventos cuya fecha ya se ha cumplido. Se ordenan cronológicamente del más reciente al más antiguo.</p>
-                        </div>
-                        <div class="card-body">
-                            <div id="lista-eventos-realizados">
-                                <p>Cargando eventos realizados...</p>
-                            </div>
+                    <div class="panel">
+                        <h2>📜 Histórico de Eventos Realizados</h2>
+                        <p class="section-desc">Eventos cuya fecha ya se ha cumplido. Se ordenan cronológicamente del más reciente al más antiguo.</p>
+                        <div id="lista-eventos-realizados" class="pedidos-list">
+                            <p>Cargando eventos realizados...</p>
                         </div>
                     </div>
                 </div>
@@ -351,12 +341,12 @@
 
     <!-- Modal para Editar Eventos -->
     <div id="modal-editar" class="modal-overlay hidden">
-        <div class="modal-content card">
-            <div class="card-header">
+        <div class="modal-card">
+            <div class="modal-header">
                 <h3>Editar Evento / Solicitud</h3>
-                <button type="button" class="btn-close" onclick="cerrarModalEdicion()">✖</button>
+                <button type="button" class="btn-close-modal" onclick="cerrarModalEdicion()">✖</button>
             </div>
-            <form id="form-editar-pedido" class="card-body">
+            <form id="form-editar-pedido">
                 <input type="hidden" id="edit-id">
 
                 <div class="form-group">
@@ -364,7 +354,7 @@
                     <input type="text" id="edit-titulo" required>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Gerencia / Área</label>
                         <input type="text" id="edit-area" required>
@@ -375,7 +365,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-3">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Fecha</label>
                         <input type="date" id="edit-fecha" required>
@@ -390,7 +380,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-3">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Responsable</label>
                         <input type="text" id="edit-resp-nombre" required>
@@ -405,7 +395,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Participantes Est.</label>
                         <input type="number" id="edit-part-aprox" required>
@@ -416,7 +406,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Ambulancia</label>
                         <select id="edit-ambulancia">
@@ -430,7 +420,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-3">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Transporte</label>
                         <input type="text" id="edit-transporte">
@@ -445,7 +435,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Resp. Micro</label>
                         <input type="text" id="edit-transporte-resp-nombre">
@@ -456,7 +446,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Extensión ART</label>
                         <select id="edit-ext-art">
@@ -470,7 +460,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Prensa</label>
                         <select id="edit-prensa">
@@ -484,7 +474,7 @@
                     </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Suspende por Lluvia</label>
                         <select id="edit-lluvia">
@@ -514,8 +504,8 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">Guardar Cambios</button>
                 </div>
             </form>
         </div>

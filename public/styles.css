@@ -274,6 +274,16 @@ body {
     font-weight: 800;
 }
 
+.badge-director {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.badge-admin {
+    background-color: #8b5cf6 !important;
+    color: #ffffff !important;
+}
+
 .btn-logout {
     background: none;
     border: none;
@@ -648,7 +658,39 @@ body {
     border-top: 1px solid var(--border);
 }
 
-/* Responsividad */
+/* Toast Success */
+.toast-success {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #10b981;
+    color: #ffffff;
+    padding: 18px 32px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -40%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Responsividad Mobile */
 .mobile-menu-toggle {
     display: none;
     background: none;
@@ -659,64 +701,6 @@ body {
 }
 
 @media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        left: -260px;
-        top: 64px;
-        bottom: 0;
-        z-index: 40;
-        transition: var(--transition);
-        box-shadow: var(--shadow-lg);
-    }
-    .sidebar.open {
-        left: 0;
-    }
-    .sidebar-overlay {
-        position: fixed;
-        top: 64px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.4);
-        display: none;
-        z-index: 35;
-    }
-    .sidebar-overlay.active {
-        display: block;
-    }
-    .mobile-menu-toggle {
-        display: block;
-    }
-    .content-wrapper {
-        padding: 1rem;
-    }
-    .welcome-banner-wrapper {
-        height: 180px !important;
-        max-height: 180px !important;
-    }
-    .welcome-banner-img {
-        height: 180px !important;
-    }
-    .welcome-card-body {
-        padding: 1.5rem 1.25rem;
-    }
-    .welcome-card-body h2 {
-        font-size: 1.35rem;
-    }
-    .welcome-card-actions {
-        flex-direction: column;
-        width: 100%;
-    }
-    .btn-welcome {
-        width: 100%;
-    }
-}
-/* ==========================================
-   AJUSTES RESPONSIVOS MOBILE (HEADER Y LAYOUT)
-   ========================================== */
-
-@media (max-width: 768px) {
-    /* Layout del header general */
     .main-header {
         display: flex;
         align-items: center;
@@ -727,16 +711,16 @@ body {
         box-sizing: border-box;
     }
 
-    /* Sección izquierda: menú + título */
     .header-left {
         display: flex;
         align-items: center;
         gap: 8px;
-        min-width: 0; /* Permite que el texto se trunque si no entra */
+        min-width: 0;
         flex: 1;
     }
 
     .mobile-menu-toggle {
+        display: block;
         font-size: 1.2rem;
         padding: 4px 8px;
         background: transparent;
@@ -760,7 +744,6 @@ body {
         font-size: 0.8rem;
     }
 
-    /* Sección derecha: info del usuario + logout */
     .header-right {
         display: flex;
         align-items: center;
@@ -768,14 +751,8 @@ body {
         flex-shrink: 0;
     }
 
-    /* Ocultamos el nombre del usuario en mobile para no abarrotar la barra */
     .user-info #user-name {
         display: none;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
     }
 
     .user-info .badge {
@@ -784,14 +761,41 @@ body {
         letter-spacing: 0;
     }
 
-    /* Botón de cerrar sesión compacto */
     .btn-logout {
         padding: 4px 8px;
         font-size: 0.75rem;
         white-space: nowrap;
     }
 
-    /* Ajustes generales del contenido de las tarjetas */
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 64px;
+        bottom: 0;
+        z-index: 40;
+        transition: var(--transition);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.4);
+        display: none;
+        z-index: 35;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
     .content-wrapper {
         padding: 12px 8px;
     }
@@ -800,44 +804,29 @@ body {
         padding: 16px 12px;
     }
 
-    .panel h2, 
-    .director-header h2 {
-        font-size: 1.25rem;
-        line-height: 1.3;
+    .welcome-banner-wrapper {
+        height: 180px !important;
+        max-height: 180px !important;
     }
 
-    .section-desc {
-        font-size: 0.85rem;
+    .welcome-banner-img {
+        height: 180px !important;
     }
-}
-/* Cartel flotante de éxito */
-.toast-success {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #10b981; /* Verde esmeralda */
-    color: #ffffff;
-    padding: 18px 32px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: 600;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    z-index: 9999;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
 
-@keyframes popIn {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -40%) scale(0.8);
+    .welcome-card-body {
+        padding: 1.5rem 1.25rem;
     }
-    100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+
+    .welcome-card-body h2 {
+        font-size: 1.35rem;
+    }
+
+    .welcome-card-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-welcome {
+        width: 100%;
     }
 }
