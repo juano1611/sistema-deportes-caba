@@ -222,38 +222,22 @@
                         </div>
 
                         <div class="form-grid">
-                            <div class="form-group">
+                            <div class="form-group" style="grid-column: 1 / -1;">
                                 <label>Transporte de Pasajeros (Micros/Colectivos)</label>
-                                <select id="ped-transporte">
+                                <select id="ped-transporte" onchange="generarCamposMicros(this.value)">
                                     <option value="No">No</option>
-                                    <option value="1 micro">1 micro</option>
-                                    <option value="2 micros">2 micros</option>
-                                    <option value="3 micros">3 micros</option>
-                                    <option value="4 micros">4 micros</option>
-                                    <option value="5 micros">5 micros</option>
-                                    <option value="6 micros">6 micros</option>
+                                    <option value="1">1 micro</option>
+                                    <option value="2">2 micros</option>
+                                    <option value="3">3 micros</option>
+                                    <option value="4">4 micros</option>
+                                    <option value="5">5 micros</option>
+                                    <option value="6">6 micros</option>
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Lugar y Horario de Salida</label>
-                                <input type="text" id="ped-transporte-salida" placeholder="Ej: Sede Central - 08:00 hs">
-                            </div>
-                            <div class="form-group">
-                                <label>Lugar y Horario de Regreso</label>
-                                <input type="text" id="ped-transporte-regreso" placeholder="Ej: Polideportivo - 15:00 hs">
                             </div>
                         </div>
 
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Nombre del Responsable de Micro/Transporte</label>
-                                <input type="text" id="ped-transporte-resp-nombre" placeholder="Ej: Maria Lopez">
-                            </div>
-                            <div class="form-group">
-                                <label>Teléfono Responsable de Micro</label>
-                                <input type="text" id="ped-transporte-resp-tel" placeholder="Ej: 1198765432">
-                            </div>
-                        </div>
+                        <!-- Contenedor dinámico de Micros -->
+                        <div id="contenedor-micros"></div>
 
                         <h3 class="form-section-title">Personal y Cobertura Docente</h3>
 
@@ -437,38 +421,21 @@
                 </div>
 
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label>Transporte</label>
-                        <select id="edit-transporte">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Transporte de Pasajeros</label>
+                        <select id="edit-transporte" onchange="generarCamposMicrosEdit(this.value)">
                             <option value="No">No</option>
-                            <option value="1 micro">1 micro</option>
-                            <option value="2 micros">2 micros</option>
-                            <option value="3 micros">3 micros</option>
-                            <option value="4 micros">4 micros</option>
-                            <option value="5 micros">5 micros</option>
-                            <option value="6 micros">6 micros</option>
+                            <option value="1">1 micro</option>
+                            <option value="2">2 micros</option>
+                            <option value="3">3 micros</option>
+                            <option value="4">4 micros</option>
+                            <option value="5">5 micros</option>
+                            <option value="6">6 micros</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Salida Transporte</label>
-                        <input type="text" id="edit-transporte-salida">
-                    </div>
-                    <div class="form-group">
-                        <label>Regreso Transporte</label>
-                        <input type="text" id="edit-transporte-regreso">
                     </div>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Resp. Micro</label>
-                        <input type="text" id="edit-transporte-resp-nombre">
-                    </div>
-                    <div class="form-group">
-                        <label>Tel. Resp. Micro</label>
-                        <input type="text" id="edit-transporte-resp-tel">
-                    </div>
-                </div>
+                <div id="edit-contenedor-micros"></div>
 
                 <div class="form-grid">
                     <div class="form-group">

@@ -71,10 +71,7 @@ const PedidoSchema = new mongoose.Schema({
     publicoGeneral: Number,
     necesidades: String,
     transportePasajeros: String,
-    transporteSalida: String,
-    transporteRegreso: String,
-    transporteRespNombre: String,
-    transporteRespTel: String,
+    detallesMicros: mongoose.Schema.Types.Mixed,
     ambulancia: String,
     ambulanciaHorario: String,
     extensionArt: String,
@@ -110,7 +107,7 @@ function generarBufferPDF(p) {
             doc.text(`Fecha de Emisión: ${fechaHoy}`, 380, 54, { align: 'right' });
 
             let y = 68;
-            
+
             // SECCIÓN TÍTULO DEL EVENTO (AGRANDADO Y DESTACADO)
             doc.rect(35, y, 525, 32).fill('#F1F5F9').stroke('#CBD5E1');
             doc.fillColor('#002B66').fontSize(13.5).font('Helvetica-Bold').text(p.titulo || 'Sin Título', 42, y + 9, { width: 510, ellipsis: true });
@@ -155,8 +152,15 @@ function generarBufferPDF(p) {
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
             printRow('Requiere Ambulancia:', p.ambulancia || 'No', 'Horario Cobertura:', p.ambulanciaHorario || 'N/A');
-            printRow('Transporte Pasajeros:', p.transportePasajeros || 'No', 'Lugar/Horario Salida:', p.transporteSalida || 'N/A');
-            printRow('Lugar/Horario Regreso:', p.transporteRegreso || 'N/A', 'Responsable Micro:', `${p.transporteRespNombre || '-'} ${p.transporteRespTel ? `(${p.transporteRespTel})` : ''}`);
+            printRow('Transporte Pasajeros:', p.transportePasajeros ? `${p.transportePasajeros} micro(s)` : 'No', '', '');
+
+            if (p.detallesMicros && Array.isArray(p.detallesMicros) && p.detallesMicros.length > 0) {
+                p.detallesMicros.forEach((m, idx) => {
+                    doc.font('Helvetica-Bold').text(`Micro #${idx + 1}:`, 42, y);
+                    doc.font('Helvetica').text(`Resp: ${m.responsableNombre || '-'} (${m.responsableTel || '-'}) | Salida: ${m.salida || '-'} | Regreso: ${m.regreso || '-'}`, 100, y);
+                    y += 13;
+                });
+            }
 
             y += 4;
             doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('5. PERSONAL Y COBERTURA DOCENTE', 35, y);

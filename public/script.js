@@ -241,6 +241,85 @@ function initAuthEvents() {
     }
 }
 
+// Generación Dinámica de Micros (Formulario Principal)
+function generarCamposMicros(valor) {
+    const container = document.getElementById('contenedor-micros');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const num = parseInt(valor) || 0;
+    if (num <= 0) return;
+
+    for (let i = 1; i <= num; i++) {
+        const div = document.createElement('div');
+        div.className = 'bloque-micro-item';
+        div.style.cssText = 'background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; margin-top: 10px; border-radius: 6px;';
+
+        div.innerHTML = `
+            <h5 style="margin: 0 0 8px 0; color: #002b66; font-size: 14px;">🚌 Datos del Micro #${i}</h5>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Nombre Responsable Micro *</label>
+                    <input type="text" class="input-micro-resp-nombre" placeholder="Ej: María López" required style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Teléfono Responsable *</label>
+                    <input type="text" class="input-micro-resp-tel" placeholder="Ej: 1198765432" required style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Lugar y Horario de Salida *</label>
+                    <input type="text" class="input-micro-salida" placeholder="Ej: Sede Central - 08:00 hs" required style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Lugar y Horario de Regreso *</label>
+                    <input type="text" class="input-micro-regreso" placeholder="Ej: Polideportivo - 15:00 hs" required style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+}
+
+// Generación Dinámica de Micros (Modal de Edición)
+function generarCamposMicrosEdit(valor, datosPrevios = []) {
+    const container = document.getElementById('edit-contenedor-micros');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const num = parseInt(valor) || 0;
+    if (num <= 0) return;
+
+    for (let i = 1; i <= num; i++) {
+        const prev = datosPrevios[i - 1] || {};
+        const div = document.createElement('div');
+        div.className = 'bloque-micro-edit-item';
+        div.style.cssText = 'background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; margin-top: 10px; border-radius: 6px;';
+
+        div.innerHTML = `
+            <h5 style="margin: 0 0 8px 0; color: #002b66; font-size: 14px;">🚌 Datos del Micro #${i}</h5>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Nombre Responsable Micro</label>
+                    <input type="text" class="edit-micro-resp-nombre" value="${prev.responsableNombre || ''}" placeholder="Ej: María López" style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Teléfono Responsable</label>
+                    <input type="text" class="edit-micro-resp-tel" value="${prev.responsableTel || ''}" placeholder="Ej: 1198765432" style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Lugar y Horario de Salida</label>
+                    <input type="text" class="edit-micro-salida" value="${prev.salida || ''}" placeholder="Ej: Sede Central - 08:00 hs" style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; font-weight: 600;">Lugar y Horario de Regreso</label>
+                    <input type="text" class="edit-micro-regreso" value="${prev.regreso || ''}" placeholder="Ej: Polideportivo - 15:00 hs" style="width: 100%; padding: 6px; margin-top: 2px;">
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+}
+
 function generarCamposProfesores(cantidad) {
     const container = document.getElementById('contenedor-profesores');
     if (!container) return;
@@ -338,10 +417,10 @@ function initPedidoForm() {
                 creadorInfo = document.getElementById('ped-resp-nombre').value.trim();
             }
 
-            const bloques = document.querySelectorAll('.bloque-profesor-item');
+            const bloquesProf = document.querySelectorAll('.bloque-profesor-item');
             const listaProfesores = [];
 
-            bloques.forEach(b => {
+            bloquesProf.forEach(b => {
                 const nombre = b.querySelector('.input-prof-nombre')?.value.trim();
                 const revista = b.querySelector('.input-prof-revista')?.value;
                 const horario = b.querySelector('.input-prof-horario')?.value.trim();
@@ -355,15 +434,37 @@ function initPedidoForm() {
                 }
             });
 
+            // Extraer micros dinámicos
+            const bloquesMicro = document.querySelectorAll('.bloque-micro-item');
+            const listaMicros = [];
+
+            bloquesMicro.forEach((bm, idx) => {
+                const respNombre = bm.querySelector('.input-micro-resp-nombre')?.value.trim();
+                const respTel = bm.querySelector('.input-micro-resp-tel')?.value.trim();
+                const salida = bm.querySelector('.input-micro-salida')?.value.trim();
+                const regreso = bm.querySelector('.input-micro-regreso')?.value.trim();
+
+                listaMicros.push({
+                    numero: idx + 1,
+                    responsableNombre: respNombre || '-',
+                    responsableTel: respTel || '-',
+                    salida: salida || '-',
+                    regreso: regreso || '-'
+                });
+            });
+
             const publicoVal = document.getElementById('ped-pub-gral') ? document.getElementById('ped-pub-gral').value : '';
+            const transporteVal = document.getElementById('ped-transporte') ? document.getElementById('ped-transporte').value.trim() : 'No';
 
             const nuevoPedido = {
                 titulo: document.getElementById('ped-titulo').value.trim(),
                 gerencia: document.getElementById('ped-area').value.trim(),
+                areaResponsable: document.getElementById('ped-area').value.trim(),
                 programa: document.getElementById('ped-programa').value.trim(),
                 fecha: document.getElementById('ped-fecha').value,
                 horario: document.getElementById('ped-horario').value.trim(),
                 lugar: document.getElementById('ped-lugar').value.trim(),
+                espacioFisico: document.getElementById('ped-espacio-fisico') ? document.getElementById('ped-espacio-fisico').value.trim() : '',
                 descripcion: document.getElementById('ped-descripcion').value.trim(),
                 objetivo: document.getElementById('ped-objetivo').value.trim(),
                 responsableNombre: document.getElementById('ped-resp-nombre').value.trim(),
@@ -375,11 +476,8 @@ function initPedidoForm() {
                 ambulancia: document.getElementById('ped-ambulancia').value,
                 ambulanciaHorario: document.getElementById('ped-amb-horario').value.trim(),
                 
-                transportePasajeros: document.getElementById('ped-transporte') ? document.getElementById('ped-transporte').value.trim() : '',
-                transporteSalida: document.getElementById('ped-transporte-salida') ? document.getElementById('ped-transporte-salida').value.trim() : '',
-                transporteRegreso: document.getElementById('ped-transporte-regreso') ? document.getElementById('ped-transporte-regreso').value.trim() : '',
-                transporteRespNombre: document.getElementById('ped-transporte-resp-nombre') ? document.getElementById('ped-transporte-resp-nombre').value.trim() : '',
-                transporteRespTel: document.getElementById('ped-transporte-resp-tel') ? document.getElementById('ped-transporte-resp-tel').value.trim() : '',
+                transportePasajeros: transporteVal,
+                detallesMicros: listaMicros,
 
                 necesidades: document.getElementById('ped-necesidades').value.trim(),
                 
@@ -411,6 +509,8 @@ function initPedidoForm() {
                 formPedido.reset();
                 const contProf = document.getElementById('contenedor-profesores');
                 if (contProf) contProf.innerHTML = '';
+                const contMicros = document.getElementById('contenedor-micros');
+                if (contMicros) contMicros.innerHTML = '';
                 toggleReprogramacion('No');
                 cargarCalendarioEventos();
             } catch (err) {
@@ -452,6 +552,15 @@ async function cargarPedidosDirector() {
                 }
             }
 
+            let microsStr = 'No requiere';
+            if (p.detallesMicros && Array.isArray(p.detallesMicros) && p.detallesMicros.length > 0) {
+                microsStr = p.detallesMicros.map(m => 
+                    `Micro #${m.numero || 1}: Resp: ${m.responsableNombre || '-'} (${m.responsableTel || '-'}) - Salida: ${m.salida || '-'} / Regreso: ${m.regreso || '-'}`
+                ).join('<br>');
+            } else if (p.transportePasajeros && p.transportePasajeros !== 'No') {
+                microsStr = `${p.transportePasajeros} micro(s)`;
+            }
+
             const nombreCreador = (p.creadoPor && p.creadoPor.trim() !== '' && p.creadoPor !== 'Docente') 
                 ? p.creadoPor 
                 : (p.responsableNombre || 'Usuario Registrado');
@@ -470,11 +579,10 @@ async function cargarPedidosDirector() {
                         <p><strong>Creado por:</strong> ${nombreCreador}</p>
                         <p><strong>Gerencia / Programa:</strong> ${p.gerencia || p.areaResponsable || '-'} | ${p.programa || '-'}</p>
                         <p><strong>Fecha y Horario:</strong> ${p.fecha || '-'} (${p.horario || '-'})</p>
-                        <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
+                        <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'} ${p.espacioFisico ? `(${p.espacioFisico})` : ''}</p>
                         <p><strong>Solicitante:</strong> ${p.responsableNombre || '-'} (DNI: ${p.responsableDni || '-'}) - Tel: ${p.responsableTelefono || '-'}</p>
                         <p><strong>Participantes Est.:</strong> ${p.participantesAprox || 0} | <strong>Público:</strong> ${p.publicoGeneral ?? '-'}</p>
-                        <p><strong>Transporte:</strong> ${p.transportePasajeros || 'No'} (Salida: ${p.transporteSalida || '-'} / Regreso: ${p.transporteRegreso || '-'})</p>
-                        <p><strong>Resp. Transporte:</strong> ${p.transporteRespNombre || '-'} (${p.transporteRespTel || '-'})</p>
+                        <p style="grid-column: 1 / -1;"><strong>Transporte (${p.transportePasajeros || 'No'}):</strong><br>${microsStr}</p>
                         <p><strong>Ambulancia:</strong> ${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''} | <strong>ART:</strong> ${p.extensionArt || 'No'}</p>
                         <p><strong>Docentes / Profesores:</strong> ${listaProfsStr}</p>
                         <p><strong>Prensa/Difusión:</strong> ${p.prensa || 'No'} ${p.tipoDifusion ? `- ${p.tipoDifusion}` : ''}</p>
@@ -516,7 +624,7 @@ async function cargarCalendarioEventos() {
                     </div>
                     <div class="event-cal-info">
                         <h3>${p.titulo || 'Sin título'}</h3>
-                        <p>📍 <strong>Lugar:</strong> ${p.lugar || '-'}</p>
+                        <p>📍 <strong>Lugar:</strong> ${p.lugar || '-'} ${p.espacioFisico ? `(${p.espacioFisico})` : ''}</p>
                         <p>🏢 <strong>Gerencia/Programa:</strong> ${p.gerencia || p.areaResponsable || '-'} ${p.programa ? `(${p.programa})` : ''}</p>
                         <p>👤 <strong>Responsable:</strong> ${p.responsableNombre || '-'}</p>
                         ${p.descripcion ? `<p class="cal-desc">📝 ${p.descripcion}</p>` : ''}
@@ -584,6 +692,7 @@ function abrirModalEdicion(id) {
     document.getElementById('edit-fecha').value = pedido.fecha || '';
     document.getElementById('edit-horario').value = pedido.horario || '';
     document.getElementById('edit-lugar').value = pedido.lugar || '';
+    document.getElementById('edit-espacio-fisico').value = pedido.espacioFisico || '';
     document.getElementById('edit-resp-nombre').value = pedido.responsableNombre || '';
     document.getElementById('edit-resp-dni').value = pedido.responsableDni || '';
     document.getElementById('edit-resp-tel').value = pedido.responsableTelefono || '';
@@ -592,11 +701,9 @@ function abrirModalEdicion(id) {
     document.getElementById('edit-ambulancia').value = pedido.ambulancia || 'No';
     document.getElementById('edit-amb-horario').value = pedido.ambulanciaHorario || '';
     
-    document.getElementById('edit-transporte').value = pedido.transportePasajeros || '';
-    document.getElementById('edit-transporte-salida').value = pedido.transporteSalida || '';
-    document.getElementById('edit-transporte-regreso').value = pedido.transporteRegreso || '';
-    document.getElementById('edit-transporte-resp-nombre').value = pedido.transporteRespNombre || '';
-    document.getElementById('edit-transporte-resp-tel').value = pedido.transporteRespTel || '';
+    const valTransp = pedido.transportePasajeros || 'No';
+    document.getElementById('edit-transporte').value = valTransp;
+    generarCamposMicrosEdit(valTransp, pedido.detallesMicros || []);
 
     document.getElementById('edit-necesidades').value = pedido.necesidades || '';
     document.getElementById('edit-ext-art').value = pedido.extensionArt || 'No';
@@ -639,13 +746,33 @@ function initEditForm() {
                 ? profsInput.split(',').map(s => ({ nombre: s.trim(), situacionRevista: 'Titular', horarioLaboral: '-' })).filter(p => p.nombre) 
                 : [];
 
+            const bloquesMicroEdit = document.querySelectorAll('.bloque-micro-edit-item');
+            const listaMicrosEdit = [];
+
+            bloquesMicroEdit.forEach((bm, idx) => {
+                const respNombre = bm.querySelector('.edit-micro-resp-nombre')?.value.trim();
+                const respTel = bm.querySelector('.edit-micro-resp-tel')?.value.trim();
+                const salida = bm.querySelector('.edit-micro-salida')?.value.trim();
+                const regreso = bm.querySelector('.edit-micro-regreso')?.value.trim();
+
+                listaMicrosEdit.push({
+                    numero: idx + 1,
+                    responsableNombre: respNombre || '-',
+                    responsableTel: respTel || '-',
+                    salida: salida || '-',
+                    regreso: regreso || '-'
+                });
+            });
+
             const datosActualizados = {
                 titulo: document.getElementById('edit-titulo').value.trim(),
                 gerencia: document.getElementById('edit-area').value.trim(),
+                areaResponsable: document.getElementById('edit-area').value.trim(),
                 programa: document.getElementById('edit-programa').value.trim(),
                 fecha: document.getElementById('edit-fecha').value,
                 horario: document.getElementById('edit-horario').value.trim(),
                 lugar: document.getElementById('edit-lugar').value.trim(),
+                espacioFisico: document.getElementById('edit-espacio-fisico').value.trim(),
                 responsableNombre: document.getElementById('edit-resp-nombre').value.trim(),
                 responsableDni: document.getElementById('edit-resp-dni').value.trim(),
                 responsableTelefono: document.getElementById('edit-resp-tel').value.trim(),
@@ -655,10 +782,7 @@ function initEditForm() {
                 ambulanciaHorario: document.getElementById('edit-amb-horario').value.trim(),
                 
                 transportePasajeros: document.getElementById('edit-transporte').value.trim(),
-                transporteSalida: document.getElementById('edit-transporte-salida').value.trim(),
-                transporteRegreso: document.getElementById('edit-transporte-regreso').value.trim(),
-                transporteRespNombre: document.getElementById('edit-transporte-resp-nombre').value.trim(),
-                transporteRespTel: document.getElementById('edit-transporte-resp-tel').value.trim(),
+                detallesMicros: listaMicrosEdit,
 
                 necesidades: document.getElementById('edit-necesidades').value.trim(),
                 extensionArt: document.getElementById('edit-ext-art').value,
@@ -794,7 +918,7 @@ function descargarReporteEventoPDF(id) {
     printRow("Creado Por:", nombreCreadorPDF);
     printRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
     printRow("Fecha Evento:", p.fecha, "Horario Jornada:", p.horario);
-    printRow("Sede / Lugar:", p.lugar);
+    printRow("Sede / Lugar:", p.lugar, "Espacio Físico:", p.espacioFisico || '-');
 
     y += 2;
     printSectionHeader("2. RESPONSABLE DE LA SOLICITUD");
@@ -808,9 +932,16 @@ function descargarReporteEventoPDF(id) {
     y += 2;
     printSectionHeader("4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE");
     printRow("Requiere Ambulancia:", `${p.ambulancia || 'No'} ${p.ambulanciaHorario ? `(${p.ambulanciaHorario})` : ''}`);
-    printRow("Transporte Pasajeros:", p.transportePasajeros || 'No', "Salida/Regreso:", `${p.transporteSalida || '-'} / ${p.transporteRegreso || '-'}`);
-    if (p.transporteRespNombre) {
-        printRow("Resp. Micro:", `${p.transporteRespNombre} (Tel: ${p.transporteRespTel || '-'})`);
+    printRow("Transporte Pasajeros:", p.transportePasajeros ? `${p.transportePasajeros} micro(s)` : 'No');
+    
+    if (p.detallesMicros && p.detallesMicros.length > 0) {
+        p.detallesMicros.forEach((m, idx) => {
+            doc.setFont("Helvetica", "bold");
+            doc.text(`Micro #${idx + 1}:`, 18, y);
+            doc.setFont("Helvetica", "normal");
+            doc.text(`Resp: ${m.responsableNombre} (${m.responsableTel}) | Salida: ${m.salida} | Regreso: ${m.regreso}`, 36, y);
+            y += 5;
+        });
     }
 
     y += 2;
