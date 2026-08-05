@@ -289,14 +289,37 @@ function toggleReprogramacion(valor) {
     }
 }
 
+function mostrarToastExito(mensaje = 'Solicitud enviada') {
+    const exist = document.querySelector('.toast-success');
+    if (exist) exist.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-success';
+    toast.innerHTML = `<span>✅</span> <span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 function initPedidoForm() {
     const formPedido = document.getElementById('form-nuevo-pedido');
-    const msgBox = document.getElementById('pedido-msg');
 
     if (formPedido) {
         formPedido.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (msgBox) msgBox.classList.add('hidden');
+
+            const currentUserRaw = sessionStorage.getItem('currentUser');
+            let creadorInfo = 'Usuario Registrado';
+            if (currentUserRaw) {
+                try {
+                    const parsed = JSON.parse(currentUserRaw);
+                    creadorInfo = `${parsed.nombre || 'Sin nombre'} (DNI: ${parsed.dni || 'S/D'})`;
+                } catch(e) {}
+            }
 
             const bloques = document.querySelectorAll('.bloque-profesor-item');
             const listaProfesores = [];
@@ -329,6 +352,7 @@ function initPedidoForm() {
                 responsableNombre: document.getElementById('ped-resp-nombre').value.trim(),
                 responsableDni: document.getElementById('ped-resp-dni').value.trim(),
                 responsableTelefono: document.getElementById('ped-resp-tel').value.trim(),
+                creadoPor: creadorInfo,
                 participantesAprox: Number(document.getElementById('ped-part-aprox').value),
                 publicoGeneral: publicoVal !== '' ? Number(publicoVal) : 0,
                 ambulancia: document.getElementById('ped-ambulancia').value,
@@ -366,10 +390,7 @@ function initPedidoForm() {
                     return;
                 }
 
-                if (msgBox) {
-                    msgBox.textContent = '✅ Solicitud enviada correctamente';
-                    msgBox.classList.remove('hidden');
-                }
+                mostrarToastExito('Solicitud enviada');
                 formPedido.reset();
                 const contProf = document.getElementById('contenedor-profesores');
                 if (contProf) contProf.innerHTML = '';
@@ -422,6 +443,7 @@ async function cargarPedidosDirector() {
                         </div>
                     </div>
                     <div class="pedido-card-body-grid">
+                        <p><strong>Creado por:</strong> ${p.creadoPor || 'Docente'}</p>
                         <p><strong>Gerencia / Programa:</strong> ${p.gerencia || p.areaResponsable || '-'} | ${p.programa || '-'}</p>
                         <p><strong>Fecha y Horario:</strong> ${p.fecha || '-'} (${p.horario || '-'})</p>
                         <p><strong>Sede / Lugar:</strong> ${p.lugar || '-'}</p>
@@ -697,7 +719,8 @@ function descargarReporteEventoPDF(id) {
         doc.setFontSize(8.5);
     }
 
-    printSectionHeader("1. DATOS GENERALES Y UBICACIÓN");
+    printSectionHeader("1. DATOS DE ORIGEN Y UBICACIÓN");
+    printRow("Creado Por:", p.creadoPor || 'Docente');
     printRow("Gerencia:", p.gerencia || p.areaResponsable, "Programa:", p.programa);
     printRow("Fecha Evento:", p.fecha, "Horario Jornada:", p.horario);
     printRow("Sede / Lugar:", p.lugar);

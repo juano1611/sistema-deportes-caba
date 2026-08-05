@@ -76,6 +76,7 @@ const Usuario = mongoose.model('Usuario', UsuarioSchema);
 
 const PedidoSchema = new mongoose.Schema({
     titulo: { type: String, required: true },
+    creadoPor: String,
     gerencia: String,
     areaResponsable: String,
     programa: String,
@@ -147,9 +148,10 @@ function generarBufferPDF(p) {
                 y += 15;
             }
 
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('1. DATOS GENERALES Y UBICACIÓN', 35, y);
+            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('1. DATOS DE ORIGEN Y UBICACIÓN', 35, y);
             y += 14;
             doc.fillColor('#1F2937').fontSize(9);
+            printRow('Creado Por:', p.creadoPor || 'Docente', '', '');
             printRow('Gerencia:', p.gerencia || p.areaResponsable, 'Programa:', p.programa);
             printRow('Fecha del Evento:', p.fecha, 'Horario de Jornada:', p.horario);
             printRow('Sede / Lugar:', p.lugar, '', '');
@@ -246,6 +248,7 @@ async function enviarEmailBackground(pedidoData) {
                 <p>Se ha generado una nueva solicitud desde el Portal de Eventos BA con toda la información técnica.</p>
                 <ul>
                     <li><strong>Título:</strong> ${pedidoData.titulo}</li>
+                    <li><strong>Creado por:</strong> ${pedidoData.creadoPor || 'Docente'}</li>
                     <li><strong>Fecha:</strong> ${pedidoData.fecha}</li>
                     <li><strong>Lugar:</strong> ${pedidoData.lugar}</li>
                     <li><strong>Solicitante:</strong> ${pedidoData.responsableNombre} (DNI: ${pedidoData.responsableDni})</li>
