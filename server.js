@@ -210,7 +210,7 @@ function generarBufferPDF(p) {
 
 async function enviarEmailBackground(pedidoData) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.log('ℹ️ Omitiendo envío de correo: EMAIL_USER y EMAIL_PASS no están configurados.');
+        console.log('ℹ️ Omitiendo envío de correo: EMAIL_USER y EMAIL_PASS no están configurados en las variables de entorno.');
         return;
     }
     try {
