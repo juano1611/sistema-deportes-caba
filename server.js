@@ -9,10 +9,11 @@ const PDFDocument = require('pdfkit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const DESTINATARIOS_BASE = [
+const DESTINATARIOS = [
     'solicituddepedidos_dgdsydd@buenosaires.gob.ar',
-    'direccionpedagogica_DGDSYDD@buenosaires.gob.ar'
-];
+    'direccionpedagogica_DGDSYDD@buenosaires.gob.ar',
+    'fpomis@buenosaires.gob.ar'
+].join(', ');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -108,7 +109,6 @@ function generarBufferPDF(p) {
 
             let y = 68;
 
-            // SECCIÓN TÍTULO DEL EVENTO (AGRANDADO Y DESTACADO)
             doc.rect(35, y, 525, 32).fill('#F1F5F9').stroke('#CBD5E1');
             doc.fillColor('#002B66').fontSize(13.5).font('Helvetica-Bold').text(p.titulo || 'Sin Título', 42, y + 9, { width: 510, ellipsis: true });
 
@@ -217,26 +217,16 @@ function generarBufferPDF(p) {
 
 async function enviarEmailBackground(pedidoData) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.log('ℹ️ Omitiendo envío de correo: EMAIL_USER y EMAIL_PASS no están configurados en las variables de entorno.');
+        console.log('❌ OMITIENDO ENVÍO DE CORREO: EMAIL_USER y/o EMAIL_PASS no están configuradas en las variables de entorno.');
         return;
     }
     try {
         const pdfBuffer = await generarBufferPDF(pedidoData);
         const tituloSanitizado = (pedidoData.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-        // Determinar lista de correo de destino según rol o parámetro
-        let listaDestinatarios = [...DESTINATARIOS_BASE];
-        const esDocente = (pedidoData.creadoPor && pedidoData.creadoPor.toUpperCase() === 'DOCENTE') || pedidoData.role === 'DOCENTE';
-
-        if (esDocente) {
-            listaDestinatarios.push('fpomis@buenosaires.gob.ar');
-        }
-
-        const stringDestinatarios = listaDestinatarios.join(', ');
-
         const mailOptions = {
-            from: '"Portal de Eventos BA" <no-reply@buenosaires.gob.ar>',
-            to: stringDestinatarios,
+            from: `"Portal de Eventos BA" <${process.env.EMAIL_USER}>`,
+            to: DESTINATARIOS,
             subject: `📌 Nueva Solicitud de Evento: ${pedidoData.titulo}`,
             html: `
                 <h2 style="color: #002B66;">NUEVA SOLICITUD DE EVENTO REGISTRADA</h2>
@@ -260,10 +250,11 @@ async function enviarEmailBackground(pedidoData) {
             ]
         };
 
-        await transporter.sendMail(mailOptions);
-        console.log(`✉️ Email con PDF completo adjunto enviado exitosamente a: ${stringDestinatarios}`);
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✉️ Email enviado con éxito. ID de mensaje: ${info.messageId}`);
+        console.log(`Destinatarios confirmados: ${DESTINATARIOS}`);
     } catch (err) {
-        console.error('⚠️ Error en segundo plano al enviar el email:', err.message);
+        console.error('❌ ERROR AL ENVIAR EMAIL CON NODEMAILER:', err);
     }
 }
 
