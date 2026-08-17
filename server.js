@@ -222,7 +222,7 @@ async function enviarEmailBackground(pedidoData) {
         const tituloSanitizado = (pedidoData.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
 
         const { data, error } = await resend.emails.send({
-            from: 'Portal de Eventos <onboarding@resend.dev>',
+            from: 'Portal de Eventos <notificaciones@pedidosdgdsydd.com.ar>',
             to: DESTINATARIOS,
             subject: `📌 Nueva Solicitud de Evento: ${pedidoData.titulo}`,
             html: `
