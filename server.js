@@ -16,7 +16,7 @@ const DESTINATARIOS = [
     'fpomis@buenosaires.gob.ar'
 ];
 
-// Inicializamos Resend
+// Inicializamos Resend con la API Key configurada desde variables de entorno
 const resend = new Resend(process.env.RESEND_API_KEY || '');
 
 app.use(cors());
@@ -96,6 +96,7 @@ function generarBufferPDF(p) {
 
             const fechaHoy = new Date().toLocaleDateString('es-AR');
 
+            // Encabezado principal
             doc.rect(35, 30, 525, 3).fill('#002B66');
             doc.moveDown(0.5);
 
@@ -105,99 +106,98 @@ function generarBufferPDF(p) {
 
             let y = 68;
 
+            // Título del evento
             doc.rect(35, y, 525, 32).fill('#F1F5F9').stroke('#CBD5E1');
             doc.fillColor('#002B66').fontSize(13.5).font('Helvetica-Bold').text(p.titulo || 'Sin Título', 42, y + 9, { width: 510, ellipsis: true });
 
             y += 42;
-            doc.fillColor('#1F2937').fontSize(9);
 
+            // Función para imprimir campos en filas con posiciones fijas para evitar encimados
             function printRow(label1, val1, label2, val2) {
-                doc.font('Helvetica-Bold').text(label1, 42, y);
-                doc.font('Helvetica').text(String(val1 || '-'), 125, y);
+                doc.fillColor('#1F2937').fontSize(9);
+                
+                doc.font('Helvetica-Bold').text(label1, 35, y, { width: 110, continued: false });
+                doc.font('Helvetica').text(String(val1 || '-'), 145, y, { width: 140, ellipsis: true });
 
                 if (label2) {
-                    doc.font('Helvetica-Bold').text(label2, 300, y);
-                    doc.font('Helvetica').text(String(val2 || '-'), 390, y);
+                    doc.font('Helvetica-Bold').text(label2, 300, y, { width: 110, continued: false });
+                    doc.font('Helvetica').text(String(val2 || '-'), 410, y, { width: 140, ellipsis: true });
                 }
-                y += 15;
+                y += 18;
             }
 
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('1. DATOS DE ORIGEN Y UBICACIÓN', 35, y);
-            y += 14;
-            doc.fillColor('#1F2937').fontSize(9);
+            function printSectionHeader(title) {
+                y += 4;
+                doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text(title, 35, y);
+                y += 16;
+            }
+
+            // 1. Datos de Origen y Ubicación
+            printSectionHeader('1. DATOS DE ORIGEN Y UBICACIÓN');
             printRow('Creado Por:', p.creadoPor || 'Docente', '', '');
             printRow('Gerencia:', p.gerencia || p.areaResponsable, 'Programa:', p.programa);
             printRow('Fecha del Evento:', p.fecha, 'Horario de Jornada:', p.horario);
             printRow('Sede / Lugar:', p.lugar, 'Espacio Físico:', p.espacioFisico);
 
-            y += 4;
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('2. RESPONSABLE DE LA SOLICITUD', 35, y);
-            y += 14;
-            doc.fillColor('#1F2937').fontSize(9);
+            // 2. Responsable de la Solicitud
+            printSectionHeader('2. RESPONSABLE DE LA SOLICITUD');
             printRow('Nombre y Apellido:', p.responsableNombre, 'DNI:', p.responsableDni);
             printRow('Teléfono Contacto:', p.responsableTelefono, '', '');
 
-            y += 4;
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('3. ESTIMACIÓN DE CONCURRENCIA', 35, y);
-            y += 14;
-            doc.fillColor('#1F2937').fontSize(9);
+            // 3. Estimación de Concurrencia
+            printSectionHeader('3. ESTIMACIÓN DE CONCURRENCIA');
             printRow('Participantes Est.:', p.participantesAprox, 'Público General Est.:', p.publicoGeneral ?? 'N/A');
 
-            y += 4;
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE', 35, y);
-            y += 14;
-            doc.fillColor('#1F2937').fontSize(9);
+            // 4. Logística, Emergencias y Transporte
+            printSectionHeader('4. LOGÍSTICA, EMERGENCIAS Y TRANSPORTE');
             printRow('Requiere Ambulancia:', p.ambulancia || 'No', 'Horario Cobertura:', p.ambulanciaHorario || 'N/A');
             printRow('Transporte Pasajeros:', p.transportePasajeros ? `${p.transportePasajeros} micro(s)` : 'No', '', '');
 
             if (p.detallesMicros && Array.isArray(p.detallesMicros) && p.detallesMicros.length > 0) {
                 p.detallesMicros.forEach((m, idx) => {
-                    doc.font('Helvetica-Bold').text(`Micro #${idx + 1}:`, 42, y);
-                    doc.font('Helvetica').text(`Resp: ${m.responsableNombre || '-'} (${m.responsableTel || '-'}) | Salida: ${m.salida || '-'} | Regreso: ${m.regreso || '-'}`, 100, y);
-                    y += 13;
+                    doc.font('Helvetica-Bold').fontSize(8.5).text(`Micro #${idx + 1}:`, 42, y);
+                    doc.font('Helvetica').fontSize(8.5).text(`Resp: ${m.responsableNombre || '-'} (${m.responsableTel || '-'}) | Salida: ${m.salida || '-'} | Regreso: ${m.regreso || '-'}`, 100, y);
+                    y += 15;
                 });
             }
 
-            y += 4;
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('5. PERSONAL Y COBERTURA DOCENTE', 35, y);
-            y += 14;
-            doc.fillColor('#1F2937').fontSize(9);
+            // 5. Personal y Cobertura Docente
+            printSectionHeader('5. PERSONAL Y COBERTURA DOCENTE');
             printRow('Extensión de ART:', p.extensionArt || 'No', '', '');
 
-            doc.font('Helvetica-Bold').text('Detalle de Docentes:', 42, y);
-            y += 12;
+            doc.font('Helvetica-Bold').fontSize(9).fillColor('#1F2937').text('Detalle de Docentes:', 35, y);
+            y += 14;
 
             if (p.profesoresAsignados && p.profesoresAsignados.length > 0) {
                 p.profesoresAsignados.forEach((prof, idx) => {
-                    doc.font('Helvetica');
+                    doc.font('Helvetica').fontSize(8.5);
                     let txt = (typeof prof === 'object') 
                         ? `${idx + 1}. ${prof.nombre} | Revista: ${prof.situacionRevista || 'S/D'} | Horario: ${prof.horarioLaboral || 'S/D'}` 
                         : `${idx + 1}. ${prof}`;
-                    doc.text(txt, 50, y);
-                    y += 13;
+                    doc.text(txt, 45, y);
+                    y += 14;
                 });
             } else {
-                doc.font('Helvetica').text('No se asignaron docentes específicos', 50, y);
-                y += 13;
+                doc.font('Helvetica').fontSize(8.5).text('No se asignaron docentes específicos', 45, y);
+                y += 14;
             }
 
-            y += 4;
-            doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text('6. PRENSA Y CONDICIÓN CLIMÁTICA', 35, y);
-            y += 14;
-            doc.fillColor('#1F2937').fontSize(9);
+            // 6. Prensa y Condición Climática
+            printSectionHeader('6. PRENSA Y CONDICIÓN CLIMÁTICA');
             printRow('Prensa / Cobertura:', p.prensa || 'No', 'Tipo de Difusión:', p.tipoDifusion || 'N/A');
             printRow('Suspende por Lluvia:', p.suspendeLluvia || 'No', 'Fecha Reprogramación:', p.fechaReprogramacion || 'N/A');
 
             y += 6;
             doc.moveTo(35, y).lineTo(560, y).strokeColor('#CBD5E1').stroke();
-            y += 12;
+            y += 14;
 
+            // Bloques de texto libre
             function printBlock(title, text) {
                 if (!text) return;
                 doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#002B66').text(title, 35, y);
-                y += 12;
-                doc.font('Helvetica').fontSize(9).fillColor('#1F2937').text(text, 35, y, { width: 525 });
-                y += doc.heightOfString(text, { width: 525 }) + 10;
+                y += 14;
+                doc.font('Helvetica').fontSize(8.5).fillColor('#1F2937').text(text, 35, y, { width: 525 });
+                y += doc.heightOfString(text, { width: 525 }) + 12;
             }
 
             printBlock('7. NECESIDADES TÉCNICAS E INFRAESTRUCTURA', p.necesidades);
