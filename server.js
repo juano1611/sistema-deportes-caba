@@ -9,10 +9,10 @@ const PDFDocument = require('pdfkit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const DESTINATARIOS = [
+const DESTINATARIOS_BASE = [
     'solicituddepedidos_dgdsydd@buenosaires.gob.ar',
     'direccionpedagogica_DGDSYDD@buenosaires.gob.ar'
-].join(', ');
+];
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -224,9 +224,19 @@ async function enviarEmailBackground(pedidoData) {
         const pdfBuffer = await generarBufferPDF(pedidoData);
         const tituloSanitizado = (pedidoData.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
 
+        // Determinar lista de correo de destino según rol o parámetro
+        let listaDestinatarios = [...DESTINATARIOS_BASE];
+        const esDocente = (pedidoData.creadoPor && pedidoData.creadoPor.toUpperCase() === 'DOCENTE') || pedidoData.role === 'DOCENTE';
+
+        if (esDocente) {
+            listaDestinatarios.push('fpomis@buenosaires.gob.ar');
+        }
+
+        const stringDestinatarios = listaDestinatarios.join(', ');
+
         const mailOptions = {
             from: '"Portal de Eventos BA" <no-reply@buenosaires.gob.ar>',
-            to: DESTINATARIOS,
+            to: stringDestinatarios,
             subject: `📌 Nueva Solicitud de Evento: ${pedidoData.titulo}`,
             html: `
                 <h2 style="color: #002B66;">NUEVA SOLICITUD DE EVENTO REGISTRADA</h2>
@@ -251,7 +261,7 @@ async function enviarEmailBackground(pedidoData) {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`✉️ Email con PDF completo adjunto enviado exitosamente a: ${DESTINATARIOS}`);
+        console.log(`✉️ Email con PDF completo adjunto enviado exitosamente a: ${stringDestinatarios}`);
     } catch (err) {
         console.error('⚠️ Error en segundo plano al enviar el email:', err.message);
     }
