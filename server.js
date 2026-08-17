@@ -3,25 +3,21 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const PDFDocument = require('pdfkit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Lista de destinatarios
 const DESTINATARIOS = [
     'solicituddepedidos_dgdsydd@buenosaires.gob.ar',
     'direccionpedagogica_DGDSYDD@buenosaires.gob.ar',
     'fpomis@buenosaires.gob.ar'
-].join(', ');
+];
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER || '',
-        pass: process.env.EMAIL_PASS || ''
-    }
-});
+// Inicializamos Resend
+const resend = new Resend(process.env.RESEND_API_KEY || '');
 
 app.use(cors());
 app.use(express.json());
@@ -216,16 +212,17 @@ function generarBufferPDF(p) {
 }
 
 async function enviarEmailBackground(pedidoData) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.log('❌ OMITIENDO ENVÍO DE CORREO: EMAIL_USER y/o EMAIL_PASS no están configuradas en las variables de entorno.');
+    if (!process.env.RESEND_API_KEY) {
+        console.error('❌ ERROR: RESEND_API_KEY no está configurada.');
         return;
     }
+
     try {
         const pdfBuffer = await generarBufferPDF(pedidoData);
         const tituloSanitizado = (pedidoData.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-        const mailOptions = {
-            from: `"Portal de Eventos BA" <${process.env.EMAIL_USER}>`,
+        const { data, error } = await resend.emails.send({
+            from: 'Portal de Eventos <onboarding@resend.dev>',
             to: DESTINATARIOS,
             subject: `📌 Nueva Solicitud de Evento: ${pedidoData.titulo}`,
             html: `
@@ -244,17 +241,18 @@ async function enviarEmailBackground(pedidoData) {
             attachments: [
                 {
                     filename: `evento-${tituloSanitizado}.pdf`,
-                    content: pdfBuffer,
-                    contentType: 'application/pdf'
+                    content: pdfBuffer
                 }
             ]
-        };
+        });
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✉️ Email enviado con éxito. ID de mensaje: ${info.messageId}`);
-        console.log(`Destinatarios confirmados: ${DESTINATARIOS}`);
+        if (error) {
+            console.error('❌ Error al enviar con Resend:', error);
+        } else {
+            console.log(`✉️ Email enviado con éxito vía Resend. ID: ${data.id}`);
+        }
     } catch (err) {
-        console.error('❌ ERROR AL ENVIAR EMAIL CON NODEMAILER:', err);
+        console.error('❌ ERROR AL ENVIAR EMAIL CON RESEND:', err.message);
     }
 }
 
